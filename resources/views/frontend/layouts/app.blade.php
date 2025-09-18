@@ -73,9 +73,6 @@
     <link rel="stylesheet" href="{{ static_asset('assets/css/aiz-core.css?v=') }}{{ rand(1000, 9999) }}">
     <link rel="stylesheet" href="{{ static_asset('assets/css/custom-style.css') }}">
 
-    <!-- Extra CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" integrity="sha512-kd6crnhech4kGLV/JSLIJx6Nwc02lD/QVPf8T3S/Hrqngg1gKjfmQnnqYVnEJ4ytwYgQyC1SsZkyh3nQxRy0Lw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 
     <script>
         var AIZ = AIZ || {};
@@ -316,12 +313,14 @@
             margin: 0 auto;
             display: flex;
             min-height: calc(100vh - 80px);
-            width: 100%;
         }
+
+
+
         /* Right Content Area */
         .right-content {
             flex: 1;
-            padding: 5px;
+            padding: 20px;
             overflow-y: auto;
         }
 
@@ -673,6 +672,50 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             margin-top: 30px;
             color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* --- Products Section (LADIES BAGS) --- */
+        .products-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);;
+        }
+
+        .view-more-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        .view-more-btn:hover {
+            background: #1a4a54;
+        }
+
+        .products-section .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
         }
 
         /* --- Products Section (LADIES BAGS) --- */
@@ -1520,6 +1563,11 @@
                 font-size: 14px;
             }
 
+            .product-sold {
+                font-size: 10px;
+                margin-left: 5px;
+            }
+
             .footer-content {
                 grid-template-columns: 1fr;
                 gap: 20px;
@@ -1571,6 +1619,10 @@
             .auth-user-type-tab-button {
                 font-size: 13px;
                 padding: 7px 10px;
+            }
+
+            .auth-form-group label {
+                font-size: 13px;
             }
 
             .auth-form-group input,
@@ -1721,6 +1773,12 @@
         }
 
 
+
+
+
+
+
+
     </style>
 
 @if (get_setting('google_analytics') == 1)
@@ -1776,21 +1834,10 @@
         <!-- Header -->
         @include('frontend.inc.nav')
 
-        {{-- NEW: Wrap @yield('content') within the main-container / right-content structure --}}
-        {{-- This ensures the dynamic content is loaded into the correct place on both initial load and AJAX calls --}}
-        <div class="main-container" style="background-color: #F2F4F8;">
-            <!-- Left Sidebar - Sticky (Desktop Only) -->
-            @include('frontend.classic.partials.category_menu')
-
-            <!-- Right Content Area -->
-            <main class="right-content">
-                @yield('content')
-            </main>
-        </div>
-
+        @yield('content')
 
         <!-- footer -->
-        {{-- @include('frontend.inc.footer')  --}}
+        {{-- @include('frontend.inc.footer') --}}
 
     </div>
 
@@ -1867,7 +1914,7 @@
                             ->exists();
             $showPopup = $hasUnreviewed;
             }else{
-              $showPopup= false;  
+              $showPopup= false;
             }
         }
         @endphp
@@ -1951,10 +1998,7 @@
         </div>
     </div>
 
-    {{-- NEW: This is the container for product-specific modals loaded via AJAX --}}
-    <div id="product-modals-container"></div> 
-    {{-- ORIGINAL: Keep this if you have other global modals yielded here --}}
-    @yield('modal') 
+    @yield('modal')
 
     <!-- SCRIPTS -->
     <script src="{{ static_asset('assets/js/vendors.js') }}"></script>
@@ -1985,7 +2029,7 @@
     a[aria-label="Go to GetButton.io website"] {
         display: none !important;
     }
-    
+
 </style>
 
     <script>
@@ -1995,8 +2039,8 @@
     </script>
 
     <script>
-        // NEW: Initial scripts for the homepage content, to be run on initial load
-        function initHomepageScripts() {
+        @if (Route::currentRouteName() == 'home' || Route::currentRouteName() == '/')
+
             $.post('{{ route('home.section.featured') }}', {
                 _token: '{{ csrf_token() }}'
             }, function(data) {
@@ -2050,79 +2094,7 @@
                 AIZ.plugins.slickCarousel();
             });
 
-            // Slider JavaScript (Make these functions global or re-define them here for homepage)
-            let currentSlideIndex = 0;
-            const slides = document.querySelectorAll('.slide');
-            const dots = document.querySelectorAll('.nav-dot');
-            const totalSlides = slides.length;
-            let autoSlideInterval;
-
-            window.showSlide = function(index) { // Made global
-                currentSlideIndex = (index + totalSlides) % totalSlides;
-                const slider = document.getElementById('autoSlider');
-                if (slider) {
-                    slider.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
-                }
-
-                dots.forEach(dot => dot.classList.remove('active'));
-                if (dots[currentSlideIndex]) {
-                    dots[currentSlideIndex].classList.add('active');
-                }
-            }
-
-            window.nextSlide = function() { // Made global
-                window.showSlide(currentSlideIndex + 1);
-            }
-
-            window.changeSlide = function(index) { // Made global
-                window.showSlide(index);
-                window.resetAutoSlide();
-            }
-
-            window.startAutoSlide = function() { // Made global
-                if (autoSlideInterval) clearInterval(autoSlideInterval);
-                autoSlideInterval = setInterval(window.nextSlide, 5000);
-            }
-
-            window.resetAutoSlide = function() { // Made global
-                clearInterval(autoSlideInterval);
-                window.startAutoSlide();
-            }
-            
-            // Initial call for slider
-            if (slides.length > 0) {
-                window.showSlide(0);
-                window.startAutoSlide();
-                dots.forEach((dot, index) => {
-                    dot.onclick = () => window.changeSlide(index);
-                });
-            }
-
-            // Other general DOMContentLoaded scripts from index.blade.php
-            const searchBox = document.querySelector('.search-box');
-            if (searchBox) {
-                searchBox.addEventListener('keyup', function (e) {
-                    if (e.key === 'Enter') {
-                        const searchTerm = this.value.toLowerCase();
-                        // This search is for the current content, not AJAX
-                        // You might want to remove it or update to use AJAX for search
-                        const products = document.querySelectorAll('#dynamic-content-wrapper .product-card');
-                        products.forEach(product => {
-                            const title = product.querySelector('.product-title');
-                            if (title && title.textContent.toLowerCase().includes(searchTerm)) {
-                                product.style.display = 'block';
-                            } else if (title) {
-                                product.style.display = 'none';
-                            }
-                        });
-                    }
-                });
-            }
-        }
-        // Call homepage scripts only on initial page load (not on AJAX content changes)
-        if (window.location.pathname === '{{ route('home') }}' || window.location.pathname === '/') {
-            document.addEventListener('DOMContentLoaded', initHomepageScripts);
-        }
+        @endif
 
         $(document).ready(function() {
             $('.category-nav-element').each(function(i, el) {
@@ -2614,10 +2586,20 @@
             }
         </script>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js" integrity="sha512-HtgITRKzMMQyqL8sM+uxKqjmU/V8A/3LtmC5YcMlpzJ0j/jF5o/rY+T42pYJ5Q3m4s/0i+5K/1R+O45pC/yA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        
     @endif
 
+
+    
+    <script>
+        // Global function for user dropdown toggle - ensure it's always available
+        window.toggleUserDropdown = function() {
+            const dropdown = document.querySelector('.hover-user-top-menu');
+            if (dropdown) {
+                dropdown.classList.toggle('show-dropdown');
+            }
+        }
+    </script>
+    
     @yield('script')
 
     @php

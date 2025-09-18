@@ -45,6 +45,48 @@ class VerificationController extends Controller
         $this->middleware('throttle:6,1')->only('verify', 'resend');
     }
 
+    /**
+     * Resend OTP verification code
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function resendVerificationCode(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|email'
+            ]);
+
+            $userEmail = $request->email;
+
+            // Generate new 6 digit random code
+            $code = rand(100000, 999999);
+
+            // Update verification code in database
+            \DB::table('verification_codes')->updateOrInsert(
+                ['email' => $userEmail],
+                [
+                    'code' => $code, 
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            );
+
+            // Send verification email
+            Mail::to($userEmail)->send(new VerificationCodeMail($code));
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Verification code resent successfully!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to resend verification code. Please try again.'
+            ], 500);
+        }
+    }
+
    
 
  public function verify($token)
@@ -65,38 +107,131 @@ class VerificationController extends Controller
         return redirect('/')->with('success', 'Email verified successfully! You are now logged in.');
     }
 
+/**
+ * Send OTP verification code to user email
+ * @param Request $request
+ * @return \Illuminate\Http\JsonResponse
+ */
 public function sendVerificationCode(Request $request)
 {
-    $userEmail = $request->email;
+    try {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
 
-    // 6 digit random code
-    $code = rand(100000, 999999);
+        $userEmail = $request->email;
 
-    // ডাটাবেসে সংরক্ষণ করতে চাইলে
-    \DB::table('verification_codes')->updateOrInsert(
-        ['email' => $userEmail],
-        ['code' => $code, 'created_at' => now()]
-    );
+        // Generate 6 digit random code
+        $code = rand(100000, 999999);
 
-    // মেইল পাঠাও
-    Mail::to($userEmail)->send(new VerificationCodeMail($code));
+        // Store verification code in database with expiration
+        \DB::table('verification_codes')->updateOrInsert(
+            ['email' => $userEmail],
+            [
+                'code' => $code, 
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
+        );
 
-    return response()->json(['message' => 'Verification code sent!']);
-}
-public function verification_confirmation($code)
-{
-    $record = \DB::table('verification_codes')->where('code', $code)->first();
-    if(!$record) return back()->with('error', 'Invalid code.');
+        // Send verification email
+        try {
+            Mail::to($userEmail)->send(new VerificationCodeMail($code));
+            \Log::info('Verification email sent successfully to: ' . $userEmail);
+        } catch (\Exception $mailException) {
+            \Log::error('Mail sending failed: ' . $mailException->getMessage());
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to send email: ' . $mailException->getMessage()
+            ], 500);
+        }
 
-    $user = User::where('email', $record->email)->first();
-    if($user) {
-        $user->is_verified = true;
-        $user->email_verified_at = now();
-        $user->save();
-        auth()->login($user);
+        return response()->json([
+            'result' => true,
+            'message' => 'Verification code sent successfully!'
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Verification code sending failed: ' . $e->getMessage());
+        return response()->json([
+            'result' => false,
+            'message' => 'Failed to send verification code: ' . $e->getMessage()
+        ], 500);
     }
+}
+/**
+ * Verify OTP code and login user
+ * @param Request $request
+ * @return \Illuminate\Http\JsonResponse
+ */
+public function verification_confirmation(Request $request)
+{
+    try {
+        $request->validate([
+            'email' => 'required|email',
+            'code' => 'required|string|size:6'
+        ]);
 
-    return redirect('/')->with('success', 'Email verified successfully!');
+        $email = $request->email;
+        $code = $request->code;
+
+        // Check if code exists and is not expired (10 minutes)
+        $record = \DB::table('verification_codes')
+            ->where('email', $email)
+            ->where('code', $code)
+            ->where('created_at', '>=', now()->subMinutes(10))
+            ->first();
+
+        if (!$record) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid or expired verification code.'
+            ], 400);
+        }
+
+        // Find or create user
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            // Create new user if doesn't exist - email-only authentication
+            $user = User::create([
+                'name' => 'No Name', // Default name for email-only users
+                'email' => $email,
+                'user_type' => 'customer',
+                'email_verified_at' => now(),
+                'is_verified' => true,
+                'password' => bcrypt(\Illuminate\Support\Str::random(8)) // Random password
+            ]);
+        } else {
+            // Update existing user
+            $user->email_verified_at = now();
+            $user->save();
+        }
+
+        // Delete used verification code
+        \DB::table('verification_codes')->where('email', $email)->delete();
+
+        // Log user into Laravel session for proper authentication
+        auth()->login($user, true);
+
+        // Generate access token for API usage
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'result' => true,
+            'message' => 'Email verified successfully!',
+            'access_token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name ?: 'No Name', // Default name if empty
+                'email' => $user->email,
+                'user_type' => $user->user_type
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'result' => false,
+            'message' => 'Verification failed. Please try again.'
+        ], 500);
+    }
 }
 
 
