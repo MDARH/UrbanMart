@@ -225,10 +225,15 @@ if (!function_exists('currency_symbol')) {
 }
 
 //formats currency
-if (!function_exists('')) {
+if (!function_exists('format_price')) {
+    /**
+     * Format price with proper currency symbol encoding
+     * @param float $price - The price to format
+     * @param bool $isMinimize - Whether to minimize large numbers
+     * @return string - Formatted price with currency symbol
+     */
     function format_price($price, $isMinimize = false)
     {
-            $price = (float)$price;
         if (get_setting('decimal_separator') == 1) {
             $fomated_price = number_format($price, get_setting('no_of_decimals'));
         } else {
@@ -250,21 +255,38 @@ if (!function_exists('')) {
             }
         }
 
-        if (get_setting('symbol_format') == 1) {
-            return currency_symbol() . $fomated_price;
-        } else if (get_setting('symbol_format') == 3) {
-            return currency_symbol() . ' ' . $fomated_price;
-        } else if (get_setting('symbol_format') == 4) {
-            return $fomated_price . ' ' . currency_symbol();
+        // Get currency symbol and ensure proper UTF-8 encoding
+        $currency_symbol = currency_symbol();
+        
+        // Ensure the currency symbol is properly UTF-8 encoded
+        if (!mb_check_encoding($currency_symbol, 'UTF-8')) {
+            $currency_symbol = mb_convert_encoding($currency_symbol, 'UTF-8', 'auto');
         }
-        return $fomated_price . currency_symbol();
+
+        if (get_setting('symbol_format') == 1) {
+            return $currency_symbol . $fomated_price;
+        } else if (get_setting('symbol_format') == 3) {
+            return $currency_symbol . ' ' . $fomated_price;
+        } else if (get_setting('symbol_format') == 4) {
+            return $fomated_price . ' ' . $currency_symbol;
+        }
+        return $fomated_price . $currency_symbol;
     }
 }
 
 //formats price to home default price with convertion
 if (!function_exists('single_price')) {
+    /**
+     * Format single price with null safety
+     * @param float|null $price - The price to format
+     * @return string - Formatted price with currency symbol
+     */
     function single_price($price)
     {
+        // Handle null or invalid price values
+        if ($price === null || !is_numeric($price)) {
+            $price = 0;
+        }
         return format_price(convert_price($price));
     }
 }

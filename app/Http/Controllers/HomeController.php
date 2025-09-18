@@ -294,75 +294,6 @@ class HomeController extends Controller
         return view('frontend.track_order');
     }
 
-    // public function product(Request $request, $slug)
-    // {
-    //     if (!Auth::check()) {
-    //         session(['link' => url()->current()]);
-    //     }
-
-    //     $detailedProduct  = Product::with('reviews', 'brand', 'stocks', 'user', 'user.shop')->where('auction_product', 0)->where('slug', $slug)->where('approved', 1)->first();
-
-    //     if ($detailedProduct != null && $detailedProduct->published) {
-    //         if ((get_setting('vendor_system_activation') != 1) && $detailedProduct->added_by == 'seller') {
-    //             abort(404);
-    //         }
-
-    //         if ($detailedProduct->added_by == 'seller' && $detailedProduct->user->banned == 1) {
-    //             abort(404);
-    //         }
-
-    //         if (!addon_is_activated('wholesale') && $detailedProduct->wholesale_product == 1) {
-    //             abort(404);
-    //         }
-
-    //         $product_queries = ProductQuery::where('product_id', $detailedProduct->id)->where('customer_id', '!=', Auth::id())->latest('id')->paginate(3);
-    //         $total_query = ProductQuery::where('product_id', $detailedProduct->id)->count();
-    //         $reviews = $detailedProduct->reviews()->where('status', 1)->orderBy('created_at', 'desc')->paginate(3);
-
-    //         // Pagination using Ajax
-    //         if (request()->ajax()) {
-    //             if ($request->type == 'query') {
-    //                 return Response::json(View::make('frontend.partials.product_query_pagination', array('product_queries' => $product_queries))->render());
-    //             }
-    //             if ($request->type == 'review') {
-    //                 return Response::json(View::make('frontend.product_details.reviews', array('reviews' => $reviews))->render());
-    //             }
-    //         }
-
-    //         // review status
-    //         $review_status = 0;
-    //         if (Auth::check()) {
-    //             $OrderDetail = OrderDetail::with(['order' => function ($q) {
-    //                 $q->where('user_id', Auth::id());
-    //             }])->where('product_id', $detailedProduct->id)->where('delivery_status', 'delivered')->first();
-    //             $review_status = $OrderDetail ? 1 : 0;
-    //         }
-    //         if ($request->has('product_referral_code') && addon_is_activated('affiliate_system')) {
-    //             $affiliate_validation_time = AffiliateConfig::where('type', 'validation_time')->first();
-    //             $cookie_minute = 30 * 24;
-    //             if ($affiliate_validation_time) {
-    //                 $cookie_minute = $affiliate_validation_time->value * 60;
-    //             }
-    //             Cookie::queue('product_referral_code', $request->product_referral_code, $cookie_minute);
-    //             Cookie::queue('referred_product_id', $detailedProduct->id, $cookie_minute);
-
-    //             $referred_by_user = User::where('referral_code', $request->product_referral_code)->first();
-
-    //             $affiliateController = new AffiliateController;
-    //             $affiliateController->processAffiliateStats($referred_by_user->id, 1, 0, 0, 0);
-    //         }
-
-    //         if(get_setting('last_viewed_product_activation') == 1 && Auth::check() && auth()->user()->user_type == 'customer'){
-    //             lastViewedProducts($detailedProduct->id, auth()->user()->id);
-    //         }
-
-    //         return view('frontend.product_details', compact('detailedProduct', 'product_queries', 'total_query', 'reviews', 'review_status'));
-    //     }
-    //     abort(404);
-    // }
-
-    
-    
     public function product(Request $request, $slug)
     {
         if (!Auth::check()) {
@@ -387,6 +318,16 @@ class HomeController extends Controller
             $product_queries = ProductQuery::where('product_id', $detailedProduct->id)->where('customer_id', '!=', Auth::id())->latest('id')->paginate(3);
             $total_query = ProductQuery::where('product_id', $detailedProduct->id)->count();
             $reviews = $detailedProduct->reviews()->where('status', 1)->orderBy('created_at', 'desc')->paginate(3);
+
+            // Pagination using Ajax
+            if (request()->ajax()) {
+                if ($request->type == 'query') {
+                    return Response::json(View::make('frontend.partials.product_query_pagination', array('product_queries' => $product_queries))->render());
+                }
+                if ($request->type == 'review') {
+                    return Response::json(View::make('frontend.product_details.reviews', array('reviews' => $reviews))->render());
+                }
+            }
 
             // review status
             $review_status = 0;
@@ -415,36 +356,11 @@ class HomeController extends Controller
                 lastViewedProducts($detailedProduct->id, auth()->user()->id);
             }
 
-            // NEW: Handle AJAX request for product details
-            if ($request->ajax()) {
-                // Pass all necessary variables to the partial views
-                $data = compact('detailedProduct', 'product_queries', 'total_query', 'reviews', 'review_status');
-
-                return response()->json([
-                    'html' => view('frontend.product_main_content', $data)->render(),
-                    'scripts' => view('frontend.product_scripts', $data)->render(),
-                    'modals' => view('frontend.product_modals', $data)->render(),
-                    'meta_title' => $detailedProduct->meta_title,
-                    'url' => route('product', $detailedProduct->slug)
-                ]);
-            }
-            // Pagination using Ajax (Keep this for internal pagination within product details, if you have it)
-            // But if product_details.blade.php itself is loaded via AJAX, these will run too.
-            // You might need to adjust their targets.
-            if ($request->type == 'query') {
-                return Response::json(View::make('frontend.partials.product_query_pagination', array('product_queries' => $product_queries))->render());
-            }
-            if ($request->type == 'review') {
-                return Response::json(View::make('frontend.product_details.reviews', array('reviews' => $reviews))->render());
-            }
-
             return view('frontend.product_details', compact('detailedProduct', 'product_queries', 'total_query', 'reviews', 'review_status'));
         }
         abort(404);
     }
-    
-    
-    
+
     public function shop($slug)
     {
         if (get_setting('vendor_system_activation') != 1) {
@@ -682,8 +598,19 @@ class HomeController extends Controller
 
         $product_stock = $product->stocks->where('variant', $str)->first();
 
-        $price = $product_stock->price;
+        // Handle case when product stock is not found for the variant
+        if (!$product_stock) {
+            return array(
+                'price' => single_price(0 * $request->quantity),
+                'quantity' => translate('Out Of Stock'),
+                'digital' => $product->digital,
+                'variation' => $str,
+                'max_limit' => 0,
+                'in_stock' => 0
+            );
+        }
 
+        $price = $product_stock->price;
 
         if ($product->wholesale_product) {
             $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $request->quantity)->where('max_qty', '>=', $request->quantity)->first();

@@ -618,13 +618,13 @@
         @endif
 
         <!-- Account -->
-        {{-- <div class="col">
+        <div class="col">
             @if (Auth::check())
                 @if(isAdmin())
                     <a href="{{ route('admin.dashboard') }}" class="text-secondary d-block text-center pb-2 pt-3">
                         <span class="d-block mx-auto">
-                            @if($user->avatar_original != null)
-                                <img src="{{ $user_avatar }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
+                            @if(Auth::user()->avatar_original != null)
+                                <img src="{{ uploaded_asset(Auth::user()->avatar_original) }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @else
                                 <img src="{{ static_asset('assets/img/avatar-place.png') }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @endif
@@ -634,8 +634,8 @@
                 @elseif(isSeller())
                     <a href="{{ route('dashboard') }}" class="text-secondary d-block text-center pb-2 pt-3">
                         <span class="d-block mx-auto">
-                            @if($user->avatar_original != null)
-                                <img src="{{ $user_avatar }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
+                            @if(Auth::user()->avatar_original != null)
+                                <img src="{{ uploaded_asset(Auth::user()->avatar_original) }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @else
                                 <img src="{{ static_asset('assets/img/avatar-place.png') }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @endif
@@ -645,8 +645,8 @@
                 @else
                     <a href="javascript:void(0)" class="text-secondary d-block text-center pb-2 pt-3 mobile-side-nav-thumb" data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav">
                         <span class="d-block mx-auto">
-                            @if($user->avatar_original != null)
-                                <img src="{{ $user_avatar }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
+                            @if(Auth::user()->avatar_original != null)
+                                <img src="{{ uploaded_asset(Auth::user()->avatar_original) }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @else
                                 <img src="{{ static_asset('assets/img/avatar-place.png') }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @endif
@@ -665,7 +665,7 @@
                     <span class="d-block mt-1 fs-10 fw-600 text-reset">{{ translate('My Account') }}</span>
                 </a>
             @endif
-        </div> --}}
+        </div>
 
     </div>
 </div>

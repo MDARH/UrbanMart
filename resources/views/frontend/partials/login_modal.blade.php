@@ -88,7 +88,7 @@
                         <a href="{{ route(get_setting('customer_registration_verify') === '1' ? 'registration.verification' : 'user.registration') }}">{{ translate('Register Now') }}</a>
                         {{-- <a href="{{ route('user.registration') }}">{{ translate('Register Now') }}</a> --}}
                     </div>
-                    
+
                     <!-- Social Login -->
                     @if (get_setting('google_login') == 1 || get_setting('facebook_login') == 1 || get_setting('twitter_login') == 1 || get_setting('apple_login') == 1)
                         <div class="separator mb-3">
