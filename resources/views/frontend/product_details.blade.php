@@ -1,4 +1,4 @@
-{{-- @extends('frontend.layouts.app')
+@extends('frontend.layouts.app')
 
 @section('meta_title'){{ $detailedProduct->meta_title }}@stop
 
@@ -408,86 +408,4 @@
             });
         }
     </script>
-@endsection --}}
-
-
-
-@if(!request()->ajax())
-    {{-- NEW: If it's a full page load, extend the main layout and define sections --}}
-    @extends('frontend.layouts.app')
-
-    @section('meta_title'){{ $detailedProduct->meta_title }}@stop
-
-    @section('meta_description'){{ $detailedProduct->meta_description }}@stop
-
-    @section('meta_keywords'){{ $detailedProduct->tags }}@stop
-
-    @section('meta')
-        @php
-            $availability = "out of stock";
-            $qty = 0;
-            if($detailedProduct->variant_product) {
-                foreach ($detailedProduct->stocks as $key => $stock) {
-                    $qty += $stock->qty;
-                }
-            }
-            else {
-                $qty = optional($detailedProduct->stocks->first())->qty;
-            }
-            if($qty > 0){
-                $availability = "in stock";
-            }
-        @endphp
-        <!-- Schema.org markup for Google+ -->
-        <meta itemprop="name" content="{{ $detailedProduct->meta_title }}">
-        <meta itemprop="description" content="{{ $detailedProduct->meta_description }}">
-        <meta itemprop="image" content="{{ uploaded_asset($detailedProduct->meta_img) }}">
-
-        <!-- Twitter Card data -->
-        <meta name="twitter:card" content="product">
-        <meta name="twitter:site" content="@publisher_handle">
-        <meta name="twitter:title" content="{{ $detailedProduct->meta_title }}">
-        <meta name="twitter:description" content="{{ $detailedProduct->meta_description }}">
-        <meta name="twitter:creator" content="@author_handle">
-        <meta name="twitter:image" content="{{ uploaded_asset($detailedProduct->meta_img) }}">
-        <meta name="twitter:data1" content="{{ single_price($detailedProduct->unit_price) }}">
-        <meta name="twitter:label1" content="Price">
-
-        <!-- Open Graph data -->
-        <meta property="og:title" content="{{ $detailedProduct->meta_title }}" />
-        <meta property="og:type" content="og.product" />
-        <meta property="og:url" content="{{ route('product', $detailedProduct->slug) }}" />
-        <meta property="og:image" content="{{ uploaded_asset($detailedProduct->meta_img) }}" />
-        <meta property="og:description" content="{{ $detailedProduct->meta_description }}" />
-        <meta property="og:site_name" content="{{ get_setting('meta_title') }}" />
-        <meta property="og:price:amount" content="{{ single_price($detailedProduct->unit_price) }}" />
-        <meta property="product:brand" content="{{ $detailedProduct->brand ? $detailedProduct->brand->name : env('APP_NAME') }}">
-        <meta property="product:availability" content="{{ $availability }}">
-        <meta property="product:condition" content="new">
-        <meta property="product:price:amount" content="{{ number_format($detailedProduct->unit_price, 2) }}">
-        <meta property="product:retailer_item_id" content="{{ $detailedProduct->slug }}">
-        <meta property="product:price:currency"
-            content="{{ get_system_default_currency()->code }}" />
-        <meta property="fb:app_id" content="{{ env('FACEBOOK_PIXEL_ID') }}">
-    @endsection
-
-    @section('content')
-@endif
-
-{{-- THIS IS THE CONTENT THAT WILL BE LOADED VIA AJAX --}}
-{{-- Original product page HTML content --}}
-@include('frontend.product_main_content', compact('detailedProduct', 'product_queries', 'total_query', 'reviews', 'review_status'))
-
-@if(!request()->ajax())
-    @endsection
-
-    @section('modal')
-        {{-- Original product page modal content --}}
-        @include('frontend.product_modals', compact('detailedProduct', 'product_queries', 'total_query', 'reviews', 'review_status'))
-    @endsection
-
-    @section('script')
-        {{-- Original product page script content --}}
-        @include('frontend.product_scripts', compact('detailedProduct', 'product_queries', 'total_query', 'reviews', 'review_status'))
-    @endsection
-@endif
+@endsection

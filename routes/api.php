@@ -7,9 +7,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V2\AuthController;
 use App\Http\Controllers\Auth\VerificationController;
 
-Route::post('/v2/auth/user-email-submit', [VerificationController::class, 'sendVerificationCode']);
-Route::post('/v2/auth/user-verify-code', [VerificationController::class, 'verification_confirmation']);
-Route::post('/v2/auth/user-resend-code', [VerificationController::class, 'resendVerificationCode']);
+Route::post('v2/auth/user-email-submit', [VerificationController::class, 'sendVerificationCode']);
+Route::post('v2/auth/user-verify-code', [VerificationController::class, 'verification_confirmation']);
+Route::post('v2/auth/user-resend-code', [VerificationController::class, 'resendVerificationCode']);
+Route::post('v2/auth/google-login', [AuthController::class, 'googleLogin']);
+Route::post('v2/auth/wholesaler-register', [AuthController::class, 'wholesalerRegister']);
+Route::post('v2/auth/wholesaler-login', [AuthController::class, 'wholesalerLogin']);
 
 Route::post('login-email', [AuthController::class, 'loginWithEmail']);
 Route::post('signup-wholesaler', [AuthController::class, 'signupWholesaler']);
