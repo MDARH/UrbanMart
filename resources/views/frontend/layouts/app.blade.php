@@ -76,7 +76,6 @@
     <!-- Extra CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" integrity="sha512-kd6crnhech4kGLV/JSLIJx6Nwc02lD/QVPf8T3S/Hrqngg1gKjfmQnnqYVnEJ4ytwYgQyC1SsZkyh3nQxRy0Lw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-
     <script>
         var AIZ = AIZ || {};
         AIZ.local = {
@@ -318,6 +317,9 @@
             min-height: calc(100vh - 80px);
             width: 100%;
         }
+
+
+
         /* Right Content Area */
         .right-content {
             flex: 1;
@@ -1720,7 +1722,6 @@
             }
         }
 
-
     </style>
 
 @if (get_setting('google_analytics') == 1)
@@ -1788,9 +1789,8 @@
             </main>
         </div>
 
-
         <!-- footer -->
-        {{-- @include('frontend.inc.footer')  --}}
+        {{-- @include('frontend.inc.footer') --}}
 
     </div>
 
@@ -1867,7 +1867,7 @@
                             ->exists();
             $showPopup = $hasUnreviewed;
             }else{
-              $showPopup= false;  
+              $showPopup= false;
             }
         }
         @endphp
@@ -1951,10 +1951,10 @@
         </div>
     </div>
 
-    {{-- NEW: This is the container for product-specific modals loaded via AJAX --}}
-    <div id="product-modals-container"></div> 
-    {{-- ORIGINAL: Keep this if you have other global modals yielded here --}}
-    @yield('modal') 
+     {{-- NEW: This is the container for product-specific modals loaded via AJAX --}}
+     <div id="product-modals-container"></div>
+     {{-- ORIGINAL: Keep this if you have other global modals yielded here --}}
+    @yield('modal')
 
     <!-- SCRIPTS -->
     <script src="{{ static_asset('assets/js/vendors.js') }}"></script>
@@ -1985,7 +1985,7 @@
     a[aria-label="Go to GetButton.io website"] {
         display: none !important;
     }
-    
+
 </style>
 
     <script>
@@ -1997,6 +1997,7 @@
     <script>
         // NEW: Initial scripts for the homepage content, to be run on initial load
         function initHomepageScripts() {
+
             $.post('{{ route('home.section.featured') }}', {
                 _token: '{{ csrf_token() }}'
             }, function(data) {
@@ -2050,45 +2051,39 @@
                 AIZ.plugins.slickCarousel();
             });
 
-            // Slider JavaScript (Make these functions global or re-define them here for homepage)
-            let currentSlideIndex = 0;
+        // Slider JavaScript (Make these functions global or re-define them here for homepage)
+        let currentSlideIndex = 0;
             const slides = document.querySelectorAll('.slide');
             const dots = document.querySelectorAll('.nav-dot');
             const totalSlides = slides.length;
             let autoSlideInterval;
-
             window.showSlide = function(index) { // Made global
                 currentSlideIndex = (index + totalSlides) % totalSlides;
                 const slider = document.getElementById('autoSlider');
                 if (slider) {
                     slider.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
                 }
-
                 dots.forEach(dot => dot.classList.remove('active'));
                 if (dots[currentSlideIndex]) {
                     dots[currentSlideIndex].classList.add('active');
                 }
             }
-
             window.nextSlide = function() { // Made global
                 window.showSlide(currentSlideIndex + 1);
             }
-
             window.changeSlide = function(index) { // Made global
                 window.showSlide(index);
                 window.resetAutoSlide();
             }
-
             window.startAutoSlide = function() { // Made global
                 if (autoSlideInterval) clearInterval(autoSlideInterval);
                 autoSlideInterval = setInterval(window.nextSlide, 5000);
             }
-
             window.resetAutoSlide = function() { // Made global
                 clearInterval(autoSlideInterval);
                 window.startAutoSlide();
             }
-            
+
             // Initial call for slider
             if (slides.length > 0) {
                 window.showSlide(0);
@@ -2097,7 +2092,6 @@
                     dot.onclick = () => window.changeSlide(index);
                 });
             }
-
             // Other general DOMContentLoaded scripts from index.blade.php
             const searchBox = document.querySelector('.search-box');
             if (searchBox) {
@@ -2615,8 +2609,20 @@
         </script>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js" integrity="sha512-HtgITRKzMMQyqL8sM+uxKqjmU/V8A/3LtmC5YcMlpzJ0j/jF5o/rY+T42pYJ5Q3m4s/0i+5K/1R+O45pC/yA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        
+
     @endif
+
+
+
+    <script>
+        // Global function for user dropdown toggle - ensure it's always available
+        window.toggleUserDropdown = function() {
+            const dropdown = document.querySelector('.hover-user-top-menu');
+            if (dropdown) {
+                dropdown.classList.toggle('show-dropdown');
+            }
+        }
+    </script>
 
     @yield('script')
 
