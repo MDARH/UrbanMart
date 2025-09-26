@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\VerifiesEmails;
+use App\Mail\VerificationCodeMail;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Auth\VerifiesEmails;
 use Illuminate\Http\Request;
-use App\Http\Controllers\OTPVerificationController;
-use App\Mail\VerificationCodeMail;
 use Illuminate\Support\Facades\Mail;
 
 class VerificationController extends Controller
@@ -66,7 +65,7 @@ class VerificationController extends Controller
             \DB::table('verification_codes')->updateOrInsert(
                 ['email' => $userEmail],
                 [
-                    'code' => $code, 
+                    'code' => $code,
                     'created_at' => now(),
                     'updated_at' => now()
                 ]
@@ -86,10 +85,7 @@ class VerificationController extends Controller
             ], 500);
         }
     }
-
-   
-
- public function verify($token)
+    public function verify($token)
     {
         $user = User::where('verification_token', $token)->first();
 
@@ -107,132 +103,140 @@ class VerificationController extends Controller
         return redirect('/')->with('success', 'Email verified successfully! You are now logged in.');
     }
 
-/**
- * Send OTP verification code to user email
- * @param Request $request
- * @return \Illuminate\Http\JsonResponse
- */
-public function sendVerificationCode(Request $request)
-{
-    try {
-        $request->validate([
-            'email' => 'required|email'
-        ]);
-
-        $userEmail = $request->email;
-
-        // Generate 6 digit random code
-        $code = rand(100000, 999999);
-
-        // Store verification code in database with expiration
-        \DB::table('verification_codes')->updateOrInsert(
-            ['email' => $userEmail],
-            [
-                'code' => $code, 
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
-        );
-
-        // Send verification email
+    /**
+     * Send OTP verification code to user email
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendVerificationCode(Request $request)
+    {
         try {
-            Mail::to($userEmail)->send(new VerificationCodeMail($code));
-            \Log::info('Verification email sent successfully to: ' . $userEmail);
-        } catch (\Exception $mailException) {
-            \Log::error('Mail sending failed: ' . $mailException->getMessage());
+            $request->validate([
+                'email' => 'required|email'
+            ]);
+
+            $userEmail = $request->email;
+
+            // Generate 6 digit random code
+            $code = rand(100000, 999999);
+
+            // Store verification code in database with expiration
+            \DB::table('verification_codes')->updateOrInsert(
+                ['email' => $userEmail],
+                [
+                    'code' => $code,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            );
+
+            // Send verification email
+            try {
+                Mail::to($userEmail)->send(new VerificationCodeMail($code));
+                \Log::info('Verification email sent successfully to: ' . $userEmail);
+            } catch (\Exception $mailException) {
+                \Log::error('Mail sending failed: ' . $mailException->getMessage());
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Failed to send email: ' . $mailException->getMessage()
+                ], 500);
+            }
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Verification code sent successfully!'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Verification code sending failed: ' . $e->getMessage());
             return response()->json([
                 'result' => false,
-                'message' => 'Failed to send email: ' . $mailException->getMessage()
+                'message' => 'Failed to send verification code: ' . $e->getMessage()
             ], 500);
         }
-
-        return response()->json([
-            'result' => true,
-            'message' => 'Verification code sent successfully!'
-        ]);
-    } catch (\Exception $e) {
-        \Log::error('Verification code sending failed: ' . $e->getMessage());
-        return response()->json([
-            'result' => false,
-            'message' => 'Failed to send verification code: ' . $e->getMessage()
-        ], 500);
     }
-}
-/**
- * Verify OTP code and login user
- * @param Request $request
- * @return \Illuminate\Http\JsonResponse
- */
-public function verification_confirmation(Request $request)
-{
-    try {
-        $request->validate([
-            'email' => 'required|email',
-            'code' => 'required|string|size:6'
-        ]);
+    /**
+     * Verify OTP code and login user
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function verification_confirmation(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'code' => 'required|string|size:6'
+            ]);
 
-        $email = $request->email;
-        $code = $request->code;
+            $email = $request->email;
+            $code = $request->code;
 
-        // Check if code exists and is not expired (10 minutes)
-        $record = \DB::table('verification_codes')
-            ->where('email', $email)
-            ->where('code', $code)
-            ->where('created_at', '>=', now()->subMinutes(10))
-            ->first();
+            // Check if code exists and is not expired (30 minutes)
+            $record = \DB::table('verification_codes')
+                ->where('email', $email)
+                ->where('code', $code)
+                ->first();
 
-        if (!$record) {
+            if (!$record) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid or expired verification code.'
+                ], 400);
+            }
+            
+            // Check if code is expired (created more than 30 minutes ago)
+            $created_at = Carbon::parse($record->created_at);
+            if ($created_at->diffInMinutes(now()) > 30) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Verification code has expired. Please request a new one.'
+                ], 400);
+            }
+
+            // Find or create user
+            $user = User::where('email', $email)->first();
+            if (!$user) {
+                // Create new user if doesn't exist - email-only authentication
+                $user = User::create([
+                    'name' => 'Customer', // Default name for email-only users
+                    'email' => $email,
+                    'user_type' => 'customer',
+                    'email_verified_at' => now(),
+                    'is_verified' => true,
+                    'password' => bcrypt(\Illuminate\Support\Str::random(8)) // Random password
+                ]);
+            } else {
+                // Update existing user
+                $user->email_verified_at = now();
+                $user->save();
+            }
+
+            // Delete used verification code
+            \DB::table('verification_codes')->where('email', $email)->delete();
+
+            // Log user into Laravel session for proper authentication
+            auth()->login($user, true);
+
+            // Generate access token for API usage
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Email verified successfully!',
+                'access_token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name ?: 'Customer', // Default name if empty
+                    'email' => $user->email,
+                    'user_type' => $user->user_type
+                ]
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'result' => false,
-                'message' => 'Invalid or expired verification code.'
-            ], 400);
+                'message' => 'Verification failed. Please try again.'
+            ], 500);
         }
-
-        // Find or create user
-        $user = User::where('email', $email)->first();
-        if (!$user) {
-            // Create new user if doesn't exist - email-only authentication
-            $user = User::create([
-                'name' => 'No Name', // Default name for email-only users
-                'email' => $email,
-                'user_type' => 'customer',
-                'email_verified_at' => now(),
-                'is_verified' => true,
-                'password' => bcrypt(\Illuminate\Support\Str::random(8)) // Random password
-            ]);
-        } else {
-            // Update existing user
-            $user->email_verified_at = now();
-            $user->save();
-        }
-
-        // Delete used verification code
-        \DB::table('verification_codes')->where('email', $email)->delete();
-
-        // Log user into Laravel session for proper authentication
-        auth()->login($user, true);
-
-        // Generate access token for API usage
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'result' => true,
-            'message' => 'Email verified successfully!',
-            'access_token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name ?: 'No Name', // Default name if empty
-                'email' => $user->email,
-                'user_type' => $user->user_type
-            ]
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'result' => false,
-            'message' => 'Verification failed. Please try again.'
-        ], 500);
     }
-}
 
 
 

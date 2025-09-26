@@ -1,8 +1,10 @@
 @php
     $cart_added = [];
 @endphp
-<div class="aiz-card-box h-auto bg-white py-3 hov-scale-img">
-    <div class="position-relative h-100px h-md-200px img-fit overflow-hidden">
+{{-- `d-flex flex-column` এবং `pb-3` ক্লাস যোগ করা হয়েছে `aiz-card-box` এ --}}
+<div class="aiz-card-box h-auto bg-white hov-scale-img d-flex flex-column pb-3"> 
+    {{-- ছবির কন্টেইনার। `h-100px h-md-200px` উচ্চতা ফিক্স করা আছে --}}
+    <div class="position-relative h-100px h-md-200px overflow-hidden">
         @php
             $product_url = route('product', $product->slug);
             if ($product->auction_product == 1) {
@@ -11,7 +13,8 @@
         @endphp
         <!-- Image -->
         <a href="{{ $product_url }}" class="d-block h-100">
-            <img class="lazyload mx-auto img-fit has-transition" src="{{ get_image($product->thumbnail) }}"
+            {{-- `mx-auto` সরানো হয়েছে img ট্যাগ থেকে। `img-fit` ক্লাসটি css এ `object-fit: cover` নিশ্চিত করবে --}}
+            <img class="lazyload img-fit has-transition" src="{{ get_image($product->thumbnail) }}"
                 alt="{{ $product->getTranslation('name') }}" title="{{ $product->getTranslation('name') }}"
                 onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
         </a>
@@ -29,122 +32,49 @@
         @endif
 
         @if ($product->auction_product == 0)
-            <!-- Desktop Icons (Top Right) -->
-            <div class="d-none d-sm-block absolute-top-right aiz-p-hov-icon">
-                <!-- Wishlist Icon -->
-                <a href="javascript:void(0)" class="hov-svg-white" onclick="addToWishList({{ $product->id }})"
-                    data-toggle="tooltip" data-title="{{ translate('Add to wishlist') }}" data-placement="left">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="14.4" viewBox="0 0 16 14.4">
-                        <g transform="translate(-3.05 -4.178)">
-                            <path
-                                d="M11.3,5.507l-.247.246L10.8,5.506A4.538,4.538,0,1,0,4.38,11.919l.247.247,6.422,6.412,6.422-6.412.247-.247A4.538,4.538,0,1,0,11.3,5.507Z"
-                                transform="translate(0 0)" fill="#919199" />
-                        </g>
-                    </svg>
-                </a>
-
-                <!-- Compare Icon -->
-                <a href="javascript:void(0)" class="hov-svg-white" onclick="addToCompare({{ $product->id }})"
-                    data-toggle="tooltip" data-title="{{ translate('Add to compare') }}" data-placement="left">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                        <path
-                            d="M18.037,5.547v.8a.8.8,0,0,1-.8.8H7.221a.4.4,0,0,0-.4.4V9.216a.642.642,0,0,1-1.1.454L2.456,6.4a.643.643,0,0,1,0-.909L5.723,2.227a.642.642,0,0,1,1.1.454V4.342a.4.4,0,0,0,.4.4H17.234a.8.8,0,0,1,.8.8Zm-3.685,4.86a.642.642,0,0,0-1.1.454v1.661a.4.4,0,0,1-.4.4H2.84a.8.8,0,0,0-.8.8v.8a.8.8,0,0,0,.8.8H12.854a.4.4,0,0,1,.4.4V17.4a.642.642,0,0,0,1.1.454l3.267-3.268a.643.643,0,0,0,0-.909Z"
-                            transform="translate(-2.037 -2.038)" fill="#919199" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Mobile Icons (Bottom) -->
-            <div class="d-sm-none position-absolute aiz-p-hov-icon-mobile"
-                style="bottom: -10px; left: 50%; transform: translateX(-50%); z-index: 10;">
-                <div class="d-inline-flex px-2 py-1 shadow-sm">
-                    <!-- Cart Icon -->
-                    <a href="javascript:void(0)" class="hov-svg-white d-inline-block mb-2"
-                        onclick="showAddToCartModal({{ $product->id }})" data-toggle="tooltip"
-                        data-title="{{ translate('Add to Cart') }}" data-placement="top">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                            <path
-                                d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"
-                                fill="#919199" />
-                        </svg>
-                    </a>
-
-                    <!-- Compare Icon -->
-                    <a href="javascript:void(0)" class="hov-svg-white d-inline-block mb-2"
-                        onclick="addToCompare({{ $product->id }})" data-toggle="tooltip"
-                        data-title="{{ translate('Add to compare') }}" data-placement="top">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                            <path
-                                d="M18.037,5.547v.8a.8.8,0,0,1-.8.8H7.221a.4.4,0,0,0-.4.4V9.216a.642.642,0,0,1-1.1.454L2.456,6.4a.643.643,0,0,1,0-.909L5.723,2.227a.642.642,0,0,1,1.1.454V4.342a.4.4,0,0,0,.4.4H17.234a.8.8,0,0,1,.8.8Zm-3.685,4.86a.642.642,0,0,0-1.1.454v1.661a.4.4,0,0,1-.4.4H2.84a.8.8,0,0,0-.8.8v.8a.8.8,0,0,0,.8.8H12.854a.4.4,0,0,1,.4.4V17.4a.642.642,0,0,0,1.1.454l3.267-3.268a.643.643,0,0,0,0-.909Z"
-                                transform="translate(-2.037 -2.038)" fill="#919199" />
-                        </svg>
-                    </a>
-
-                    <!-- Wishlist Icon -->
-                    <a href="javascript:void(0)" class="hov-svg-white d-inline-block"
-                        onclick="addToWishList({{ $product->id }})" data-toggle="tooltip"
-                        data-title="{{ translate('Add to wishlist') }}" data-placement="top">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="14.4" viewBox="0 0 16 14.4">
-                            <g transform="translate(-3.05 -4.178)">
-                                <path
-                                    d="M11.3,5.507l-.247.246L10.8,5.506A4.538,4.538,0,1,0,4.38,11.919l.247.247,6.422,6.412,6.422-6.412.247-.247A4.538,4.538,0,1,0,11.3,5.507Z"
-                                    transform="translate(0 0)" fill="#919199" />
-                            </g>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Original Add to Cart (Desktop only) -->
-            <a class="cart-btn absolute-bottom-left w-100 h-35px aiz-p-hov-icon text-white fs-13 fw-700 d-none d-sm-flex flex-column justify-content-center align-items-center @if (in_array($product->id, $cart_added)) active @endif"
-                href="javascript:void(0)" onclick="showAddToCartModal({{ $product->id }})">
-                <span class="cart-btn-text">
-                    {{ translate('Add to Cart') }}
-                </span>
-                <span><i class="las la-2x la-shopping-cart"></i></span>
-            </a>
+            {{-- Desktop Icons (Top Right) -- এই অংশটি কমেন্ট করা আছে --}}
+            {{-- Mobile Icons (Bottom) -- এই অংশটি এখন ছবির নিচে আর থাকবে না, তাই এটি সরিয়ে দিন বা কমেন্ট করে রাখুন --}}
+            {{-- Original Add to Cart (Desktop only) -- এই অংশটি এখান থেকে সরানো হয়েছে --}}
         @endif
 
-        @if (
-            $product->auction_product == 1 &&
-                $product->auction_start_date <= strtotime('now') &&
-                $product->auction_end_date >= strtotime('now'))
-            <!-- Place Bid -->
-            @php
-                $carts = get_user_cart();
-                if (count($carts) > 0) {
-                    $cart_added = $carts->pluck('product_id')->toArray();
-                }
-                $highest_bid = $product->bids->max('amount');
-                $min_bid_amount = $highest_bid != null ? $highest_bid + 1 : $product->starting_bid;
-            @endphp
-            <a class="cart-btn absolute-bottom-left w-100 h-35px aiz-p-hov-icon text-white fs-13 fw-700 d-flex flex-column justify-content-center align-items-center @if (in_array($product->id, $cart_added)) active @endif"
-                href="javascript:void(0)" onclick="bid_single_modal({{ $product->id }}, {{ $min_bid_amount }})">
-                <span class="cart-btn-text">{{ translate('Place Bid') }}</span>
-                <span><i class="las la-2x la-gavel"></i></span>
-            </a>
-        @endif
+        {{-- Original Place Bid button (auction products) -- এই অংশটিও এখান থেকে সরানো হয়েছে --}}
     </div>
 
-    <div class="p-2 p-md-3 text-left">
+    {{-- পণ্যের নাম, দাম এবং নতুন Add to Cart বাটন এই div-এর মধ্যে থাকবে --}}
+    {{-- `p-3` যোগ করা হয়েছে যাতে ভেতরের কন্টেন্টের চারপাশে পর্যাপ্ত প্যাডিং থাকে --}}
+    <div class="p-3 text-left d-flex flex-column flex-grow-1">
         <!-- Product name -->
-        <h3 class="fw-400 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px text-center">
-            <a href="{{ $product_url }}" class="d-block text-reset hov-text-primary"
+        <h3 class="fw-400 fs-13 text-truncate-2 lh-1-4 mb-2 h-35px "> {{-- mb-2 যোগ করা হয়েছে --}}
+            <a class="product-name" style="margin-left: -12px;" href="{{ $product_url }}" class="d-block text-reset hov-text-primary"
                 title="{{ $product->getTranslation('name') }}">{{ $product->getTranslation('name') }}</a>
         </h3>
-        <div class="fs-14 d-flex justify-content-center mt-3">
+        <style>
+       .product-name{
+             font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    padding: 0 15px;
+       }
+        </style>
+        <div class="fs-14 d-flex mb-auto product-price"> {{-- mt-3 থেকে mb-auto তে পরিবর্তন --}}
             @if ($product->auction_product == 0)
                 <!-- Previous price -->
                 @if (home_base_price($product) != home_discounted_base_price($product))
-                    <div class="disc-amount has-transition">
-                        <del class="fw-400 text-secondary mr-1">{{ home_base_price($product) }}</del>
+                    <div class="disc-amount has-transition ">
+                        <del class="original-price fw-400 text-secondary mr-1">{{ home_base_price($product) }}</del>
                     </div>
                 @endif
                 <!-- price -->
                 <div class="">
-                    <span class="fw-700 text-primary">{{ home_discounted_base_price($product) }}</span>
+                    <span class="current-price text-primary">{{ home_discounted_base_price($product) }}</span>
                 </div>
             @endif
+             
             @if ($product->auction_product == 1)
                 <!-- Bid Amount -->
                 <div class="">
@@ -152,5 +82,55 @@
                 </div>
             @endif
         </div>
+         <div class="sold-info text-secondary fs-12 mt-1"> 
+                {{-- 'SOLD:' এর সাথে $product->num_of_sale যোগ করুন --}}
+                SOLD: {{ $product->num_of_sale ?? 0 }} 
+                @if ($product->auction_product == 0 && $product->stock_visibility_state == 'quantity' && isset($product->stocks) && count($product->stocks) > 0)
+                    {{-- যদি স্টক দেখাতে চান --}}
+                    | available: {{ $product->stocks->sum('qty') }} 
+                @endif
+            </div>
+        <style>
+            .products-section .product-price {
+            display: flex
+        ;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 0 15px;
+        }
+        .current-price {
+            color: #e74c3c!important;
+            font-weight: 800!important;
+        }
+        .original-price {
+            color: #95a5a6;
+            text-decoration: line-through;
+        }
+        </style>
+
+        {{-- Add to Cart / Place Bid বাটনটি এখানে সরানো হয়েছে এবং mt-3 ব্যবহার করা হয়েছে যাতে এটি দাম থেকে কিছুটা নিচে থাকে --}}
+        {{-- <div class="mt-3">
+            @if ($product->auction_product == 0)
+                <button type="button" class="btn btn-block add-to-cart-product-box"
+                    onclick="showAddToCartModal({{ $product->id }})">
+                    {{ translate('Add to Cart') }}
+                </button>
+            @endif
+
+            @if (
+                $product->auction_product == 1 &&
+                $product->auction_start_date <= strtotime('now') &&
+                $product->auction_end_date >= strtotime('now'))
+                @php
+                    $highest_bid = $product->bids->max('amount');
+                    $min_bid_amount = $highest_bid != null ? $highest_bid + 1 : $product->starting_bid;
+                @endphp
+                <button type="button" class="btn btn-block add-to-cart-product-box"
+                    onclick="bid_single_modal({{ $product->id }}, {{ $min_bid_amount }})">
+                    {{ translate('Place Bid') }}
+                </button>
+            @endif
+        </div> --}}
     </div>
 </div>

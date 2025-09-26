@@ -51,7 +51,7 @@ use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\SizeChartController;
-
+use App\Http\Controllers\Preorder\PreorderController;
 /*
   |--------------------------------------------------------------------------
   | Web Routes
@@ -66,6 +66,33 @@ use App\Http\Controllers\SizeChartController;
 // Route::get('verify/{token}', [VerificationController::class, 'verify'])->name('verify');
 // Route::post('send-verification-code', [VerificationController::class, 'sendVerificationCode']);
 // Route::post('verify-code', [VerificationController::class, 'verification_confirmation']);
+Route::post('/pre-order/submit', [PreorderController::class, 'submit_request'])->name('pre_order.submit')->middleware(['auth']);
+
+Route::group(['middleware' => 'web'], function () {
+    // Authentication Routes...
+    Route::get('login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
+    // Route::post('logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout'); // যদি আপনার আলাদা logout রুট থাকে
+
+    // Registration Routes...
+    Route::get('register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('register', [App\Http\Controllers\Auth\RegisterController::class, 'register']);
+
+    // Password Reset Routes...
+    Route::get('password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
+
+    // Email Verification Routes...
+    Route::get('email/verify', [App\Http\Controllers\Auth\VerificationController::class, 'show'])->name('verification.notice');
+    Route::get('email/verify/{id}/{hash}', [App\Http\Controllers\Auth\VerificationController::class, 'verify'])->name('verification.verify');
+    Route::post('email/resend', [App\Http\Controllers\Auth\VerificationController::class, 'resend'])->name('verification.resend');
+});
+
+
+
+
 
 
 
@@ -95,7 +122,7 @@ Route::controller(AizUploadController::class)->group(function () {
     Route::get('/aiz-uploader/download/{id}', 'attachment_download')->name('download_attachment');
 });
 
-Route::group(['middleware' => ['prevent-back-history','handle-demo-login']], function () {
+Route::group(['middleware' => ['prevent-back-history']], function () {
     Auth::routes(['verify' => true]);
 });
 
@@ -123,7 +150,7 @@ Route::controller(ShopController::class)->group(function () {
     Route::post('/shop/registration/verification-code-send', 'sendRegVerificationCode')->name('shop-reg.verification_code_send');
     Route::get('/shop/registration/verify-code/{id}', 'regVerifyCode')->name('shop-reg.verify_code');
     Route::post('/shop/registration/verification-code-confirmation', 'regVerifyCodeConfirmation')->name('shop-reg.verify_code_confirmation');
-    
+
 });
 
 Route::controller(HomeController::class)->group(function () {
@@ -134,11 +161,11 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/email-change/callback', 'email_change_callback')->name('email_change.callback');
     Route::post('/password/reset/email/submit', 'reset_password_with_code')->name('password.update');
 
-    Route::get('/users/login', 'login')->name('user.login')->middleware('handle-demo-login');
-    Route::get('/seller/login', 'login')->name('seller.login')->middleware('handle-demo-login');
-    Route::get('/deliveryboy/login', 'login')->name('deliveryboy.login')->middleware('handle-demo-login');
-    Route::get('/users/registration', 'registration')->name('user.registration')->middleware('handle-demo-login');
-    Route::post('/users/login/cart', 'cart_login')->name('cart.login.submit')->middleware('handle-demo-login');
+    Route::get('/users/login', 'login')->name('user.login');
+    Route::get('/seller/login', 'login')->name('seller.login');
+    Route::get('/deliveryboy/login', 'login')->name('deliveryboy.login');
+    Route::get('/users/registration', 'registration')->name('user.registration');
+    Route::post('/users/login/cart', 'cart_login')->name('cart.login.submit');
 
     Route::post('/import-data', 'import_data');
 
@@ -411,7 +438,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::controller(NoteController::class)->group(function () {
         Route::post('/get-notes', 'getNotes')->name('get_notes');
         Route::get('/get-single-note/{id}', 'getSingleNote')->name('get-single-note');
-        
+
     });
 });
 
@@ -518,4 +545,26 @@ Route::controller(PageController::class)->group(function () {
 });
 Route::controller(ContactController::class)->group(function () {
     Route::post('/contact', 'contact')->name('contact');
+});
+
+
+
+
+// Route::group(['middleware' => ['auth', 'user']], function() {
+//     Route::get('/wholesaler/dashboard', 'App\Http\Controllers\Admin\WholesalerController@wholesaler_dashboard')->name('wholesaler.dashboard');
+// });
+
+
+Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function() {
+    $wholesaler_controller = 'App\Http\Controllers\Admin\WholesalerController';
+    Route::get('wholesaler-requests', [$wholesaler_controller, 'all_requests'])->name('wholesaler.requests');
+    Route::get('all-wholesalers', [$wholesaler_controller, 'all_wholesalers'])->name('wholesalers.all');
+    Route::get('wholesaler-requests/approve/{id}', [$wholesaler_controller, 'approve_request'])->name('wholesaler.request.approve');
+    Route::get('wholesaler-requests/reject/{id}', [$wholesaler_controller, 'reject_request'])->name('wholesaler.request.reject');
+    Route::get('wholesaler-requests/delete/{id}', [$wholesaler_controller, 'delete_request'])->name('wholesaler.request.delete');
+    Route::get('wholesale-orders', [$wholesaler_controller, 'wholesale_orders_index'])->name('wholesale_orders.index');
+    Route::get('wholesale-orders/{id}/show', [$wholesaler_controller, 'wholesale_order_show'])->name('wholesale_orders.show'); // রুটের নাম 'wholesale_orders.show' নিশ্চিত করা হলো
+    Route::get('wholesale-settings', [$wholesaler_controller, 'wholesale_settings_index'])->name('wholesale.settings');
+    Route::post('wholesale-settings/update', [$wholesaler_controller, 'wholesale_settings_update'])->name('wholesale.settings.update');
+    Route::get('wholesale-products/all', [$wholesaler_controller, 'all_wholesale_products'])->name('wholesale_products.all');
 });

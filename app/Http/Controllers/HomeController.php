@@ -41,6 +41,7 @@ use ZipArchive;
 use Carbon\Carbon;
 use Session;
 
+
 class HomeController extends Controller
 {
     /**
@@ -122,17 +123,44 @@ class HomeController extends Controller
         return view('frontend.' . get_setting('homepage_select') . '.partials.preorder_products_section', compact('preorder_products'));
     }
 
-    public function login()
+    // public function login()
+    // {
+    //     if (Auth::check()) {
+    //         return redirect()->route('home');
+    //     }
+
+    //     if (Route::currentRouteName() == 'seller.login' && get_setting('vendor_system_activation') == 1) {
+    //         return view('auth.' . get_setting('authentication_layout_select') . '.seller_login');
+    //     } else if (Route::currentRouteName() == 'deliveryboy.login' && addon_is_activated('delivery_boy')) {
+    //         return view('auth.' . get_setting('authentication_layout_select') . '.deliveryboy_login');
+    //     }
+    //     return view('auth.' . get_setting('authentication_layout_select') . '.user_login');
+    // }
+
+      public function login()
     {
+        // যদি ইউজার ইতিমধ্যে লগইন করা থাকে, তাহলে তাকে তার ড্যাশবোর্ডে রিডাইরেক্ট করুন।
         if (Auth::check()) {
-            return redirect()->route('home');
+            $userType = Auth::user()->user_type;
+            if ($userType === 'admin' || $userType === 'staff') {
+                return redirect()->route('admin.dashboard');
+            } elseif ($userType === 'seller') {
+                return redirect()->route('seller.dashboard');
+            } elseif ($userType === 'customer' || $userType === 'wholesaler') { // Wholesaler-ও এখানে হ্যান্ডেল করা হলো
+                return redirect()->route('dashboard'); // সাধারণ/হোলসেলার ড্যাশবোর্ড
+            } elseif ($userType === 'delivery_boy') {
+                return redirect()->route('deliveryboy.dashboard');
+            }
+            return redirect()->route('home'); // অন্য কোনো user_type থাকলে হোমে পাঠান
         }
 
+        // যদি লগইন করা না থাকে, তাহলে user_type অনুযায়ী লগইন ভিউ দেখান।
         if (Route::currentRouteName() == 'seller.login' && get_setting('vendor_system_activation') == 1) {
             return view('auth.' . get_setting('authentication_layout_select') . '.seller_login');
         } else if (Route::currentRouteName() == 'deliveryboy.login' && addon_is_activated('delivery_boy')) {
             return view('auth.' . get_setting('authentication_layout_select') . '.deliveryboy_login');
         }
+        // ডিফল্ট user_login ভিউ দেখান
         return view('auth.' . get_setting('authentication_layout_select') . '.user_login');
     }
 
@@ -216,23 +244,26 @@ class HomeController extends Controller
         //$this->middleware('auth');
     }
 
-    public function dashboard()
+     public function dashboard()
     {
-        if (Auth::user()->user_type == 'seller') {
+        $userType = Auth::user()->user_type;
+
+        if ($userType == 'seller') {
             return redirect()->route('seller.dashboard');
-        } elseif (Auth::user()->user_type == 'customer') {
+        } elseif ($userType == 'customer' || $userType == 'wholesaler') {
+            $users_cart_warning = null;
             $users_cart = Cart::where('user_id', auth()->user()->id)->first();
             if ($users_cart) {
-                flash(translate('You had placed your items in the shopping cart. Try to order before the product quantity runs out.'))->warning();
+                $users_cart_warning = translate('You had placed your items in the shopping cart. Try to order before the product quantity runs out.');
             }
-            return view('frontend.user.customer.dashboard');
-        } elseif (Auth::user()->user_type == 'delivery_boy') {
+            return view('frontend.user.customer.dashboard', compact('users_cart_warning'));
+        } elseif ($userType == 'delivery_boy') {
             return view('delivery_boys.dashboard');
         } else {
             abort(404);
         }
     }
-
+    
     public function profile(Request $request)
     {
         if (Auth::user()->user_type == 'seller') {

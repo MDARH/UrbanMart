@@ -117,7 +117,7 @@
                 @endif
 
                 <!-- Downloads -->
-                <li class="aiz-side-nav-item">
+                {{-- <li class="aiz-side-nav-item">
                     <a href="{{ route('digital_purchase_history.index') }}"
                         class="aiz-side-nav-link {{ areActiveRoutes(['digital_purchase_history.index']) }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16.001" height="16" viewBox="0 0 16.001 16">
@@ -128,10 +128,10 @@
                         </svg>
                         <span class="aiz-side-nav-text ml-3">{{ translate('Downloads') }}</span>
                     </a>
-                </li>
+                </li> --}}
 
                 <!-- Refund Requests -->
-                @if (addon_is_activated('refund_request'))
+                {{-- @if (addon_is_activated('refund_request'))
                     <li class="aiz-side-nav-item">
                         <a href="{{ route('customer_refund_request') }}"
                             class="aiz-side-nav-link {{ areActiveRoutes(['customer_refund_request']) }}">
@@ -144,10 +144,10 @@
                             <span class="aiz-side-nav-text ml-3">{{ translate('Refund Requests') }}</span>
                         </a>
                     </li>
-                @endif
+                @endif --}}
 
                 <!-- Wishlist -->
-                <li class="aiz-side-nav-item">
+                {{-- <li class="aiz-side-nav-item">
                     <a href="{{ route('wishlists.index') }}"
                         class="aiz-side-nav-link {{ areActiveRoutes(['wishlists.index']) }}">
                         <svg id="Group_8116" data-name="Group 8116" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="14" viewBox="0 0 16 14">
@@ -162,10 +162,10 @@
                         </svg>
                         <span class="aiz-side-nav-text ml-3">{{ translate('Wishlist') }}</span>
                     </a>
-                </li>
+                </li> --}}
 
                 <!-- Compare -->
-                <li class="aiz-side-nav-item">
+                {{-- <li class="aiz-side-nav-item">
                     <a href="{{ route('compare') }}" class="aiz-side-nav-link {{ areActiveRoutes(['compare']) }}">
                         <svg id="Group_22071" data-name="Group 22071" xmlns="http://www.w3.org/2000/svg" width="14.6" height="16" viewBox="0 0 14.6 16">
                             <g id="LWPOLYLINE" transform="translate(0.158)">
@@ -177,9 +177,9 @@
                         </svg>
                         <span class="aiz-side-nav-text ml-3">{{ translate('Compare') }}</span>
                     </a>
-                </li>
+                </li> --}}
 
-                @if (get_setting('vendor_system_activation') == 1)
+                {{-- @if (get_setting('vendor_system_activation') == 1)
                 <!-- Followed Sellers -->
                 <li class="aiz-side-nav-item">
                     <a href="{{ route('followed_seller') }}" class="aiz-side-nav-link {{ areActiveRoutes(['followed_seller']) }}">
@@ -191,10 +191,10 @@
                         <span class="aiz-side-nav-text ml-3">{{ translate('Followed Sellers') }}</span>
                     </a>
                 </li>
-                @endif
+                @endif --}}
 
                 <!-- Classified Products -->
-                @if (get_setting('classified_product') == 1)
+                {{-- @if (get_setting('classified_product') == 1)
                     <li class="aiz-side-nav-item">
                         <a href="{{ route('customer_products.index') }}"
                             class="aiz-side-nav-link {{ areActiveRoutes(['customer_products.index', 'customer_products.create', 'customer_products.edit']) }}">
@@ -215,10 +215,10 @@
                             <span class="aiz-side-nav-text ml-3">{{ translate('Classified Products') }}</span>
                         </a>
                     </li>
-                @endif
+                @endif --}}
 
                 <!-- Auction -->
-                @if (addon_is_activated('auction'))
+                {{-- @if (addon_is_activated('auction'))
                     <li class="aiz-side-nav-item">
                         <a href="javascript:void(0);" class="aiz-side-nav-link">
                             <svg id="Group_8142" data-name="Group 8142" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
@@ -252,10 +252,10 @@
                             </li>
                         </ul>
                     </li>
-                @endif
+                @endif --}}
 
                 <!-- Conversations -->
-                @if (get_setting('conversation_system') == 1)
+                {{-- @if (get_setting('conversation_system') == 1)
                     @php
                         $conversation = get_non_viewed_conversations();
                     @endphp
@@ -276,10 +276,10 @@
                             @endif
                         </a>
                     </li>
-                @endif
+                @endif --}}
 
                 <!-- My Wallet -->
-                @if (get_setting('wallet_system') == 1)
+                {{-- @if (get_setting('wallet_system') == 1)
                     <li class="aiz-side-nav-item">
                         <a href="{{ route('wallet.index') }}"
                             class="aiz-side-nav-link {{ areActiveRoutes(['wallet.index']) }}">
@@ -296,10 +296,10 @@
                             <span class="aiz-side-nav-text ml-3">{{ translate('My Wallet') }}</span>
                         </a>
                     </li>
-                @endif
+                @endif --}}
 
                 <!-- Earning Points -->
-                @if (addon_is_activated('club_point'))
+                {{-- @if (addon_is_activated('club_point'))
                     <li class="aiz-side-nav-item">
                         <a href="{{ route('earnng_point_for_user') }}"
                             class="aiz-side-nav-link {{ areActiveRoutes(['earnng_point_for_user']) }}">
@@ -312,10 +312,10 @@
                             <span class="aiz-side-nav-text ml-3">{{ translate('Earning Points') }}</span>
                         </a>
                     </li>
-                @endif
+                @endif --}}
 
                 <!-- Affiliate -->
-                @if (addon_is_activated('affiliate_system') &&
+                {{-- @if (addon_is_activated('affiliate_system') &&
                     Auth::user()->affiliate_user != null &&
                     Auth::user()->affiliate_user->status)
                     <li class="aiz-side-nav-item">
@@ -353,7 +353,7 @@
 
                         </ul>
                     </li>
-                @endif
+                @endif --}}
 
                 @php
                     $support_ticket = DB::table('tickets')
@@ -380,7 +380,7 @@
                 </li>
 
                 <!-- Manage Profile -->
-                <li class="aiz-side-nav-item">
+                {{-- <li class="aiz-side-nav-item">
                     <a href="{{ route('profile') }}" class="aiz-side-nav-link {{ areActiveRoutes(['profile']) }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
                             <g id="Group_8094" data-name="Group 8094" transform="translate(3176 -602)">
@@ -390,7 +390,7 @@
                         </svg>
                         <span class="aiz-side-nav-text ml-3">{{ translate('Manage Profile') }}</span>
                     </a>
-                </li>
+                </li> --}}
 
                 <!-- Delete My Account -->
                 <li class="aiz-side-nav-item">

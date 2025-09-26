@@ -299,6 +299,8 @@ class LoginController extends Controller
                 'time' => now()->toDateTimeString(),
             ]);
             return redirect()->route('seller.dashboard');
+        } elseif (auth()->user()->user_type == 'wholesaler') {
+            return redirect()->route('dashboard'); // Wholesaler-দের জন্য ড্যাশবোর্ড
         } else {
 
             if (session('link') != null) {

@@ -20,6 +20,7 @@ use Socialite;
 use App\Models\Cart;
 use App\Rules\Recaptcha;
 use App\Utility\EmailUtility;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -27,6 +28,30 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
+    /**
+     * Check if email belongs to admin or seller
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkUserType(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            return response()->json([
+                'result' => true,
+                'user_type' => $user->user_type
+            ]);
+        }
+
+        return response()->json([
+            'result' => false,
+            'user_type' => null
+        ]);
+    }
 
   public function userEmailSubmit(Request $request)
     {
@@ -155,12 +180,13 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'user_type' => 'wholesaler',
+                'business_name' => $request->businessName,
                 'facebook_link' => $request->facebookLink,
                 'website_link' => $request->websiteLink,
                 'address' => $request->address,
-                'trade_license_number' => $request->tradeLicense,
+                'trade_license' => $request->tradeLicense,
                 'password' => bcrypt($request->password),
-                'approval_status' => 'pending',
+                'status' => 'pending',
                 'email_verified_at' => now() // Auto-verify for wholesalers
             ]);
 
@@ -172,14 +198,23 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'user_type' => $user->user_type,
-                    'approval_status' => $user->approval_status
+                    'status' => $user->status
                 ]
             ]);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // --- শুরু: ভ্যালিডেশন ফেইল হলে এরর রেসপন্স পাঠানো ---
             return response()->json([
                 'result' => false,
-                'message' => 'Registration failed. Please try again.'
+                'message' => $e->errors()
+            ], 422);
+            // --- শেষ: ভ্যালিডেশন ফেইল হলে এরর রেসপন্স পাঠানো ---
+        } catch (\Exception $e) {
+            // --- শুরু: অন্য কোনো সমস্যা হলে এরর রেসপন্স পাঠানো ---
+            return response()->json([
+                'result' => false,
+                'message' => 'Registration failed. Please try again. Error: ' . $e->getMessage()
             ], 500);
+            // --- শেষ: অন্য কোনো সমস্যা হলে এরর রেসপন্স পাঠানো ---
         }
     }
 
@@ -209,10 +244,17 @@ class AuthController extends Controller
             }
 
             // Check if account is approved
-            if ($user->approval_status !== 'approved') {
+             if ($user->status === 'pending') {
                 return response()->json([
                     'result' => false,
                     'message' => 'Your wholesaler account is still pending approval. Please contact support.'
+                ], 403);
+            }
+
+               if ($user->status !== 'active') { // 'active' মানে 'approved' ধরা হয়েছে। অন্য কোনো স্ট্যাটাস (যেমন inactive, rejected) থাকলে লগইন করতে দেওয়া হবে না।
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Your account is not active. Please contact support.'
                 ], 403);
             }
 
@@ -228,7 +270,7 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'user_type' => $user->user_type,
-                    'approval_status' => $user->approval_status
+                    'status' => $user->status
                 ]
             ]);
         } catch (\Exception $e) {
@@ -361,114 +403,6 @@ public function signupWholesaler(Request $request)
         'access_token' => $token
     ]);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // public function signup(Request $request)
-    // {
-    //     $messages = array(
-    //         'name.required' => translate('Name is required'),
-    //         'email_or_phone.required' => $request->register_by == 'email' ? translate('Email is required') : translate('Phone is required'),
-    //         'email_or_phone.email' => translate('Email must be a valid email address'),
-    //         'email_or_phone.numeric' => translate('Phone must be a number.'),
-    //         'email_or_phone.unique' => $request->register_by == 'email' ? translate('The email has already been taken') : translate('The phone has already been taken'),
-    //         'password.required' => translate('Password is required'),
-    //         'password.confirmed' => translate('Password confirmation does not match'),
-    //         'password.min' => translate('Minimum 6 digits required for password')
-    //     );
-    //     $validator = Validator::make($request->all(), [
-    //         'name' => 'required',
-    //         'password' => 'required|min:6|confirmed',
-    //         'email_or_phone' => [
-    //             'required',
-    //             Rule::when($request->register_by === 'email', ['email', 'unique:users,email']),
-    //             Rule::when($request->register_by === 'phone', ['numeric', 'unique:users,phone']),
-    //         ],
-    //         'g-recaptcha-response' => [
-    //             Rule::when(get_setting('google_recaptcha') == 1, ['required', new Recaptcha()], ['sometimes'])
-    //         ]
-    //     ], $messages);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'result' => false,
-    //             'message' => $validator->errors()->all()
-    //         ]);
-    //     }
-
-    //     $user = new User();
-    //     $user->name = $request->name;
-    //     if ($request->register_by == 'email') {
-
-    //         $user->email = $request->email_or_phone;
-    //     }
-    //     if ($request->register_by == 'phone') {
-    //         $user->phone = $request->email_or_phone;
-    //     }
-    //     $user->password = bcrypt($request->password);
-    //     $user->verification_code = rand(100000, 999999);
-    //     $user->save();
-
-
-    //     $user->email_verified_at = null;
-    //     if ($user->email != null) {
-    //         if (BusinessSetting::where('type', 'email_verification')->first()->value != 1) {
-    //             $user->email_verified_at = date('Y-m-d H:m:s');
-    //         }
-    //     }
-
-    //     if ($user->email_verified_at == null) {
-    //         if ($request->register_by == 'email') {
-    //             try {
-    //                 $user->notify(new AppEmailVerificationNotification());
-    //             } catch (\Exception $e) {
-    //             }
-    //         } else {
-    //             $otpController = new OTPVerificationController();
-    //             $otpController->send_code($user);
-    //         }
-    //     }
-
-    //     $user->save();
-    //     //create token
-    //     $user->createToken('tokens')->plainTextToken;
-
-    //     $tempUserId = $request->has('temp_user_id') ? $request->temp_user_id : null;
-    //     return $this->loginSuccess($user, '', $tempUserId);
-    // }
-
-    // public function resendCode()
-    // {
-    //     $user = auth()->user();
-    //     $user->verification_code = rand(100000, 999999);
-
-    //     if ($user->email) {
-    //         try {
-    //             $user->notify(new AppEmailVerificationNotification());
-    //         } catch (\Exception $e) {
-    //         }
-    //     } else {
-    //         $otpController = new OTPVerificationController();
-    //         $otpController->send_code($user);
-    //     }
-
-    //     $user->save();
-
-    //     return response()->json([
-    //         'result' => true,
-    //         'message' => translate('Verification code is sent again'),
-    //     ], 200);
-    // }
 
     public function confirmCode(Request $request)
     {
@@ -707,7 +641,7 @@ public function signupWholesaler(Request $request)
         if($isEmailVerificationEnabled == 1){
             $user->notify(new AppEmailVerificationNotification());
         }
-        
+
         // User Address Create
         $address = new Address();
         $address->user_id       = $user->id;
@@ -734,9 +668,8 @@ public function signupWholesaler(Request $request)
         return $this->loginSuccess($user);
     }
 
-    public function loginSuccess($user, $token = null, $tempUserId = null)
+      public function loginSuccess($user, $token = null, $tempUserId = null)
     {
-
         if (!$token) {
             $token = $user->createToken('API Token')->plainTextToken;
         }
@@ -749,7 +682,10 @@ public function signupWholesaler(Request $request)
                 ]);
         }
 
-         if($user->user_type == 'seller'){
+        Auth::login($user);
+        session()->flash('redirect_to', route('dashboard')); 
+
+        if($user->user_type == 'seller'){
             \Log::channel('seller_login')->info('Seller Logged In', [
                 'user_id' => $user->id,
                 'email' => $user->email,
@@ -769,7 +705,7 @@ public function signupWholesaler(Request $request)
                 'name' => $user->name,
                 'email' => $user->email,
                 'avatar' => $user->avatar,
-                'avatar_original' => uploaded_asset($user->avatar_original),
+                'avatar_original' => uploaded_asset($user->avatar->avatar_original), 
                 'phone' => $user->phone,
                 'email_verified' => $user->email_verified_at != null
             ]

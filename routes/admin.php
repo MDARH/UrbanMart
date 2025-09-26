@@ -85,7 +85,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
     Route::controller(CybersourceSettingController::class)->group(function () {
         Route::get('/cybersource-configuration', 'configuration')->name('cybersource_configuration');
     });
-    
+
     // category
     Route::resource('categories', CategoryController::class);
     Route::controller(CategoryController::class)->group(function () {
@@ -93,7 +93,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
         Route::get('/categories/destroy/{id}', 'destroy')->name('categories.destroy');
         Route::post('/categories/featured', 'updateFeatured')->name('categories.featured');
         Route::post('/categories/categoriesByType', 'categoriesByType')->name('categories.categories-by-type');
-      
+
         //category-wise commission
         Route::get('/categories-wise-commission', 'categoriesWiseCommission')->name('categories_wise_commission');
         Route::post('/categories-wise-commission', 'categoriesWiseCommissionUpdate')->name('categories_wise_commission.update');
@@ -314,7 +314,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
 
         // Order Configuration
         Route::get('/order-configuration', 'order_configuration')->name('order_configuration.index');
-        
+
     });
 
 
@@ -437,7 +437,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
         // Order bulk export
         Route::get('/order-bulk-export', 'orderBulkExport')->name('order-bulk-export');
 
-        // 
+        //
         Route::post('order-payment-notification', 'unpaid_order_payment_notification_send')->name('unpaid_order_payment_notification');
     });
 
@@ -563,8 +563,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
     Route::get('/measurement-points/destroy/{id}',  [MeasurementPointsController::class, 'destroy'])->name('measurement-points.destroy');
 
     // Addon
-    Route::resource('addons', AddonController::class);
-    Route::post('/addons/activation', [AddonController::class, 'activation'])->name('addons.activation');
+    // Route::resource('addons', AddonController::class);
+    // Route::post('/addons/activation', [AddonController::class, 'activation'])->name('addons.activation');
 
     //Customer Package
     Route::resource('customer_packages', CustomerPackageController::class);
