@@ -38,7 +38,7 @@
   <div class="container-full">
     <div class="section-header">
       <h2 class="section-title" style="color: var(--skybuy-blue);">{{ translate('Best Selling') }}</h2>
-      <a href="{{ route('search') }}?featured=1" class="view-more-btn">
+      <a href="{{ route('search', ['best_selling' => 1]) }}" class="view-more-btn">
         {{ translate('View More') }}
       </a>
     </div>
@@ -93,6 +93,7 @@
 @endif
 
 <style>
+/* Your existing CSS code here (no changes needed) */
     .products-section{ background:#fff; border-radius:15px; padding:30px; margin-top:20px; box-shadow:0 4px 15px rgba(0,0,0,.1); }
 .section-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:12px; border-bottom:2px solid #e5e7eb; }
 .section-title{ font-size:22px; font-weight:800; color:var(--skybuy-blue); margin:0; }

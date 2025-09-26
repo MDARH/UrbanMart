@@ -10,9 +10,13 @@ use App\Http\Controllers\Auth\VerificationController;
 Route::post('v2/auth/user-email-submit', [VerificationController::class, 'sendVerificationCode']);
 Route::post('v2/auth/user-verify-code', [VerificationController::class, 'verification_confirmation']);
 Route::post('v2/auth/user-resend-code', [VerificationController::class, 'resendVerificationCode']);
+Route::post('v2/auth/check-user-type', [AuthController::class, 'checkUserType']);
 Route::post('v2/auth/google-login', [AuthController::class, 'googleLogin']);
 Route::post('v2/auth/wholesaler-register', [AuthController::class, 'wholesalerRegister']);
 Route::post('v2/auth/wholesaler-login', [AuthController::class, 'wholesalerLogin']);
+
+
+
 
 Route::post('login-email', [AuthController::class, 'loginWithEmail']);
 Route::post('signup-wholesaler', [AuthController::class, 'signupWholesaler']);
@@ -23,14 +27,6 @@ Route::prefix('auth')->group(function() {
     Route::get('verify-email/{token}', [VerificationController::class, 'verify']);
     Route::post('resend-verification-email', [VerificationController::class, 'resend']);
 });
-
-
-
-
-
-
-
-
 
 Route::group(['prefix' => 'v2/auth', 'middleware' => ['app_language']], function () {
 
@@ -473,7 +469,7 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
         Route::any('cyber-source/payment/process', 'App\Http\Controllers\Api\V2\CybersourceController@process')->name('cybersource.process');
         Route::any('cyber-source/payment/callback', 'App\Http\Controllers\Api\V2\CybersourceController@callback')->name('cybersource.callback');
         Route::any('cyber-source/payment/webhook', 'App\Http\Controllers\Api\V2\CybersourceController@webhook')->name('cybersource.webhook');
-        
+
         //Payfast routes <starts>
         Route::controller(PayfastController::class)->group(function () {
             Route::any('/payfast/notify', 'payfast_notify')->name('api.payfast.notify');

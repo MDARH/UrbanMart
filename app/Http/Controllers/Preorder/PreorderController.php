@@ -12,6 +12,7 @@ use App\Models\PreorderCoupon;
 use App\Models\PreorderProduct;
 use App\Utility\PreorderNotificationUtility;
 use Illuminate\Http\Request;
+use App\Models\Product; 
 
 class PreorderController extends Controller
 {
@@ -20,7 +21,48 @@ class PreorderController extends Controller
         // Staff Permission Check
         $this->middleware(['permission:preorder_settings'])->only('preorderSettings');
     }
-    
+
+       public function submit_request(Request $request)
+    {
+        // Find the standard product from the database
+        $product = Product::find($request->product_id);
+
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Product not found.']);
+        }
+
+        // Create a new Preorder record to log the request
+        $preorder = new Preorder();
+        $preorder->user_id = auth()->id();
+
+        // IMPORTANT: We are storing the standard product ID here.
+        // Your other logic uses a 'preorder_product_id', so be aware of this difference.
+        $preorder->product_id = $product->id;
+
+        $preorder->product_owner_id = $product->user_id;
+        $preorder->order_code = date('Ymd-His') . rand(10, 99);
+
+        // We use a custom status to identify this as an out-of-stock request
+        $preorder->status = 'out_of_stock_request';
+        $preorder->request_preorder_status = 1; // Mark as a request
+        $preorder->request_preorder_time = now();
+
+        // Set default values for other required fields
+        $preorder->grand_total = 0;
+        $preorder->subtotal = 0;
+        $preorder->quantity = 1; // Default to 1 for a simple request
+
+        $preorder->save();
+
+        // You can uncomment the line below if you want to send a notification
+        // PreorderNotificationUtility::preorderNotification($preorder, 'request');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thank you! We have received your pre-order request and will contact you soon.'
+        ]);
+    }
+
 
     public function place_order(Request $request){
 
@@ -89,7 +131,7 @@ class PreorderController extends Controller
             flash(translate('No order found!!'))->success();
             return redirect()->back();
         }
-        
+
         $sort_search = '';
 
         if (get_setting('guest_checkout_activation') == 0 && auth()->user() == null) {
@@ -248,7 +290,7 @@ class PreorderController extends Controller
         $coupon = PreorderCoupon::where('preorder_product_id', $request->preorder_product_id)->where('coupon_code',$request->coupon_code)->first();
 
 
-        // Coupon Code Invalid 
+        // Coupon Code Invalid
         if(!$coupon){
             flash(translate('Coupon is invalid!!'))->error();
             return redirect()->back();
@@ -260,7 +302,7 @@ class PreorderController extends Controller
         }
 
         $currentTimestamp = strtotime(date('d-m-Y'));
-        
+
         if ($currentTimestamp < $coupon->coupon_start_date || $currentTimestamp > $coupon->coupon_end_date) {
             flash(translate('Coupon is invalid!!'))->error();
             return redirect()->back();

@@ -137,9 +137,10 @@ if (!function_exists('filter_products')) {
 
         $products = $products->isApprovedPublished()->where('auction_product', 0);
 
-        if (!addon_is_activated('wholesale')) {
-            $products = $products->where('wholesale_product', 0);
-        }
+        // if (!addon_is_activated('wholesale')) {
+        //     $products = $products->where('wholesale_product', 0);
+        // }
+        $products = $products->where('wholesale_product', 0);
         $verified_sellers = verified_sellers_id();
         if (get_setting('vendor_system_activation') == 1) {
             return $products->where(function ($p) use ($verified_sellers) {
@@ -1944,7 +1945,7 @@ if (!function_exists('getLastViewedProducts')) {
                                         ->from('products')
                                         ->where('approved', '1')->where('published', 1)
                                         ->when(!addon_is_activated('wholesale') ,function ($q1){
-                                            $q1->where('wholesale_product', 0);
+                                            $q1->where('wholesale_product', 1);
                                         })
                                         ->when(!addon_is_activated('auction') ,function ($q2){
                                             $q2->where('auction_product', 0);
@@ -2087,11 +2088,20 @@ if (!function_exists('get_categories_by_preorder_products')) {
 }
 
 // Get single Color name
+// if (!function_exists('get_single_color_name')) {
+//     function get_single_color_name($color)
+//     {
+//         $color_query = Color::query();
+//         return $color_query->where('code', $color)->first()->name;
+//     }
+// }
 if (!function_exists('get_single_color_name')) {
-    function get_single_color_name($color)
-    {
-        $color_query = Color::query();
-        return $color_query->where('code', $color)->first()->name;
+    function get_single_color_name($color) {
+        // Find the color object by its code
+        $color_obj = Color::where('code', $color)->first();
+
+        // Check if a color object was found before trying to access its name
+        return $color_obj->name ?? ''; // If $color_obj is null, return an empty string instead of 'name'
     }
 }
 
@@ -2618,7 +2628,7 @@ if (!function_exists('get_wishlists')) {
                             ->from('products')
                             ->where('approved', '1')->where('published', 1)
                             ->when(!addon_is_activated('wholesale') ,function ($q1){
-                                $q1->where('wholesale_product', 0);
+                                $q1->where('wholesale_product', 1);
                             })
                             ->when(!addon_is_activated('auction') ,function ($q2){
                                 $q2->where('auction_product', 0);

@@ -1,5 +1,70 @@
 # FILE CHANGES HISTORY
 
+## Latest Changes - July 22, 2024 (Session 15)
+**Developer:** DEV Support Assistant
+
+### Files Modified
+
+#### 1. [app/Http/Controllers/Auth/VerificationController.php](app/Http/Controllers/Auth/VerificationController.php)
+**Changes:**
+- Fixed `verification_confirmation` method to properly validate verification codes
+- Removed the direct timestamp comparison that was causing validation failures
+- Added separate Carbon-based timestamp validation with 30-minute expiration window
+- Added Carbon import for proper datetime handling
+
+### Issues Resolved
+- **API Error**: Fixed 400 Bad Request error on user-verify-code endpoint
+- **Verification Flow**: Improved verification code validation logic
+- **User Experience**: Better error messages for expired verification codes
+
+## Previous Changes - July 21, 2024 (Session 14)
+**Developer:** DEV Support Assistant
+
+### Files Modified
+
+#### 1. [app/Http/Controllers/Auth/VerificationController.php](app/Http/Controllers/Auth/VerificationController.php)
+**Changes:**
+- Fixed `resendVerificationCode` method to use verification_codes table instead of User model
+- Updated error handling with more descriptive error messages
+- Ensured consistent code storage and retrieval for verification process
+
+### Issues Resolved
+- **API Error**: Fixed 400 Bad Request error on user-verify-code endpoint
+- **Verification Flow**: Corrected verification code storage and retrieval mechanism
+- **Consistency**: Aligned verification code implementation with successful implementation from Hassan project
+
+## Previous Changes - July 20, 2024 (Session 13)
+**Developer:** DEV Support Assistant
+
+### Files Modified
+
+#### 1. [app/Http/Controllers/Api/V2/AuthController.php](app/Http/Controllers/Api/V2/AuthController.php)
+**Changes:**
+- Added new `checkUserType` method to verify user account types
+- Implemented email validation and user type checking
+- Returns user_type for existing users or null for new users
+
+#### 2. [routes/api.php](routes/api.php)
+**Changes:**
+- Added missing API route for `POST /api/v2/auth/check-user-type`
+- Connected route to AuthController's checkUserType method
+
+#### 3. [app/Http/Controllers/Auth/VerificationController.php](app/Http/Controllers/Auth/VerificationController.php)
+**Changes:**
+- Fixed email verification code sending functionality
+- Updated to use User model instead of verification_codes table
+- Improved error handling with detailed error messages
+
+### Issues Resolved
+- **API Error**: Fixed 405 Method Not Allowed error on check-user-type endpoint
+- **User Verification**: Fixed email verification code sending functionality
+- **Security**: Improved user type validation before sending verification codes
+
+### Technical Implementation
+- **API Routes**: Added missing route configuration
+- **User Validation**: Added logic to check if email belongs to admin/seller accounts
+- **Error Handling**: Improved error reporting for better debugging
+
 ## Latest Changes - January 18, 2025 (Session 12)
 **Developer:** Mohammad Hassan - DEV Support Assistant
 

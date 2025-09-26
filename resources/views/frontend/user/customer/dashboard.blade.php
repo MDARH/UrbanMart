@@ -128,7 +128,7 @@
                 </div>
 
                 <!-- Wishlist summary -->
-                <div class="d-flex align-items-center py-4 border-bottom">
+                {{-- <div class="d-flex align-items-center py-4 border-bottom">
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
                         <g id="Group_25000" data-name="Group 25000" transform="translate(-1367 -499)">
                         <path id="Path_32309" data-name="Path 32309" d="M24,0A24,24,0,1,1,0,24,24,24,0,0,1,24,0Z" transform="translate(1367 499)" fill="#3490f3"/>
@@ -144,7 +144,7 @@
                         <span class="fs-20 fw-700 mb-1">{{ count(Auth::user()->wishlists) > 0 ? sprintf("%02d", count(Auth::user()->wishlists)) : 0 }}</span>
                         <span class="fs-14 fw-400 text-secondary">{{ translate('Products in Wishlist') }}</span>
                     </div>
-                </div>
+                </div> --}}
 
                 <!-- Order summary -->
                 <div class="d-flex align-items-center py-4">
@@ -221,14 +221,14 @@
 
     </div>
 
-    <div class="row align-items-center mb-2 mt-1">
+    {{-- <div class="row align-items-center mb-2 mt-1">
         <div class="col-6">
             <h3 class=" mb-0 fs-14 fs-md-16 fw-700 text-dark">{{ translate('My Wishlist')}}</h3>
         </div>
         <div class="col-6 text-right">
             <a class="text-blue fs-10 fs-md-12 fw-700 hov-text-primary animate-underline-primary" href="{{ route('wishlists.index') }}">{{ translate('View All') }}</a>
         </div>
-    </div>
+    </div> --}}
     @php
         $wishlists = get_user_wishlist();
     @endphp

@@ -1,4 +1,3 @@
-
 @extends('frontend.layouts.app')
 
 @section('content')
@@ -94,9 +93,13 @@
                         <div class="slider-container">
                             <div class="slider" id="autoSlider">
                                 @php
-                                    $decoded_slider_images = json_decode(get_setting('home_slider_images', null, $lang), true);
+                                    $decoded_slider_images = json_decode(
+                                        get_setting('home_slider_images', null, $lang),
+                                        true,
+                                    );
                                     $sliders = get_slider_images($decoded_slider_images);
-                                    $home_slider_links = json_decode(get_setting('home_slider_links', null, $lang), true) ?? [];
+                                    $home_slider_links =
+                                        json_decode(get_setting('home_slider_links', null, $lang), true) ?? [];
                                 @endphp
                                 @foreach ($sliders as $key => $slider)
                                     <div class="slide">
@@ -112,7 +115,8 @@
 
                             <div class="slider-nav">
                                 @foreach ($sliders as $key => $slider)
-                                    <div class="nav-dot @if ($key == 0) active @endif" onclick="changeSlide({{ $key }})"></div>
+                                    <div class="nav-dot @if ($key == 0) active @endif"
+                                        onclick="changeSlide({{ $key }})"></div>
                                 @endforeach
                             </div>
                         </div>
@@ -174,8 +178,9 @@
                         </div>
                         <div class="login-card wholesaler-login" onclick="openWholesalerLogin()">
                             <div class="icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
-                                    style="width: 80% !important;" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none"
+                                    viewBox="0 0 24 24" style="width: 80% !important;" stroke="currentColor"
+                                    stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
@@ -202,10 +207,12 @@
                                     : static_asset('assets/img/placeholder.jpg');
                             @endphp
 
-                            <a class="category-card" href="{{ route('products.category', $slug) }}" title="{{ $name }}">
+                            <a class="category-card" href="{{ route('products.category', $slug) }}"
+                                title="{{ $name }}">
                                 <span class="category-card-icon">
-                                    <img src="{{ static_asset('assets/img/placeholder.jpg') }}" data-src="{{ $icon }}"
-                                        class="lazyload cat-icon" alt="{{ $name }}">
+                                    <img src="{{ static_asset('assets/img/placeholder.jpg') }}"
+                                        data-src="{{ $icon }}" class="lazyload cat-icon"
+                                        alt="{{ $name }}">
                                 </span>
                                 <div class="category-card-name">{{ $name }}</div>
                             </a>
@@ -305,36 +312,35 @@
                 </style>
                 <!-- Categories Section Style End-->
 
-                {{-- Flash Sale Products Start--}}
+                {{-- Flash Sale Products Start --}}
 
-                @php
-                    $flash_deal = get_featured_flash_deal();
-                @endphp
+                {{-- Flash Sale Products Start --}}
 
-                @if ($flash_deal)
+@php
+    $flash_deal = get_featured_flash_deal();
+@endphp
+
+@if ($flash_deal && $flash_deal->status == 1 && strtotime(date('Y-m-d H:i:s')) <= $flash_deal->end_date)
     <section id="flash_deal" class="flash-section products-section">
         <div class="container-full">
             <!-- header -->
             <div class="flash-head">
                 <h3 class="flash-title" style="color: var(--skybuy-blue);">
                     {{ translate('Flash Sale') }}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="24" viewBox="0 0 16 24"
-                        class="ml-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="24"
+                        viewBox="0 0 16 24" class="ml-1">
                         <path
                             d="M30.953,13.695a.474.474,0,0,0-.424-.25h-4.9l3.917-7.81a.423.423,0,0,0-.028-.428.477.477,0,0,0-.4-.207H21.588a.473.473,0,0,0-.429.263L15.041,18.151a.423.423,0,0,0,.034.423.478.478,0,0,0,.4.2h4.593l-2.229,9.683a.438.438,0,0,0,.259.5.489.489,0,0,0,.571-.127L30.9,14.164a.425.425,0,0,0,.054-.469Z"
                             transform="translate(-15 -5)" fill="#fcc201" />
                     </svg>
                 </h3>
 
-                {{-- NEW: Countdown added here, inside flash-head --}}
-                <div class="flash-countdown" data-end-date="{{ date('Y/m/d H:i:s', $flash_deal->end_date) }}">
-                    <span class="mr-1">{{ translate('Ends in:') }}</span>
-                    <span id="flash-days">00</span> {{ translate('days') }}
-                    <span id="flash-hours">00</span> {{ translate('hrs') }}
-                    <span id="flash-mins">00</span> {{ translate('min') }}
-                    <span id="flash-secs">00</span> {{ translate('sec') }}
+                {{-- Countdown element for Flash Sale - copied structure from flash_deal_details.blade.php --}}
+                <div class="flash-countdown d-flex align-items-center">
+                    <span class="mr-1 text-white">{{ translate('Ends in:') }}</span>
+                    <div class="aiz-count-down-circle" style="background: none;" end-date="{{ date('Y/m/d H:i:s', $flash_deal->end_date) }}"></div>
                 </div>
-                {{-- NEW: End Countdown --}}
+                {{-- End Countdown --}}
 
                 <div class="flash-links">
                     <a class="view-all" href="{{ route('flash-deal-details', $flash_deal->slug) }}">
@@ -348,30 +354,37 @@
                 <!-- right: products grid -->
                 <div class="col-12 col-lg-12">
                     @php
-                        $flash_deal_products = get_flash_deal_products($flash_deal->id);
+                        // Limit flash deal products to, for example, 12 for the homepage section
+                        $flash_deal_products_for_homepage = collect(get_flash_deal_products($flash_deal->id))->take(12); 
                     @endphp
 
                     <div class="products-grid">
-                        @foreach ($flash_deal_products as $fd)
+                        @foreach ($flash_deal_products_for_homepage as $fd) {{-- Using limited products --}}
                             @if ($fd->product && $fd->product->published)
                                 @php
                                     $p = $fd->product;
-                                    $url = $p->auction_product ? route('auction-product', $p->slug) : route('product', $p->slug);
+                                    $url = $p->auction_product
+                                        ? route('auction-product', $p->slug)
+                                        : route('product', $p->slug);
                                     $name = $p->getTranslation('name');
-                                    $thumb = get_image($p->thumbnail) ?: static_asset('assets/img/placeholder.jpg');
+                                    $thumb =
+                                        uploaded_asset($p->thumbnail_img) ?: // Using uploaded_asset
+                                        static_asset('assets/img/placeholder.jpg');
                                     $now = home_discounted_base_price($p);
                                     $was = home_base_price($p);
                                 @endphp
 
-                                <a href="{{ $url }}" class="fx-card product-ajax-link" title="{{ $name }}">
+                                <a href="{{ $url }}" class="fx-card" {{-- product-ajax-link removed --}}
+                                    title="{{ $name }}">
                                     <div class="fx-img">
                                         <img src="{{ static_asset('assets/img/placeholder.jpg') }}"
-                                            data-src="{{ $thumb }}" class="lazyload" alt="{{ $name }}">
+                                            data-src="{{ $thumb }}" class="lazyload"
+                                            alt="{{ $name }}">
                                     </div>
                                     <h4 class="fx-title">{{ $name }}</h4>
                                     <div class="fx-price">
                                         <span class="now">{{ $now }}</span>
-                                        @if($now !== $was)
+                                        @if ($now !== $was)
                                             <span class="was">{{ $was }}</span>
                                         @endif
                                     </div>
@@ -385,336 +398,204 @@
     </section>
 @endif
 
-                {{-- @if ($flash_deal)
-                    <section id="flash_deal" class="flash-section products-section">
-                        <div class="container-full">
-                          
-                            <div class="flash-head">
-                                <h3 class="flash-title" style="color: var(--skybuy-blue);">
-                                    {{ translate('Flash Sale') }}
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="24" viewBox="0 0 16 24"
-                                        class="ml-1">
-                                        <path
-                                            d="M30.953,13.695a.474.474,0,0,0-.424-.25h-4.9l3.917-7.81a.423.423,0,0,0-.028-.428.477.477,0,0,0-.4-.207H21.588a.473.473,0,0,0-.429.263L15.041,18.151a.423.423,0,0,0,.034.423.478.478,0,0,0,.4.2h4.593l-2.229,9.683a.438.438,0,0,0,.259.5.489.489,0,0,0,.571-.127L30.9,14.164a.425.425,0,0,0,.054-.469Z"
-                                            transform="translate(-15 -5)" fill="#fcc201" />
-                                    </svg>
-                                </h3>
-
-                                <div class="flash-links">
-                                    <a class="view-all" href="{{ route('flash-deal-details', $flash_deal->slug) }}">
-                                        {{ translate('View All Flash Sale') }}
-                                    </a>
-                                </div>
-                            </div>
-
-                          
-                            <div class="row gutters-5">
-                                <div class="col-12 col-lg-12">
-                                    @php
-                                        $flash_deal_products = get_flash_deal_products($flash_deal->id);
-                                    @endphp
-
-                                    <div class="products-grid">
-                                        @foreach ($flash_deal_products as $fd)
-                                            @if ($fd->product && $fd->product->published)
-                                                @php
-                                                    $p = $fd->product;
-                                                    $url = $p->auction_product ? route('auction-product', $p->slug) : route('product', $p->slug);
-                                                    $name = $p->getTranslation('name');
-                                                    $thumb = get_image($p->thumbnail) ?: static_asset('assets/img/placeholder.jpg');
-                                                    $now = home_discounted_base_price($p);
-                                                    $was = home_base_price($p);
-                                                @endphp
-
-                                                <a href="{{ $url }}" class="fx-card product-ajax-link" title="{{ $name }}">
-                                                    <div class="fx-img">
-                                                        <img src="{{ static_asset('assets/img/placeholder.jpg') }}"
-                                                            data-src="{{ $thumb }}" class="lazyload" alt="{{ $name }}">
-                                                    </div>
-                                                    <h4 class="fx-title">{{ $name }}</h4>
-                                                    <div class="fx-price">
-                                                        <span class="now">{{ $now }}</span>
-                                                        @if($now !== $was)
-                                                            <span class="was">{{ $was }}</span>
-                                                        @endif
-                                                    </div>
-                                                </a>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                @endif --}}
-                <style>
-                    .flash-head {
-                        display: flex;
-                        flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-                        align-items: center;
-                        justify-content: space-between; /* Space out title, countdown, and link */
-                        margin-bottom: 12px;
-                        padding-bottom: 10px;
-                        border-bottom: 1.5px solid #e5e7eb;
-                    }
-
-                    .flash-countdown {
-                        background-color: #ff4d00; /* Example: Orange background for countdown */
-                        color: #fff;
-                        padding: 5px 10px;
-                        border-radius: 5px;
-                        font-weight: 700;
-                        font-size: 14px;
-                        display: flex;
-                        align-items: center;
-                        margin: 0 15px; /* Adjust spacing around countdown */
-                        flex-shrink: 0; /* Prevent it from shrinking */
-                    }
-
-                    .flash-countdown span {
-                        margin-right: 3px;
-                    }
-
-                    .flash-title {
-                        /* Existing styles */
-                        flex-shrink: 0; /* Prevent it from shrinking */
-                    }
-
-                    .flash-links {
-                        /* Existing styles */
-                        margin-left: auto; /* Push it to the far right if space allows */
-                        flex-shrink: 0;
-                    }
-
-                    /* Responsive adjustments for flash-head */
-                    @media (max-width: 768px) {
-                        .flash-head {
-                            flex-direction: column; /* Stack items vertically on very small screens */
-                            align-items: flex-start;
-                            gap: 10px;
-                        }
-                        .flash-countdown {
-                            width: 100%;
-                            justify-content: center;
-                            margin: 0;
-                        }
-                        .flash-links {
-                            width: 100%;
-                            text-align: center;
-                            margin-left: 0;
-                        }
-                        .flash-links .view-all {
-                            width: 100%;
-                            display: block;
-                        }
-                    }
-                    .flash-section {
-                        margin-top: 16px;
-                        margin-bottom: 16px
-                    }
-
-                    .flash-head {
-                        display: flex;
-                        flex-wrap: wrap;
-                        align-items: center;
-                        justify-content: space-between;
-                        margin-bottom: 12px;
-                        padding-bottom: 10px;
-                        border-bottom: 1.5px solid #e5e7eb
-                    }
-
-                    .flash-title {
-                        font: 800 20px/1.2 ui-sans-serif, system-ui;
-                        color: #0f172a;
-                        margin: 0;
-                        display: flex;
-                        align-items: center;
-                        gap: 6px
-                    }
-
-                    .flash-links {
-                        display: flex;
-                        gap: 16px
-                    }
-
-                    .flash-links .view-all {
-                        background: var(--skybuy-blue);
-                        color: #fff;
-                        font-weight: 700;
-                        font-size: 12.5px;
-                        padding: 7px 12px;
-                        border-radius: 8px;
-                        text-decoration: none
-                    }
-
-                    .flash-links .view-all:hover {
-                        background: var(--skybuy-blue);
-                    }
-
-                    /* banner */
-                    .flash-banner {
-                        display: block;
-                        border-radius: 12px;
-                        overflow: hidden
-                    }
-
-                    .flash-banner-bg {
-                        height: 315px;
-                        background-size: cover;
-                        background-position: center
-                    }
-
-                    @media (max-width:991.98px) {
-                        .flash-banner-bg {
-                            height: 240px
-                        }
-                    }
-
-                    @media (max-width:575.98px) {
-                        .flash-banner-bg {
-                            height: 208px
-                        }
-                    }
-
-                    .cd-wrap {
-                        background: #fff;
-                        border-radius: 10px;
-                        display: inline-block;
-                        padding: 10px;
-                        margin: 18px
-                    }
-
-                    /* mobile countdown text */
-                    .flash-count {
-                        margin-top: 10px;
-                        text-align: center;
-                        font-weight: 700
-                    }
-
-                    /* grid */
-                    .flash-grid {
-                        display: grid;
-                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                        gap: 16px
-                    }
-
-                    /* responsive RAM */
-                    /* [1][2] */
-
-                    /* card */
-                    .fx-card {
-                        display: block;
-                        background: #fff;
-                        border: 1px solid #e6e8ec;
-                        border-radius: 12px;
-                        overflow: hidden;
-                        box-shadow: 0 1px 6px rgba(2, 6, 23, .05);
-                        transition: transform .16s, box-shadow .16s, border-color .16s;
-                        color: inherit;
-                        text-decoration: none
-                    }
-
-                    .fx-card:hover {
-                        transform: translateY(-2px);
-                        box-shadow: 0 10px 20px rgba(2, 6, 23, .08);
-                        border-color: #dfe3ea
-                    }
-
-                    .fx-img {
-                        height: 180px;
-                        background: #f6f7fb;
-                        overflow: hidden
-                    }
-
-                    .fx-img img {
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                        display: block
-                    }
-
-                    /* uniform crop */
-                    /* [3] */
-                    .fx-title {
-                        font: 600 13.5px/1.35 ui-sans-serif, system-ui;
-                        color: #0f172a;
-                        margin: 10px 12px 8px;
-                        height: 36px;
-                        display: -webkit-box;
-                        -webkit-line-clamp: 2;
-                        -webkit-box-orient: vertical;
-                        overflow: hidden
-                    }
-
-                    .fx-price {
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        margin: 0 12px 12px
-                    }
-
-                    .fx-price .now {
-                        color: #e11d48;
-                        font-weight: 800;
-                        font-size: 14px
-                    }
-
-                    .fx-price .was {
-                        color: #9aa3b2;
-                        text-decoration: line-through;
-                        font-size: 12.5px
-                    }
-                </style>
-
-
-<script>
-    // In app.blade.php, within the <script> tags for homepage scripts
-function initHomepageScripts() {
-    // ... (existing AJAX calls for featured, todays_deal, etc.) ...
-
-    // NEW: Initialize flash sale countdown if present
-    const flashCountdownEl = document.querySelector('.flash-countdown');
-    if (flashCountdownEl) {
-        const endDateStr = flashCountdownEl.dataset.endDate;
-        if (endDateStr) {
-            const parsedEndDate = new Date(endDateStr.replace(/-/g, '/'));
-            startFlashSaleCountdown(parsedEndDate); // Call new countdown function
-        }
+<style>
+    /* Your CSS here */
+    .aiz-count-down-circle #time .circle{
+        width: 47px;
+        height: 40px;
     }
-    // ... (other existing homepage scripts like slider init) ...
-}
 
-// NEW: Modified startSimpleCountdown specifically for Flash Sale
-function startFlashSaleCountdown(endDate) {
-    function updateFlashCountdown() {
-        const now = new Date();
-        const diff = endDate - now;
-        if (diff > 0) {
-            const totalSeconds = Math.floor(diff / 1000);
-            const days = Math.floor(totalSeconds / (60 * 60 * 24));
-            const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
-            const mins = Math.floor((totalSeconds % (60 * 60)) / 60);
-            const secs = totalSeconds % 60;
+    .flash-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1.5px solid #e5e7eb;
+    }
 
-            document.getElementById("flash-days").textContent = days.toString().padStart(2, '0');
-            document.getElementById("flash-hours").textContent = hours.toString().padStart(2, '0');
-            document.getElementById("flash-mins").textContent = mins.toString().padStart(2, '0');
-            document.getElementById("flash-secs").textContent = secs.toString().padStart(2, '0');
-        } else {
-            const flashCountdownEl = document.querySelector('.flash-countdown');
-            if (flashCountdownEl) {
-                flashCountdownEl.innerHTML = `<span>${'Sale Ended'}</span>`; // Or any "Ended" message
-                flashCountdownEl.style.backgroundColor = '#cccccc'; // Grey out if ended
-            }
-            clearInterval(flashTimer);
+    /* Outer container for countdown, to match the orange background from your image */
+    .flash-countdown {
+        background-color: #ff4d00; 
+        color: #fff;
+        padding: 0px 10px;
+        border-radius: 5px;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        margin: 0 15px; 
+        flex-shrink: 0; 
+    }
+
+    /* Styles for the individual countdown values within aiz-count-down-circle */
+    .flash-countdown .aiz-count-down-circle > div { /* Target each time unit container (days, hrs, min, sec) */
+        background-color: transparent !important;
+        padding: 0 !important; 
+       margin: -8px -11px 6px 6px !important;
+    }
+
+    .flash-countdown .aiz-count-down-circle > div > span { /* Target value (e.g., 00) */
+        color: white !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+    }
+    .flash-countdown .aiz-count-down-circle > div:last-child { /* Fix for 'SEC' showing twice */
+        /* If the last element after 'SEC' is causing issues, hide it or adjust its display */
+        display: flex; /* Ensure it stays flex to display day/hour/min/sec properly */
+    }
+    .flash-countdown .aiz-count-down-circle > div > span:last-child { /* Target label (e.g., DAYS) */
+        color: white !important;
+        font-size: 10px !important;
+        text-transform: uppercase !important;
+        /* line-height: 1.2 !important; */
+    }
+    .aiz-count-down-circle{
+        padding: 0px;
+        box-shadow: none;
+    }
+    .circle svg circle {
+        stroke: none!important;
+    }
+    .aiz-count-down-circle #time div{
+        color: white!important;
+        /* font-size: 16px; */
+    }
+
+
+    .flash-title {
+        font: 800 20px/1.2 ui-sans-serif, system-ui;
+        color: #0f172a;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px
+    }
+
+    .flash-links {
+        display: flex;
+        gap: 16px;
+        margin-left: auto; /* Ensure it stays right */
+        flex-shrink: 0;
+    }
+
+    .flash-links .view-all {
+        background: var(--skybuy-blue);
+        color: #fff;
+        font-weight: 700;
+        font-size: 12.5px;
+        padding: 7px 12px;
+        border-radius: 8px;
+        text-decoration: none
+    }
+
+    .flash-links .view-all:hover {
+        background: #1a4a54; /* Slightly darker blue on hover */
+    }
+
+    /* Responsive adjustments for flash-head */
+    @media (max-width: 768px) {
+        .flash-head {
+            flex-direction: column; /* Stack items vertically on very small screens */
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .flash-countdown {
+            width: 100%;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .flash-links {
+            width: 100%;
+            text-align: center;
+            margin-left: 0;
+        }
+
+        .flash-links .view-all {
+            width: 100%;
+            display: block;
         }
     }
 
-    updateFlashCountdown();
-    const flashTimer = setInterval(updateFlashCountdown, 1000);
-}
-</script>
-                {{-- Flash Sale Products End--}}
+    .flash-section {
+        margin-top: 16px;
+        margin-bottom: 16px
+    }
+    
+    /* grid */
+    .products-grid { 
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px
+    }
+
+    /* card */
+    .fx-card {
+        display: block;
+        background: #fff;
+        border: 1px solid #e6e8ec;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 6px rgba(2, 6, 23, .05);
+        transition: transform .16s, box-shadow .16s, border-color .16s;
+        color: inherit;
+        text-decoration: none
+    }
+
+    .fx-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(2, 6, 23, .08);
+        border-color: #dfe3ea
+    }
+
+    .fx-img {
+        height: 180px;
+        background: #f6f7fb;
+        overflow: hidden
+    }
+
+    .fx-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block
+    }
+
+    .fx-title {
+        font: 600 13.5px/1.35 ui-sans-serif, system-ui;
+        color: #0f172a;
+        margin: 10px 12px 8px;
+        height: 36px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden
+    }
+
+    .fx-price {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 12px 12px
+    }
+
+    .fx-price .now {
+        color: #e11d48;
+        font-weight: 800;
+        font-size: 14px
+    }
+
+    .fx-price .was {
+        color: #9aa3b2;
+        text-decoration: line-through;
+        font-size: 12.5px
+    }
+</style>
+                {{-- Flash Sale Products End --}}
 
                 {{-- Featured Products STart --}}
                 <section id="section_featured">
@@ -741,14 +622,15 @@ function startFlashSaleCountdown(endDate) {
 
 
         <!-- NEW: Mobile Category Sidebar (positioned after main content but before bottom-nav) -->
-        <div id="mobileCategorySidebar" class="mobile-category-sidebar">
+        {{-- <div id="mobileCategorySidebar" class="mobile-category-sidebar">
             <div class="sidebar-header">
                 <h3>Categories</h3>
                 <span class="close-sidebar" onclick="closeMobileCategorySidebar()">&times;</span>
             </div>
             <div class="category-grid">
                 <!-- These categories will be dynamically loaded or hardcoded, matching the desktop sidebar -->
-                <a href="#" class="category-item" onclick="filterByCategory('bags', event); closeMobileCategorySidebar();">
+                <a href="#" class="category-item"
+                    onclick="filterByCategory('bags', event); closeMobileCategorySidebar();">
                     <div class="category-icon">👜</div>
                     <div class="category-name">Bags</div>
                 </a>
@@ -757,7 +639,8 @@ function startFlashSaleCountdown(endDate) {
                     <div class="category-icon">💍</div>
                     <div class="category-name">Jewelry</div>
                 </a>
-                <a href="#" class="category-item" onclick="filterByCategory('shoes', event); closeMobileCategorySidebar();">
+                <a href="#" class="category-item"
+                    onclick="filterByCategory('shoes', event); closeMobileCategorySidebar();">
                     <div class="category-icon">👟</div>
                     <div class="category-name">Shoes</div>
                 </a>
@@ -776,7 +659,8 @@ function startFlashSaleCountdown(endDate) {
                     <div class="category-icon">👗</div>
                     <div class="category-name">Women's Clothing</div>
                 </a>
-                <a href="#" class="category-item" onclick="filterByCategory('baby', event); closeMobileCategorySidebar();">
+                <a href="#" class="category-item"
+                    onclick="filterByCategory('baby', event); closeMobileCategorySidebar();">
                     <div class="category-icon">🍼</div>
                     <div class="category-name">Baby Items</div>
                 </a>
@@ -826,11 +710,11 @@ function startFlashSaleCountdown(endDate) {
                     <div class="category-name">Books & Media</div>
                 </a>
             </div>
-        </div>
+        </div> --}}
 
 
         <!-- NEW: Bottom Navigation Bar for Mobile -->
-        <nav class="bottom-nav">
+        {{-- <nav class="bottom-nav">
             <a href="#" class="bottom-nav-item active" onclick="loadHomePageContent(true); return false;">
                 <span class="icon">🏠</span>
                 <span>Home</span>
@@ -851,7 +735,7 @@ function startFlashSaleCountdown(endDate) {
                 <span class="icon">💬</span>
                 <span>Chat</span>
             </a>
-        </nav>
+        </nav> --}}
 
         <!-- NEW: Authentication Modal (for both Login and Register) -->
         {{-- @includeIf('frontend.classic.partials.authentication') --}}
@@ -889,7 +773,7 @@ function startFlashSaleCountdown(endDate) {
             const timer = setInterval(update, 1000);
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const countdownEl = document.querySelector('.mobile-countdown-simple');
             if (!countdownEl) return;
 
@@ -938,13 +822,16 @@ function startFlashSaleCountdown(endDate) {
 
                     // Update browser URL and history
                     if (pushState) {
-                        history.pushState({ path: response.url }, response.meta_title, response.url);
+                        history.pushState({
+                            path: response.url
+                        }, response.meta_title, response.url);
                     }
                     document.title = response.meta_title; // Update page title
 
                     // Reinitialize any necessary JS for the new content (e.g., lazyload, variant price, sliders etc.)
                     // You might need to call specific functions here based on your product details page structure
-                    AIZ.plugins.init(); // Assuming AIZ has a general reinitialization function for elements like lazyload
+                    AIZ.plugins
+                .init(); // Assuming AIZ has a general reinitialization function for elements like lazyload
                     AIZ.extra.inputRating(); // If product reviews use AIZ ratings
                     // Call getVariantPrice() from product_scripts.blade.php if it's there
                     // Check if getVariantPrice function exists (it should be loaded by product_scripts)
@@ -953,12 +840,15 @@ function startFlashSaleCountdown(endDate) {
                     }
 
                     // Scroll to top of the new content for better UX
-                    $('#dynamic-content-wrapper').get(0).scrollIntoView({ behavior: 'smooth' });
+                    $('#dynamic-content-wrapper').get(0).scrollIntoView({
+                        behavior: 'smooth'
+                    });
 
                 },
                 error: function(xhr, status, error) {
                     console.error("Error loading product details:", error);
-                    AIZ.plugins.notify('danger', '{{ translate('Could not load product details. Redirecting to full page...') }}');
+                    AIZ.plugins.notify('danger',
+                        '{{ translate('Could not load product details. Redirecting to full page...') }}');
                     window.location.href = url; // Fallback to full page load
                 },
                 complete: function() {
@@ -979,7 +869,9 @@ function startFlashSaleCountdown(endDate) {
             $.ajax({
                 url: '{{ route('home') }}', // Your homepage URL
                 type: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 success: function(response) {
                     $('#dynamic-content-wrapper').html(response.html);
                     // Reinitialize homepage specific scripts if needed (like the slider)
@@ -995,15 +887,20 @@ function startFlashSaleCountdown(endDate) {
                     AIZ.plugins.init(); // Reinitialize lazyload etc. on homepage content
 
                     if (pushState) {
-                        history.pushState({ path: '{{ route('home') }}' }, '{{ get_setting('meta_title') }}', '{{ route('home') }}');
+                        history.pushState({
+                            path: '{{ route('home') }}'
+                        }, '{{ get_setting('meta_title') }}', '{{ route('home') }}');
                     }
                     document.title = '{{ get_setting('meta_title') }}';
 
                     // Scroll to top
-                    $('#dynamic-content-wrapper').get(0).scrollIntoView({ behavior: 'smooth' });
+                    $('#dynamic-content-wrapper').get(0).scrollIntoView({
+                        behavior: 'smooth'
+                    });
                 },
                 error: function() {
-                    AIZ.plugins.notify('danger', '{{ translate('Could not load home page content. Redirecting to full page...') }}');
+                    AIZ.plugins.notify('danger',
+                        '{{ translate('Could not load home page content. Redirecting to full page...') }}');
                     window.location.href = '{{ route('home') }}';
                 },
                 complete: function() {
@@ -1026,7 +923,8 @@ function startFlashSaleCountdown(endDate) {
                 // Check if it's a product page URL (adjust regex based on your URL structure)
                 if (event.state.path.includes('/product/')) {
                     loadProductDetails(event.state.path, false); // false because we don't want to push a new state
-                } else if (event.state.path === '{{ route('home') }}' || event.state.path === '{{ url('/') }}') {
+                } else if (event.state.path === '{{ route('home') }}' || event.state.path ===
+                    '{{ url('/') }}') {
                     loadHomePageContent(false);
                 } else {
                     // If it's another page that we don't handle via AJAX history,
@@ -1039,7 +937,7 @@ function startFlashSaleCountdown(endDate) {
                 if (window.location.pathname === '/' || window.location.pathname === '{{ url('/') }}') {
                     loadHomePageContent(false);
                 } else {
-                     window.location.reload(); // Or load the current page content via AJAX if it's supported
+                    window.location.reload(); // Or load the current page content via AJAX if it's supported
                 }
             }
         });
@@ -1047,12 +945,14 @@ function startFlashSaleCountdown(endDate) {
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize history state for the initial page load
             // This is important so popstate works correctly when user navigates back to the initial page
-            history.replaceState({ path: window.location.href }, document.title, window.location.href);
+            history.replaceState({
+                path: window.location.href
+            }, document.title, window.location.href);
 
             // Your existing DOMContentLoaded scripts (from original index.blade.php)
             const searchBox = document.querySelector('.search-box');
             if (searchBox) {
-                searchBox.addEventListener('keyup', function (e) {
+                searchBox.addEventListener('keyup', function(e) {
                     if (e.key === 'Enter') {
                         const searchTerm = this.value.toLowerCase();
                         const products = document.querySelectorAll('.product-card');
@@ -1078,41 +978,42 @@ function startFlashSaleCountdown(endDate) {
     </script>
 
 
-<style>
-    /* NEW: Ensure this specific style is applied to ALL product grids you want 6 columns on */
-/* Adjust minmax(150px, 1fr) to control item width, e.g., for smaller items */
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr); /* এখানে 6টি কলাম সেট করা হলো */
-    gap: 20px; /* আপনার প্রয়োজন অনুযায়ী গ্যাপ দিন */
-}
+    <style>
 
-/* যদি আপনি responsive grid চান, তাহলে: */
-@media (min-width: 1200px) {
-    .products-grid {
-        grid-template-columns: repeat(6, 1fr);
-    }
-}
-@media (min-width: 992px) and (max-width: 1199px) {
-    .products-grid {
-        grid-template-columns: repeat(5, 1fr);
-    }
-}
-@media (min-width: 768px) and (max-width: 991px) {
-    .products-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-@media (max-width: 767px) {
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr); /* মোবাইলে 2টি কলাম */
-        gap: 10px; /* মোবাইলে কম গ্যাপ */
-    }
-}
-/* আপনার existing .products-section .products-grid style (app.blade.php এ) */
-.products-section .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* এটা আগের মতই রাখতে পারেন, অথবা উপরেরটা ব্যবহার করতে পারেন */
-    gap: 20px;
-}
-</style>
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+        }
+
+        @media (min-width: 1200px) {
+            .products-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .products-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 991px) {
+            .products-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 767px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+
+        .products-section .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+    </style>
 @endsection

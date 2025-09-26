@@ -285,8 +285,8 @@
                 @endcanany
 
                 {{-- Preorder --}}
-                @if (addon_is_activated('preorder'))
-                    @canany(['preorder_dashboard', 'add_preorder_product', 'view_all_preorder_products', 'view_all_preorders', 'view_all_inhouse_preorders', 
+                {{-- @if (addon_is_activated('preorder')) --}}
+                    @canany(['preorder_dashboard', 'add_preorder_product', 'view_all_preorder_products', 'view_all_preorders', 'view_all_inhouse_preorders',
                             'view_all_seller_preorders', 'view_all_delayed_prepayment_preorders', 'view_all_final_preorders', 'view_preorder_seller_commission_history',
                             'preorder_settings', 'view_all_preorder_product_conversations','view_all_preorder_product_queries', 'view_all_preorder_product_reviews',
                             'view_all_faqs', 'view_all_preorder_notification_types'])
@@ -427,7 +427,7 @@
                                     @if (get_setting('conversation_system') == 1)
                                         @php
                                             $preorderConversation = get_non_viewed_preorder_conversations();
-                                        @endphp   
+                                        @endphp
                                         <li class="aiz-side-nav-item">
                                             <a href="{{ route('preorder-conversations.admin_index') }}"
                                                 class="aiz-side-nav-link {{ areActiveRoutes(['preorder-conversations.admin_index','preorder-conversations.admin_show']) }}">
@@ -475,7 +475,7 @@
                             </ul>
                         </li>
                     @endcan
-                @endif
+                {{-- @endif --}}
 
                 <!-- Note  -->
                 @canany(['view_notes', 'add_note'])
@@ -579,67 +579,129 @@
                     @endcanany
                 @endif
 
-                <!-- Wholesale Product -->
-         @if(addon_is_activated('wholesale'))
-                @canany(['add_wholesale_product','view_all_wholesale_products','view_inhouse_wholesale_products','view_sellers_wholesale_products'])
+           <!-- Wholesale Product -->
+{{-- @if(addon_is_activated('wholesale')) --}}
+  @canany(['add_wholesale_product', 'view_all_wholesale_products', 'view_inhouse_wholesale_products', 'view_sellers_wholesale_products', 'view_wholesaler_requests', 'view_all_wholesalers', 'view_wholesale_orders', 'manage_wholesale_settings'])
+    {{-- 'view_wholesaler_requests', 'view_all_wholesalers', 'view_wholesale_orders', 'manage_wholesale_settings' - নতুন পারমিশনগুলো যোগ করা হয়েছে --}}
+    <li class="aiz-side-nav-item">
+        <a href="#" class="aiz-side-nav-link">
+            <div class="aiz-side-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <path id="Union_48" data-name="Union 48"
+                        d="M1.2,14.236a1.762,1.762,0,0,1,1.2-1.657V2c0-.325-.268-.823-.6-.823H.6C.268,1.176,0,1.031,0,.7V.647A.645.645,0,0,1,.6,0H2.4A1.407,1.407,0,0,1,3.6,1.41v9.65h10a1.4,1.4,0,0,1,1.2,1.518,1.757,1.757,0,0,1,1.165,2.01,1.8,1.8,0,0,1-3.566-.353,1.761,1.761,0,0,1,1.2-1.656v-.342H3.6v.342a1.754,1.754,0,0,1,1.165,2.01A1.784,1.784,0,0,1,3.338,15.97,1.927,1.927,0,0,1,3,16,1.782,1.782,0,0,1,1.2,14.236Zm12.4,0a.594.594,0,0,0,.6.588h0a.6.6,0,0,0,.6-.589c0-.389-.272-.5-.6-.617C13.872,13.732,13.6,13.846,13.6,14.235Zm-11.2,0a.6.6,0,0,0,.6.588H3a.6.6,0,0,0,.6-.589c0-.389-.272-.5-.6-.617C2.671,13.732,2.4,13.846,2.4,14.235Zm4.216-4.158A1.615,1.615,0,0,1,5,8.462V6.692A1.615,1.615,0,0,1,6.615,5.077h5.77A1.616,1.616,0,0,1,14,6.692V8.462a1.616,1.616,0,0,1-1.616,1.615ZM6.234,6.311a.542.542,0,0,0-.157.382V8.462A.538.538,0,0,0,6.615,9h5.77a.538.538,0,0,0,.538-.538V6.692a.536.536,0,0,0-.538-.538H6.612A.535.535,0,0,0,6.234,6.311ZM5.473,3.527A1.617,1.617,0,0,1,5,2.385V1.616A1.615,1.615,0,0,1,6.615,0H9.384A1.616,1.616,0,0,1,11,1.616v.769A1.615,1.615,0,0,1,9.384,4H6.612A1.614,1.614,0,0,1,5.473,3.527Zm.761-2.293a.542.542,0,0,0-.157.382v.769a.538.538,0,0,0,.538.538H9.384a.538.538,0,0,0,.539-.538V1.616a.542.542,0,0,0-.157-.382.536.536,0,0,0-.382-.157H6.612A.535.535,0,0,0,6.234,1.234Z"
+                        fill="#575b6a" />
+                </svg>
+            </div>
+            <span class="aiz-side-nav-text">{{ translate('Wholesale Products') }}</span>
+            @php
+                // এই কোডটি একবারই গণনা করা হচ্ছে যাতে পারফরম্যান্স ভালো থাকে।
+                $pending_request_count = \App\Models\User::where('user_type', 'wholesaler')->where('status', 'pending')->count();
+            @endphp
+            @if($pending_request_count > 0)
+                {{-- নতুন স্টাইলের জন্য 'ml-auto' ক্লাস যোগ করা হয়েছে --}}
+                <span class="badge badge-danger badge-circle ml-auto">{{ $pending_request_count }}</span>
+            @endif
+            <!-- END: নোটিফিকেশন ব্যাজ এখানে যোগ করা হয়েছে -->
+
+            <span class="aiz-side-nav-arrow"></span>
+        </a>
+
+        <!-- সাব-মেন্যু -->
+        <ul class="aiz-side-nav-list level-2">
+            @can('view_wholesaler_requests')
+            <li class="aiz-side-nav-item">
+                {{-- এখানে $pending_request_count ভেরিয়েবলটি আবার ব্যবহার করা হচ্ছে --}}
+                <a href="{{ route('wholesaler.requests') }}" class="aiz-side-nav-link">
+                    <span class="aiz-side-nav-text">{{ translate('Wholesaler Requests') }}</span>
+                    @if($pending_request_count > 0)
+                        <span class="badge badge-inline badge-danger">{{ $pending_request_count }}</span>
+                    @endif
+                </a>
+            </li>
+            @endcan
+
+            @can('view_all_wholesalers')
+            <li class="aiz-side-nav-item">
+                <a href="{{ route('wholesalers.all') }}" class="aiz-side-nav-link">
+                    <span class="aiz-side-nav-text">{{ translate('All Wholesalers') }}</span>
+                </a>
+            </li>
+            @endcan
+
+            {{-- নতুন যোগ করা হয়েছে: Wholesale Orders --}}
+            @can('view_wholesale_orders')
+            <li class="aiz-side-nav-item">
+                <a href="{{ route('wholesale_orders.index') }}" class="aiz-side-nav-link">
+                    <span class="aiz-side-nav-text">{{ translate('Wholesale Orders') }}</span>
+                </a>
+            </li>
+            @endcan
+
+            {{-- আপনার বাকি সাব-মেন্যুগুলো --}}
+            {{-- @can('add_wholesale_product')
+            <li class="aiz-side-nav-item">
+                <a class="aiz-side-nav-link" href="{{route('wholesale_product_create.admin')}}">
+                    <span class="aiz-side-nav-text">{{translate('Add New Wholesale Product')}}</span>
+                </a>
+            </li>
+            @endcan --}}
+            @can('view_all_wholesale_products')
+            <li class="aiz-side-nav-item">
+                <a href="{{ route('wholesale_products.all') }}"
+                    class="aiz-side-nav-link {{ areActiveRoutes(['wholesale_product_edit.admin']) }}">
+                    <span class="aiz-side-nav-text">{{ translate('All Wholesale Products') }}</span>
+                </a>
+            </li>
+            @endcan
+            {{-- @can('view_inhouse_wholesale_products')
+            <li class="aiz-side-nav-item">
+                <a href="{{route('wholesale_products.in_house')}}"
+                    class="aiz-side-nav-link {{ areActiveRoutes(['wholesale_product_edit.admin']) }}">
+                    <span class="aiz-side-nav-text">{{ translate('In House Wholesale Products') }}</span>
+                </a>
+            </li>
+            @endcan --}}
+            {{-- @if (get_setting('vendor_system_activation') == 1)
+                @can('view_sellers_wholesale_products')
                 <li class="aiz-side-nav-item">
-                    <a href="#" class="aiz-side-nav-link">
-                        <div class="aiz-side-nav-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                                <path id="Union_48" data-name="Union 48"
-                                    d="M1.2,14.236a1.762,1.762,0,0,1,1.2-1.657V2c0-.325-.268-.823-.6-.823H.6C.268,1.176,0,1.031,0,.7V.647A.645.645,0,0,1,.6,0H2.4A1.407,1.407,0,0,1,3.6,1.41v9.65h10a1.4,1.4,0,0,1,1.2,1.518,1.757,1.757,0,0,1,1.165,2.01,1.8,1.8,0,0,1-3.566-.353,1.761,1.761,0,0,1,1.2-1.656v-.342H3.6v.342a1.754,1.754,0,0,1,1.165,2.01A1.784,1.784,0,0,1,3.338,15.97,1.927,1.927,0,0,1,3,16,1.782,1.782,0,0,1,1.2,14.236Zm12.4,0a.594.594,0,0,0,.6.588h0a.6.6,0,0,0,.6-.589c0-.389-.272-.5-.6-.617C13.872,13.732,13.6,13.846,13.6,14.235Zm-11.2,0a.6.6,0,0,0,.6.588H3a.6.6,0,0,0,.6-.589c0-.389-.272-.5-.6-.617C2.671,13.732,2.4,13.846,2.4,14.235Zm4.216-4.158A1.615,1.615,0,0,1,5,8.462V6.692A1.615,1.615,0,0,1,6.615,5.077h5.77A1.616,1.616,0,0,1,14,6.692V8.462a1.616,1.616,0,0,1-1.616,1.615ZM6.234,6.311a.542.542,0,0,0-.157.382V8.462A.538.538,0,0,0,6.615,9h5.77a.538.538,0,0,0,.538-.538V6.692a.536.536,0,0,0-.538-.538H6.612A.535.535,0,0,0,6.234,6.311ZM5.473,3.527A1.617,1.617,0,0,1,5,2.385V1.616A1.615,1.615,0,0,1,6.615,0H9.384A1.616,1.616,0,0,1,11,1.616v.769A1.615,1.615,0,0,1,9.384,4H6.612A1.614,1.614,0,0,1,5.473,3.527Zm.761-2.293a.542.542,0,0,0-.157.382v.769a.538.538,0,0,0,.538.538H9.384a.538.538,0,0,0,.539-.538V1.616a.542.542,0,0,0-.157-.382.536.536,0,0,0-.382-.157H6.612A.535.535,0,0,0,6.234,1.234Z"
-                                    fill="#575b6a" />
-                            </svg>
-                        </div>
-                        <span class="aiz-side-nav-text">{{translate('Wholesale Products')}}</span>
-                        @if (env("DEMO_MODE") == "On")
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="14.001" viewBox="0 0 16 14.001"
-                            class="mx-2">
-                            <path id="Union_49" data-name="Union 49"
-                                d="M-19322,3342.5v-5a2.007,2.007,0,0,0-2-2v1.5a3,3,0,0,1-3,3h-4v-10h4a3,3,0,0,1,3,3v1.5a3,3,0,0,1,3,3v5a.506.506,0,0,1-.5.5A.5.5,0,0,1-19322,3342.5Zm-11-2V3339h-3a1,1,0,0,1-1-1,1,1,0,0,1,1-1h3v-7.5a.5.5,0,0,1,.5-.5.5.5,0,0,1,.5.5v11a.5.5,0,0,1-.5.5A.506.506,0,0,1-19333,3340.5Zm-3-7.5a1,1,0,0,1-1-1,1,1,0,0,1,1-1h3v2Z"
-                                transform="translate(19337 -3329)" fill="#f51350" />
-                        </svg>
-                        @endif
-                        <span class="aiz-side-nav-arrow"></span>
+                    <a href="{{route('wholesale_products.seller')}}"
+                        class="aiz-side-nav-link {{ areActiveRoutes(['wholesale_product_edit.admin']) }}">
+                        <span class="aiz-side-nav-text">{{ translate('Seller Wholesale Products') }}</span>
                     </a>
-                    <ul class="aiz-side-nav-list level-2">
-                        @can('add_wholesale_product')
-                        <li class="aiz-side-nav-item">
-                            <a class="aiz-side-nav-link" href="{{route('wholesale_product_create.admin')}}">
-                                <span class="aiz-side-nav-text">{{translate('Add New Wholesale Product')}}</span>
-                            </a>
-                        </li>
-                        @endcan
-                        @can('view_all_wholesale_products')
-                        <li class="aiz-side-nav-item">
-                            <a href="{{route('wholesale_products.all')}}"
-                                class="aiz-side-nav-link {{ areActiveRoutes(['wholesale_product_edit.admin']) }}">
-                                <span class="aiz-side-nav-text">{{ translate('All Wholesale Products') }}</span>
-                            </a>
-                        </li>
-                        @endcan
-                        @can('view_inhouse_wholesale_products')
-                        <li class="aiz-side-nav-item">
-                            <a href="{{route('wholesale_products.in_house')}}"
-                                class="aiz-side-nav-link {{ areActiveRoutes(['wholesale_product_edit.admin']) }}">
-                                <span class="aiz-side-nav-text">{{ translate('In House Wholesale Products') }}</span>
-                            </a>
-                        </li>
-                        @endcan
-                        @if (get_setting('vendor_system_activation') == 1)
-                        @can('view_sellers_wholesale_products')
-                        <li class="aiz-side-nav-item">
-                            <a href="{{route('wholesale_products.seller')}}"
-                                class="aiz-side-nav-link {{ areActiveRoutes(['wholesale_product_edit.admin']) }}">
-                                <span class="aiz-side-nav-text">{{ translate('Seller Wholesale Products') }}</span>
-                            </a>
-                        </li>
-                        @endcan
-                        @endif
-                    </ul>
                 </li>
-                @endcanany
-                @endif 
+                @endcan
+            @endif --}}
+
+            {{-- নতুন যোগ করা হয়েছে: Wholesale Settings --}}
+            @can('manage_wholesale_settings')
+            <li class="aiz-side-nav-item">
+                <a href="{{ route('wholesale.settings') }}" class="aiz-side-nav-link">
+                    <span class="aiz-side-nav-text">{{ translate('Wholesale Settings') }}</span>
+                </a>
+            </li>
+            @endcan
+        </ul>
+    </li>
+@endcanany
+{{-- @endif --}}
+<style>
+    /* Pulsing effect for notification badge */
+.badge-pulse {
+    animation: pulse-animation 1.5s infinite;
+}
+
+@keyframes pulse-animation {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 82, 82, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
+    }
+}
+</style>
 
                 <!-- Sale -->
                 @canany(['view_all_orders', 'view_inhouse_orders','view_seller_orders','view_pickup_point_orders'])
@@ -710,7 +772,7 @@
                 @endcanany
 
                 <!-- Deliver Boy Addon-->
-                @if (addon_is_activated('delivery_boy'))
+                {{-- @if (addon_is_activated('delivery_boy'))
                 @canany(['view_all_delivery_boy','add_delivery_boy','delivery_boy_payment_history','collected_histories_from_delivery_boy','order_cancle_request_by_delivery_boy','delivery_boy_configuration'])
                 <li class="aiz-side-nav-item">
                     <a href="#" class="aiz-side-nav-link">
@@ -782,10 +844,10 @@
                     </ul>
                 </li>
                 @endcanany
-                @endif
+                @endif --}}
 
  <!-- Refund addon -->
-                @if (addon_is_activated('refund_request'))
+                {{-- @if (addon_is_activated('refund_request'))
                     @canany(['view_refund_requests','view_approved_refund_requests','view_rejected_refund_requests','refund_request_configuration','set_category_wise_refund'])
                         <li class="aiz-side-nav-item">
                             <a href="#" class="aiz-side-nav-link">
@@ -816,7 +878,7 @@
                                         </a>
                                     </li>
                                 @endcan
-                                
+
                                 @can('view_approved_refund_requests')
                                 <li class="aiz-side-nav-item">
                                     <a href="{{route('paid_refund')}}" class="aiz-side-nav-link">
@@ -849,7 +911,7 @@
                             </ul>
                         </li>
                     @endcanany
-                @endif
+                @endif --}}
 
                 <!-- Customers -->
                 @canany(['view_all_customers','view_classified_products','view_classified_packages'])
@@ -975,7 +1037,7 @@
                             </a>
                         </li>
                         @endcan
-                        @if (addon_is_activated('seller_subscription'))
+                        {{-- @if (addon_is_activated('seller_subscription')) --}}
                         @can('view_all_seller_packages')
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('seller_packages.index') }}"
@@ -992,7 +1054,7 @@
                             </a>
                         </li>
                         @endcan
-                        @endif
+                        {{-- @endif --}}
                         @can('seller_verification_form_configuration')
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('seller_verification_form.index') }}" class="aiz-side-nav-link">
@@ -1236,7 +1298,7 @@
                             </ul>
                         </li>
                         @endcan
-                        
+
                         @can('send_newsletter')
                         <li class="aiz-side-nav-item">
                             <a href="{{route('newsletters.index')}}" class="aiz-side-nav-link">
@@ -1283,7 +1345,7 @@
                             </ul>
                         </li>
                         @endcanany
-                        @if (addon_is_activated('otp_system') && auth()->user()->can('send_bulk_sms'))
+                        {{-- @if (addon_is_activated('otp_system') && auth()->user()->can('send_bulk_sms'))
                         <li class="aiz-side-nav-item">
                             <a href="{{route('sms.index')}}" class="aiz-side-nav-link">
                                 <span class="aiz-side-nav-text">{{ translate('Bulk SMS') }}</span>
@@ -1297,7 +1359,7 @@
                                 @endif
                             </a>
                         </li>
-                        @endif
+                        @endif --}}
                         @can('view_all_subscribers')
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('subscribers.index') }}" class="aiz-side-nav-link">
@@ -1335,7 +1397,18 @@
                                 </g>
                             </svg>
                         </div>
-                        <span class="aiz-side-nav-text">{{translate('Support')}}</span>
+                        <span class="aiz-side-nav-text">{{translate('Support')}}    </span>
+                            @php
+                                $support_ticket = DB::table('tickets')
+                                                    ->where('viewed', 0)
+                                                    ->select('id')
+                                                    ->count();
+                            @endphp
+
+
+                            @if($support_ticket > 0)<span class="badge badge-info">{{ $support_ticket
+                                        }}</span>@endif
+                                      
                         <span class="aiz-side-nav-arrow"></span>
                     </a>
                     <ul class="aiz-side-nav-list level-2">
@@ -1394,7 +1467,7 @@
                 @endcanany
 
                 <!-- Affiliate Addon -->
-                @if (addon_is_activated('affiliate_system'))
+                {{-- @if (addon_is_activated('affiliate_system'))
                 @canany(['affiliate_registration_form_config','affiliate_configurations','view_affiliate_users','view_all_referral_users','view_affiliate_withdraw_requests','view_affiliate_logs'])
                 <li class="aiz-side-nav-item">
                     <a href="#" class="aiz-side-nav-link">
@@ -1482,12 +1555,12 @@
                     </ul>
                 </li>
                 @endcanany
-                @endif
+                @endif --}}
 
-               
+
 
                 <!-- Club Point Addon-->
-                @if (addon_is_activated('club_point'))
+                {{-- @if (addon_is_activated('club_point'))
                 @canany(['club_point_configurations','set_club_points','view_users_club_points'])
                 <li class="aiz-side-nav-item">
                     <a href="#" class="aiz-side-nav-link">
@@ -1546,10 +1619,10 @@
                     </ul>
                 </li>
                 @endcanany
-                @endif
+                @endif --}}
 
                 <!--OTP addon -->
-                @if (addon_is_activated('otp_system'))
+                {{-- @if (addon_is_activated('otp_system'))
                 @canany(['otp_configurations','sms_templates','sms_providers_configurations','send_bulk_sms'])
                 <li class="aiz-side-nav-item">
                     <a href="#" class="aiz-side-nav-link">
@@ -1591,18 +1664,18 @@
                                 </a>
                             </li>
                         @endcan
-                       
+
                     </ul>
                 </li>
                 @endcanany
-                @endif
+                @endif --}}
 
-                
+
 
                 @canany(['payment_methods_configurations','african_pg_configuration','african_pg_credentials_configuration','view_all_manual_payment_methods','view_all_offline_payment_orders',
                         'view_all_offline_wallet_recharges','view_all_offline_customer_package_payments','view_all_offline_seller_package_payments','asian_payment_gateway_configuration'])
                 <li class="aiz-side-nav-item">
-                    
+
                     <a href="javascript:void(0);" class="aiz-side-nav-link">
                         <div class="aiz-side-nav-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
@@ -1636,9 +1709,9 @@
                         </li>
                         @endcan
 
-                        
+
                         <!-- Cybersource Addon -->
-                        @if (addon_is_activated('cybersource')  && auth()->user()->can('cybersource_pg_configuration'))
+                        {{-- @if (addon_is_activated('cybersource')  && auth()->user()->can('cybersource_pg_configuration'))
                         <li class="aiz-side-nav-item">
                             <a href="{{route('cybersource_configuration')}}" class="aiz-side-nav-link">
                                 <span class="aiz-side-nav-text">{{translate('Cybersource Payment Gateway')}}</span>
@@ -1652,14 +1725,14 @@
                                 @endif
                             </a>
                         </li>
-                        @endif
-
-                       
+                        @endif --}}
 
 
-                       
+
+
+
                         <!-- Paytm Addon -->
-                        @if (addon_is_activated('paytm') && auth()->user()->can('asian_payment_gateway_configuration'))
+                        {{-- @if (addon_is_activated('paytm') && auth()->user()->can('asian_payment_gateway_configuration'))
                         <li class="aiz-side-nav-item">
                             <a href="{{route('paytm.index')}}" class="aiz-side-nav-link">
                                 <span class="aiz-side-nav-text">{{translate('Asian Payment Gateway')}}</span>
@@ -1673,10 +1746,10 @@
                                 @endif
                             </a>
                         </li>
-                        @endif
+                        @endif --}}
 
                          <!-- African Payment Gateway -->
-                        @if(addon_is_activated('african_pg'))
+                        {{-- @if(addon_is_activated('african_pg'))
                         @canany(['african_pg_configuration','african_pg_credentials_configuration'])
                          <li class="aiz-side-nav-item">
                             <a href="{{route('african_credentials.index')}}" class="aiz-side-nav-link">
@@ -1692,7 +1765,7 @@
                             </a>
                         </li>
                         @endcanany
-                        @endif
+                        @endif --}}
 
 
 
@@ -1766,7 +1839,7 @@
                 </li>
                 @endcanany
 
-                
+
 
                 <!-- Website Setup -->
                 @canany(['header_setup','footer_setup','view_all_website_pages','website_appearance','authentication_layout_settings'])
@@ -1944,7 +2017,7 @@
                                         <span class="aiz-side-nav-text">{{translate('Facebook Chat')}}</span>
                                     </a>
                                 </li>
-                                
+
                                 @endcan --}}
 
                                 @can('whatsapp_chat')
@@ -2195,7 +2268,7 @@
                             </a>
                         </li>
                         @endcan
-                       
+
                         @can('sitemap_generator')
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('sitemap_generator') }}" class="aiz-side-nav-link">

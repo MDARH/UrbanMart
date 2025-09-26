@@ -211,6 +211,7 @@
                 $("#search-menu").html('')
             }
         }
+        
     </script>
 
 </body>
