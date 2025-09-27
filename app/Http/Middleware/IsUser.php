@@ -16,10 +16,12 @@ class IsUser
      */
     public function handle($request, Closure $next)
     {
+        // Mohammad Hassan
         if (Auth::check() && 
                 (Auth::user()->user_type == 'customer' || 
                 Auth::user()->user_type == 'seller' || 
-                Auth::user()->user_type == 'delivery_boy') ) {
+                Auth::user()->user_type == 'delivery_boy' ||
+                Auth::user()->user_type == 'wholesaler') ) {
             
             return $next($request);
         }

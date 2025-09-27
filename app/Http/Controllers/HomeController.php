@@ -251,6 +251,7 @@ class HomeController extends Controller
         if ($userType == 'seller') {
             return redirect()->route('seller.dashboard');
         } elseif ($userType == 'customer' || $userType == 'wholesaler') {
+            // Mohammad Hassan - Enable proper dashboard view for wholesaler and customer
             $users_cart_warning = null;
             $users_cart = Cart::where('user_id', auth()->user()->id)->first();
             if ($users_cart) {

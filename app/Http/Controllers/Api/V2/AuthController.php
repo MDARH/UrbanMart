@@ -239,7 +239,8 @@ class AuthController extends Controller
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'Invalid credentials'
+                    'message' => 'Invalid email or password. Please check your credentials.',
+                    'message_type' => 'error'
                 ], 401);
             }
 
@@ -247,24 +248,35 @@ class AuthController extends Controller
              if ($user->status === 'pending') {
                 return response()->json([
                     'result' => false,
-                    'message' => 'Your wholesaler account is still pending approval. Please contact support.'
+                    'message' => 'Your wholesaler account is still pending approval. Please contact support.',
+                    'message_type' => 'warning'
                 ], 403);
             }
 
-               if ($user->status !== 'active') { // 'active' মানে 'approved' ধরা হয়েছে। অন্য কোনো স্ট্যাটাস (যেমন inactive, rejected) থাকলে লগইন করতে দেওয়া হবে না।
+               if ($user->status !== 'active') { // 'active' মানে 'approved' ধরা হয়েছে। অন্য কোনো স্ট্যাটাস (যেমন inactive, rejected) থাকলে লগইন করতে দেওয়া হবে না।
                 return response()->json([
                     'result' => false,
-                    'message' => 'Your account is not active. Please contact support.'
+                    'message' => 'Your account is not active. Please contact support.',
+                    'message_type' => 'error'
                 ], 403);
             }
 
+            // Mohammad Hassan
+            // Log in the user to create Laravel session
+            \Auth::login($user);
+            
+            // Set session flash message for dashboard
+            session()->flash('success', 'Welcome back! You have successfully logged in as a wholesaler.');
+            
             // Generate access token
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
                 'result' => true,
-                'message' => 'Wholesaler login successful!',
+                'message' => 'Welcome back! Login successful. Redirecting to your dashboard...',
+                'message_type' => 'success',
                 'access_token' => $token,
+                'redirect_url' => route('dashboard'),
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -273,10 +285,18 @@ class AuthController extends Controller
                     'status' => $user->status
                 ]
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Please fill in all required fields correctly.',
+                'message_type' => 'error',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'result' => false,
-                'message' => 'Login failed. Please try again.'
+                'message' => 'Login failed. Please try again later.',
+                'message_type' => 'error'
             ], 500);
         }
     }
