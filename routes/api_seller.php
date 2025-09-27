@@ -128,11 +128,14 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
         });
 
         //Seller Package 
+        // Mohammad Hassan - Commented out SellerPackageController routes as controller doesn't exist
+        /*
         Route::controller(SellerPackageController::class)->group(function () {
             Route::get('seller-packages-list', 'seller_packages_list');
             Route::post('seller-package/offline-payment', 'purchase_package_offline');
             Route::post('seller-package/free-package', 'purchase_free_package');
         });
+        */
 
         //Seller File Upload 
         Route::controller(SellerFileUploadController::class)->group(function () {

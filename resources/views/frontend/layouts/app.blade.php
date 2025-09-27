@@ -73,9 +73,6 @@
     <link rel="stylesheet" href="{{ static_asset('assets/css/aiz-core.css?v=') }}{{ rand(1000, 9999) }}">
     <link rel="stylesheet" href="{{ static_asset('assets/css/custom-style.css') }}">
 
-    <!-- Extra CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" integrity="sha512-kd6crnhech4kGLV/JSLIJx6Nwc02lD/QVPf8T3S/Hrqngg1gKjfmQnnqYVnEJ4ytwYgQyC1SsZkyh3nQxRy0Lw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
     <script>
         var AIZ = AIZ || {};
         AIZ.local = {
@@ -1799,9 +1796,9 @@
         @include('frontend.inc.floating_buttons')
     @endif --}}
 
-    <div class="aiz-refresh">
+    {{-- <div class="aiz-refresh">
         <div class="aiz-refresh-content"><div></div><div></div><div></div></div>
-    </div>
+    </div> --}}
 
 
     @if (env("DEMO_MODE") == "On")

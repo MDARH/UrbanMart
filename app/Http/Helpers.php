@@ -258,7 +258,7 @@ if (!function_exists('format_price')) {
 
         // Get currency symbol and ensure proper UTF-8 encoding
         $currency_symbol = currency_symbol();
-        
+
         // Ensure the currency symbol is properly UTF-8 encoded
         if (!mb_check_encoding($currency_symbol, 'UTF-8')) {
             $currency_symbol = mb_convert_encoding($currency_symbol, 'UTF-8', 'auto');
@@ -1423,8 +1423,8 @@ if (!function_exists('checkout_done')) {
             $order->save();
 
             // Order paid notification to Customer, Seller, & Admin
-            EmailUtility::order_email($order, 'paid'); 
-            
+            EmailUtility::order_email($order, 'paid');
+
             try {
                 NotificationUtility::sendOrderPlacedNotification($order);
                 calculateCommissionAffilationClubPoint($order);
@@ -1586,12 +1586,12 @@ if (!function_exists('calculateCommissionAffilationClubPoint')) {
 if (!function_exists('addon_is_activated')) {
     function addon_is_activated($identifier, $default = null)
     {
-        $addons = Cache::remember('addons', 86400, function () {
-            return Addon::all();
-        });
+        // $addons = Cache::remember('addons', 86400, function () {
+        //     return Addon::all();
+        // });
 
-        $activation = $addons->where('unique_identifier', $identifier)->where('activated', 1)->first();
-        return $activation == null ? false : true;
+        // $activation = $addons->where('unique_identifier', $identifier)->where('activated', 1)->first();
+        // return $activation == null ? false : true;
     }
 }
 
@@ -2830,10 +2830,10 @@ if (!function_exists('timezones')) {
 function formatToArray($input) {
     // Remove extra quotes from the string
     $cleanedString = trim($input, '"');
-    
+
     // Split the string by commas to get each element
     $values = explode(',', $cleanedString);
-    
+
     // Filter out "NaN" and non-numeric values, convert to integers
     $result = array_filter($values, function($value) {
         return is_numeric($value);
@@ -2841,7 +2841,7 @@ function formatToArray($input) {
 
     // Convert numeric values to integers
     $result = array_map('intval', $result);
-    
+
     return $result;
 }
 
@@ -2853,7 +2853,7 @@ if (!function_exists('preorder_product_availability_check')) {
         if($product->is_available){
             return true;
         }
-        $publishDate = Carbon::parse($product->available_date); 
+        $publishDate = Carbon::parse($product->available_date);
         if (Carbon::today()->greaterThanOrEqualTo($publishDate)) {
             return true;
         }
@@ -2867,11 +2867,11 @@ if (!function_exists('preorder_fill_color')) {
     function preorder_fill_color($current_order_status, $previous_order_status = 0)
     {
         $color = match (true) {
-            $current_order_status === 2 => '#28a745', 
-            $current_order_status === 3 => '#dc3545', 
-            $current_order_status === 1 || $previous_order_status == 2 => '#FF6002', 
-            $current_order_status === 0 => '#9d9da6', 
-            default => '#000000', 
+            $current_order_status === 2 => '#28a745',
+            $current_order_status === 3 => '#dc3545',
+            $current_order_status === 1 || $previous_order_status == 2 => '#FF6002',
+            $current_order_status === 0 => '#9d9da6',
+            default => '#000000',
         };
         return $color;
     }
@@ -3025,7 +3025,7 @@ if (!function_exists('preorder_payment_type')) {
     }
 }
 
-// preorder product 
+// preorder product
 if (!function_exists('filter_preorder_product')) {
     function filter_preorder_product($products)
     {
@@ -3056,8 +3056,8 @@ function filter_single_preorder_product($product)
         }
         // Return the product if the user is not a seller (e.g., admin)
         return $product;
-    } 
-    
+    }
+
     // If vendor system is not activated, return the product directly
     return $product;
 }

@@ -46,8 +46,9 @@ Route::group([ 'middleware' => ['isPreorder', ]], function () {
         // Preorder Products
         Route::resource('preorder-product', PreorderProductController::class);
         Route::controller(PreorderProductController::class)->group(function () {
-            Route::get('/preorder-product/edit/{id}', 'edit')->name('preorder-product.edit');
-            Route::get('/preorder-product/destroy/{id}', 'destroy')->name('preorder-product.destroy');
+            // Mohammad Hassan - Commented out duplicate route names that conflict with resource route
+            // Route::get('/preorder-product/edit/{id}', 'edit')->name('preorder-product.edit');
+            // Route::get('/preorder-product/destroy/{id}', 'destroy')->name('preorder-product.destroy');
             Route::post('/preorder-product/bulk-destroy', 'bulkProductDestroy')->name('preorder-product.bulk-destroy');
             Route::post('/preorder-product/published', 'preorder_product_published')->name('preorder-product.published');
             Route::post('/preorder-product/approval', 'preorderProductApproval')->name('preorder-product.approval');
@@ -131,8 +132,9 @@ Route::group([ 'middleware' => ['isPreorder', ]], function () {
 
         Route::resource('preorder-product', SellerPreorderProductController::class);  
         Route::controller(SellerPreorderProductController::class)->group(function () {
-            Route::get('/preorder-product/edit/{id}', 'edit')->name('preorder-product.edit');
-            Route::get('/preorder-product/destroy/{id}', 'destroy')->name('preorder-product.destroy');
+            // Mohammad Hassan - Commented out duplicate route names that conflict with admin preorder-product resource route
+            // Route::get('/preorder-product/edit/{id}', 'edit')->name('preorder-product.edit');
+            // Route::get('/preorder-product/destroy/{id}', 'destroy')->name('preorder-product.destroy');
             Route::post('/preorder-product/bulk-destroy', 'bulkProductDestroy')->name('preorder-product.bulk-destroy');
             Route::post('/preorder-product/published', 'preorder_product_published')->name('preorder-product.published');
             Route::post('/preorder-product/featured', 'preorder_product_featured')->name('preorder-product.featured');

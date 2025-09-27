@@ -1,6 +1,99 @@
 # FILE CHANGES HISTORY
 
-## Latest Changes - July 22, 2024 (Session 15)
+## Latest Changes - January 27, 2025 (Session 18)
+**Developer:** Mohammad Hassan
+
+### Files Modified
+
+#### 1. [app/Http/Controllers/AuctionProductBidController.php](app/Http/Controllers/AuctionProductBidController.php)
+**Changes:**
+- Created new AuctionProductBidController for web routes to handle auction product bidding functionality
+- Implemented store method to save auction bids and send email notifications to previous highest bidders
+- Added proper error handling and flash messages for web interface
+
+#### 2. [routes/auction.php](routes/auction.php)
+**Changes:**
+- Added AuctionProductBidController import statement
+- Uncommented auction_product_bids resource route to enable auction bidding functionality
+- Fixed Route [auction_product_bids.store] not defined error
+
+---
+
+## Previous Changes - January 27, 2025 (Session 17)
+**Developer:** Mohammad Hassan
+
+### Files Modified
+
+#### 1. [routes/web.php](routes/web.php)
+**Changes:**
+- Fixed route name conflict: Changed `subscribers.index` route name to `newsletter.subscribers.index` to resolve duplicate with resource route
+- Fixed route name conflict: Changed `purchase_history/destroy/{id}` route name from `purchase_history.destroy` to `purchase_history.cancel`
+- Commented out explicit `customer_products` edit and destroy routes to resolve naming conflicts with resource route
+- Commented out explicit `conversations` destroy route to resolve naming conflicts with resource route
+- Commented out explicit `addresses` update and destroy routes to resolve naming conflicts with resource route
+- Fixed route name conflict: Changed `/customer-products/admin` route name from `profile.edit` to `iyzico.init_payment`
+- Fixed route name conflict: Changed `/payhere/wallet/testing` route name from `payhere.checkout.testing` to `payhere.wallet.testing`
+
+#### 2. [routes/admin.php](routes/admin.php)
+**Changes:**
+- Fixed route name conflict: Changed `reviews` route name from `reviews.index` to `admin.reviews.index`
+- Fixed route name conflict: Changed `reviews/destroy` route name from `reviews.destroy` to `admin.reviews.destroy`
+
+### Issues Resolved
+- **Route Caching Error**: Fixed multiple LogicException errors when running `php artisan route:cache`
+- **Duplicate Route Names**: Systematically resolved all duplicate route name conflicts across the application
+- **Route Serialization**: Ensured all routes can be properly serialized and cached without conflicts
+- **Application Performance**: Route caching now works successfully, improving application performance
+
+## Previous Changes - January 27, 2025 (Session 16)
+**Developer:** Mohammad Hassan
+
+### Files Modified
+
+#### 1. [routes/api_seller.php](routes/api_seller.php)
+**Changes:**
+- Commented out SellerPackageController route group as controller doesn't exist
+- Fixed missing controller error preventing route:list command from working
+
+#### 2. [routes/african_pg.php](routes/african_pg.php)
+**Changes:**
+- Commented out AfricanPaymentGatewayController use statement and route group as controller doesn't exist
+- Commented out MpesaController use statement and route group as controller doesn't exist
+- Commented out FlutterwaveController use statement and route group as controller doesn't exist
+- Commented out PayfastController use statement and route group as controller doesn't exist
+
+#### 3. [routes/paytm.php](routes/paytm.php)
+**Changes:**
+- Commented out PaytmController use statement and route groups as controller doesn't exist
+- Commented out ToyyibpayController use statement and route groups as controller doesn't exist
+- Commented out MyfatoorahController use statement and route groups as controller doesn't exist
+- Commented out KhaltiController use statement and route groups as controller doesn't exist
+- Commented out PhonepeController use statement and route groups as controller doesn't exist
+
+#### 4. [routes/pos.php](routes/pos.php)
+**Changes:**
+- Commented out PosController use statement and route groups as controller doesn't exist
+- Commented out SellerPosController use statement and route groups as controller doesn't exist
+
+#### 5. [routes/delivery_boy.php](routes/delivery_boy.php)
+**Changes:**
+- Commented out DeliveryBoyController use statement and route groups as controller doesn't exist
+
+#### 6. [routes/auction.php](routes/auction.php)
+**Changes:**
+- Commented out AuctionProductController use statement and route groups as controller doesn't exist
+- Commented out AuctionProductBidController use statement and route groups as controller doesn't exist
+
+#### 7. [routes/web.php](routes/web.php)
+**Changes:**
+- Commented out CybersourceController route group as controller doesn't exist
+
+### Issues Resolved
+- **Route List Error**: Fixed ReflectionException errors when running `php artisan route:list`
+- **Missing Controllers**: Systematically commented out all references to non-existent controllers
+- **Application Stability**: Ensured Laravel can properly load and display all routes without errors
+
+## Previous Changes - July 22, 2024 (Session 15)
 **Developer:** DEV Support Assistant
 
 ### Files Modified

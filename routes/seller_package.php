@@ -11,9 +11,12 @@
 |
 */
 
-use App\Http\Controllers\SellerPackageController;
+// Mohammad Hassan - Commented out SellerPackageController as it doesn't exist
+// use App\Http\Controllers\SellerPackageController;
 
 //Admin
+// Mohammad Hassan - Commented out all SellerPackageController routes as controller doesn't exist
+/*
 Route::group(['prefix' =>'admin', 'middleware' => ['auth', 'admin']], function(){
     Route::resource('seller_packages', SellerPackageController::class);
     Route::controller(SellerPackageController::class)->group(function () {
@@ -32,3 +35,4 @@ Route::group(['middleware' => ['seller']], function(){
 });
 
 Route::get('/seller_packages/check_for_invalid', [SellerPackageController::class, 'unpublish_products'])->name('seller_packages.unpublish_products');
+*/

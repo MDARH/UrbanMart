@@ -1871,8 +1871,9 @@
                         @endcan --}}
                         @can('edit_website_page')
                         <li class="aiz-side-nav-item">
-                            <a href="{{ route('custom-pages.edit', ['id'=>'home', 'lang'=>env('DEFAULT_LANGUAGE'), 'page'=>'home']) }}"
-                                class="aiz-side-nav-link {{ (url()->current() == url('/admin/website/custom-pages/edit/home')) ? 'active' : '' }}">
+                            {{-- Mohammad Hassan - Fixed route parameter: changed from array parameters to single custom_page parameter --}}
+                            <a href="{{ route('custom-pages.edit', 'home') }}"
+                                class="aiz-side-nav-link {{ (url()->current() == url('/admin/website/custom-pages/home/edit')) ? 'active' : '' }}">
                                 <span class="aiz-side-nav-text">{{translate('Homepage Settings')}}</span>
                             </a>
                         </li>

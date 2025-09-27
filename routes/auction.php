@@ -11,7 +11,9 @@
 |
 */
 
-use App\Http\Controllers\AuctionProductController;
+// Mohammad Hassan - Commented out AuctionProductController use statement as controller doesn't exist
+// use App\Http\Controllers\AuctionProductController;
+// Mohammad Hassan - Added AuctionProductBidController use statement
 use App\Http\Controllers\AuctionProductBidController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
@@ -19,6 +21,8 @@ use App\Http\Controllers\HomeController;
 //Admin
 Route::group(['prefix' =>'admin', 'middleware' => ['auth', 'admin']], function(){
     // Auction product lists
+    // Mohammad Hassan - Commented out AuctionProductController route group as controller doesn't exist
+    /*
     Route::controller(AuctionProductController::class)->group(function () {
         Route::get('auction/all-products', 'all_auction_product_list')->name('auction.all_products');
         Route::get('auction/inhouse-products', 'inhouse_auction_products')->name('auction.inhouse_products');
@@ -33,13 +37,19 @@ Route::group(['prefix' =>'admin', 'middleware' => ['auth', 'admin']], function()
         // Sales
         Route::get('/auction_products-orders', 'admin_auction_product_orders')->name('auction_products_orders');
     });
+    */
+    // Mohammad Hassan - Commented out AuctionProductBidController route group as controller doesn't exist
+    /*
     Route::controller(AuctionProductBidController::class)->group(function () {
         Route::get('/product-bids/{id}', 'product_bids_admin')->name('product_bids.admin');
         Route::get('/product-bids/destroy/{id}', 'bid_destroy_admin')->name('product_bids_destroy.admin');
     });
+    */
 });
 
 Route::group(['prefix' => 'seller', 'middleware' => ['seller', 'verified', 'user']], function() {
+    // Mohammad Hassan - Commented out AuctionProductController route group as controller doesn't exist
+    /*
     Route::controller(AuctionProductController::class)->group(function () {
         Route::get('/auction_products', 'auction_product_list_seller')->name('auction_products.seller.index');
 
@@ -51,22 +61,31 @@ Route::group(['prefix' => 'seller', 'middleware' => ['seller', 'verified', 'user
 
         Route::get('/auction_products-orders', 'seller_auction_product_orders')->name('auction_products_orders.seller');
     });
+    */
+    // Mohammad Hassan - Commented out AuctionProductBidController route group as controller doesn't exist
+    /*
     Route::controller(AuctionProductBidController::class)->group(function () {
         Route::get('/product-bids/{id}', 'product_bids_seller')->name('product_bids.seller');
         Route::get('/product-bids/destroy/{id}', 'bid_destroy_seller')->name('product_bids_destroy.seller');
     });
+    */
 });
 
 Route::group(['middleware' => ['auth']], function() {
+    // Mohammad Hassan - Uncommented AuctionProductBidController resource route
     Route::resource('auction_product_bids', AuctionProductBidController::class);
 
     Route::post('/auction/cart/show-cart-modal', [CartController::class, 'showCartModalAuction'])->name('auction.cart.showCartModal');
-    Route::get('/auction/purchase_history', [AuctionProductController::class, 'purchase_history_user'])->name('auction_product.purchase_history');
+    // Mohammad Hassan - Commented out AuctionProductController route as controller doesn't exist
+    // Route::get('/auction/purchase_history', [AuctionProductController::class, 'purchase_history_user'])->name('auction_product.purchase_history');
 });
 
 Route::post('/home/section/auction_products', [HomeController::class, 'load_auction_products_section'])->name('home.section.auction_products');
 
+// Mohammad Hassan - Commented out AuctionProductController route group as controller doesn't exist
+/*
 Route::controller(AuctionProductController::class)->group(function () {
     Route::get('/auction-product/{slug}', 'auction_product_details')->name('auction-product');
     Route::get('/auction-products', 'all_auction_products')->name('auction_products.all');
 });
+*/

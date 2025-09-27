@@ -14,11 +14,14 @@
 
 //Admin
 
-use App\Http\Controllers\DeliveryBoyController;
+// Mohammad Hassan - Commented out DeliveryBoyController use statement as controller doesn't exist
+// use App\Http\Controllers\DeliveryBoyController;
 use App\Http\Controllers\OrderController;
 
 Route::group(['prefix' =>'admin', 'middleware' => ['auth', 'admin', 'prevent-back-history']], function(){
     //Delivery Boy
+    // Mohammad Hassan - Commented out DeliveryBoyController route group as controller doesn't exist
+    /*
     Route::resource('delivery-boys', DeliveryBoyController::class);
     
     Route::controller(DeliveryBoyController::class)->group(function () {
@@ -33,9 +36,12 @@ Route::group(['prefix' =>'admin', 'middleware' => ['auth', 'admin', 'prevent-bac
         Route::get('/delivery-boy/cancel-request', 'cancel_request_list')->name('delivery-boy.cancel-request');
         
     });
+    */
 });
 
 Route::group(['middleware' => ['user', 'verified', 'unbanned', 'prevent-back-history']], function() {
+    // Mohammad Hassan - Commented out DeliveryBoyController route groups as controller doesn't exist
+    /*
     Route::controller(DeliveryBoyController::class)->group(function () {
         Route::get('/assigned-deliveries', 'assigned_delivery')->name('assigned-deliveries');
         Route::get('/pickup-deliveries', 'pickup_delivery')->name('pickup-deliveries');
@@ -48,13 +54,17 @@ Route::group(['middleware' => ['user', 'verified', 'unbanned', 'prevent-back-his
         Route::get('/cancel-request/{id}', 'cancel_request')->name('cancel-request');
         Route::get('/cancel-request-list', 'delivery_boys_cancel_request_list')->name('cancel-request-list');
     });
+    */
 
     Route::controller(OrderController::class)->group(function () {
         Route::post('/orders/update_delivery_status', 'update_delivery_status')->name('delivery-boy.orders.update_delivery_status');
     });
 
+    // Mohammad Hassan - Commented out DeliveryBoyController route group as controller doesn't exist
+    /*
     Route::controller(DeliveryBoyController::class)->group(function () {
         Route::get('/delivery-boy/order-detail/{id}', 'order_detail')->name('delivery-boy.order-detail');
     });
+    */
     
 });

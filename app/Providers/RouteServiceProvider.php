@@ -74,8 +74,6 @@ class RouteServiceProvider extends ServiceProvider
 
     $this->mapPreorderRoutes();
 
-    $this->mapCybersourceRoutes();
-
     $this->mapWebRoutes();
 
     // $this->mapInstallRoutes();
@@ -364,21 +362,6 @@ class RouteServiceProvider extends ServiceProvider
        ->middleware('api')
        ->namespace($this->namespace)
        ->group(base_path('routes/api.php'));
-  }
-
-
-  /**
-   * Define the "b2b" routes for the application.
-   *
-   * These routes all receive session state, CSRF protection, etc.
-   *
-   * @return void
-   */
-  protected function mapCybersourceRoutes()
-  {
-    Route::middleware('web')
-       ->namespace($this->namespace)
-       ->group(base_path('routes/cybersource.php'));
   }
 
   /**

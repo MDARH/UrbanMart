@@ -27,11 +27,11 @@ class MyfatoorahController extends Controller
     {
 
         // If you want to set the credentials and the mode manually.
-        $this->mfObj = new PaymentMyfatoorahApiV2(env('MYFATOORAH_TOKEN'), env('MYFATOORAH_COUNTRY_ISO'), get_setting('myfatoorah_sandbox') == 1 ? true : false);
+        // $this->mfObj = new PaymentMyfatoorahApiV2(env('MYFATOORAH_TOKEN'), env('MYFATOORAH_COUNTRY_ISO'), get_setting('myfatoorah_sandbox') == 1 ? true : false);
     }
 
     /**
-     * Create MyFatoorah invoice 
+     * Create MyFatoorah invoice
      *
      * @return \Illuminate\Http\Response
      */
@@ -87,7 +87,7 @@ class MyfatoorahController extends Controller
 
     /**
      * Get MyFatoorah payment information
-     * 
+     *
      * @return \Illuminate\Http\Response
      */
 

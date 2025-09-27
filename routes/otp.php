@@ -11,12 +11,18 @@
 |
 */
 
-use App\Http\Controllers\OTPVerificationController;
-use App\Http\Controllers\OTPController;
-use App\Http\Controllers\SmsController;
-use App\Http\Controllers\SmsTemplateController;
+// Mohammad Hassan - Commented out OTPVerificationController as it doesn't exist
+// use App\Http\Controllers\OTPVerificationController;
+// Mohammad Hassan - Commented out OTPController as it doesn't exist
+// use App\Http\Controllers\OTPController;
+// Mohammad Hassan - Commented out SmsController as it doesn't exist
+// use App\Http\Controllers\SmsController;
+// Mohammad Hassan - Commented out SmsTemplateController as it doesn't exist
+// use App\Http\Controllers\SmsTemplateController;
 
 //Verofocation phone
+// Mohammad Hassan - Commented out OTPVerificationController route group as controller doesn't exist
+/*
 Route::controller(OTPVerificationController::class)->group(function () {
     Route::get('/verification', 'verification')->name('verification');
     Route::post('/verification', 'verify_phone')->name('verification.submit');
@@ -33,8 +39,11 @@ Route::controller(OTPVerificationController::class)->group(function () {
     Route::post('/validate-otp-code', 'validateOtpCode')->name('validate-otp-code');
     
 });
+*/
 
 //Admin
+// Mohammad Hassan - Commented out all route groups as controllers don't exist
+/*
 Route::group(['prefix' =>'admin', 'middleware' => ['auth', 'admin']], function(){
     Route::controller(OTPController::class)->group(function () {
         Route::get('/otp-login-configuration', 'loginConfigure')->name('otp.login_configuration');
@@ -50,3 +59,4 @@ Route::group(['prefix' =>'admin', 'middleware' => ['auth', 'admin']], function()
 
     Route::resource('sms-templates', SmsTemplateController::class);
 });
+*/
