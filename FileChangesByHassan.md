@@ -1,23 +1,42 @@
 # File Changes by Mohammad Hassan
 
-## Files Changed Today (19 files)
+## Files Modified:
 
-1. [routes/web.php](routes/web.php)
-2. [routes/admin.php](routes/admin.php)
-3. [routes/api_seller.php](routes/api_seller.php)
-4. [routes/african_pg.php](routes/african_pg.php)
-5. [routes/paytm.php](routes/paytm.php)
-6. [routes/pos.php](routes/pos.php)
-7. [routes/delivery_boy.php](routes/delivery_boy.php)
-8. [routes/auction.php](routes/auction.php)
-9. [resources/views/backend/inc/admin_sidenav.blade.php](resources/views/backend/inc/admin_sidenav.blade.php)
-10. [resources/views/backend/inc/admin_nav.blade.php](resources/views/backend/inc/admin_nav.blade.php)
-11. [app/Http/Controllers/AddonController.php](app/Http/Controllers/AddonController.php)
-12. [app/Http/Controllers/Api/V2/MyfatoorahController.php](app/Http/Controllers/Api/V2/MyfatoorahController.php) - Deleted
-13. [routes/offline_payment.php](routes/offline_payment.php)
-14. [routes/api.php](routes/api.php)
-15. [routes/preorder.php](routes/preorder.php)
-16. [routes/seller.php](routes/seller.php)
-17. [routes/wholesale.php](routes/wholesale.php)
-18. [app/Http/Controllers/AuctionProductBidController.php](app/Http/Controllers/AuctionProductBidController.php) - Created
-19. [CHANGELOG.md](CHANGELOG.md)
+1. resources/views/auth/login_register_js.blade.php
+2. app/Http/Controllers/HomeController.php
+3. resources/views/frontend/user/wholesaler/dashboard.blade.php
+4. routes/web.php
+5. routes/admin.php
+6. routes/api_seller.php
+7. routes/african_pg.php
+8. routes/paytm.php
+9. routes/pos.php
+10. routes/delivery_boy.php
+11. routes/auction.php
+12. resources/views/backend/inc/admin_sidenav.blade.php
+13. resources/views/backend/inc/admin_nav.blade.php
+14. app/Http/Controllers/AddonController.php
+15. routes/offline_payment.php
+16. routes/api.php
+17. routes/preorder.php
+18. routes/seller.php
+19. routes/wholesale.php
+20. app/Http/Controllers/AuctionProductBidController.php
+21. CHANGELOG.md
+22. app/Http/Controllers/Api/V2/AuthController.php
+23. resources/views/auth/modals.blade.php
+24. resources/views/frontend/layouts/app.blade.php
+25. resources/views/frontend/partials/notification_system.blade.php
+26. app/Http/Middleware/IsUser.php
+27. app/Http/Controllers/Auth/VerificationController.php
+28. app/Http/Middleware/EnsureEmailVerified.php
+29. app/Http/Kernel.php
+
+## Files Deleted:
+- app/Http/Controllers/Api/V2/MyfatoorahController.php
+
+## Files Created:
+- app/Http/Controllers/AuctionProductBidController.php
+- resources/views/frontend/user/wholesaler/dashboard.blade.php
+- resources/views/frontend/partials/notification_system.blade.php
+- app/Http/Middleware/EnsureEmailIsVerifiedCustom.php

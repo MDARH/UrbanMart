@@ -277,102 +277,7 @@
         }
     }
 
-    /* Toast Notification Styles */
-    .toast-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 10000;
-    }
-
-    .toast {
-        background: white;
-        border-radius: 8px;
-        padding: 16px 20px;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        border-left: 4px solid #3498db;
-        min-width: 320px;
-        max-width: 400px;
-        animation: slideInRight 0.3s ease-out;
-        word-wrap: break-word;
-    }
-
-    .toast.success {
-        border-left-color: #27ae60;
-    }
-
-    .toast.error {
-        border-left-color: #e74c3c;
-    }
-
-    .toast.warning {
-        border-left-color: #f39c12;
-    }
-
-    .toast-content {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .toast-icon {
-        font-size: 20px;
-    }
-
-    .toast.success .toast-icon::before {
-        content: '✅';
-    }
-
-    .toast.error .toast-icon::before {
-        content: '❌';
-    }
-
-    .toast.warning .toast-icon::before {
-        content: '⚠️';
-    }
-
-    .toast-message {
-        flex: 1;
-        font-size: 15px;
-        color: #333;
-        line-height: 1.4;
-        font-weight: 500;
-    }
-
-    .toast-close {
-        cursor: pointer;
-        font-size: 18px;
-        color: #999;
-    }
-
-    .toast-close:hover {
-        color: #333;
-    }
-
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
+    // Mohammad Hassan - Removed custom toast notification styles, using AIZ notification system instead
 </style>
 
 {{-- ===========================
@@ -522,8 +427,7 @@
     </div>
 </div>
 
-<!-- Toast Container -->
-<div id="toastContainer" class="toast-container"></div>
+<!-- Mohammad Hassan - Removed toast container, using AIZ notification system instead -->
 
 <script>
     // =========================
@@ -543,48 +447,7 @@
     }
 
     // =========================
-    // Toast Notification System
-    // =========================
-    function showToast(message, type = 'info', duration = 15000) { // 15 seconds for normal display
-        let container = document.getElementById('toastContainer');
-
-        // Create container if it doesn't exist
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toastContainer';
-            container.className = 'toast-container';
-            document.body.appendChild(container);
-        }
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-
-        toast.innerHTML = `
-            <div class="toast-content">
-                <div class="toast-icon"></div>
-                <div class="toast-message">${message}</div>
-                <div class="toast-close" onclick="removeToast(this.parentElement.parentElement)">&times;</div>
-            </div>
-        `;
-
-        container.appendChild(toast);
-
-        // Auto remove after duration
-        setTimeout(() => {
-            removeToast(toast);
-        }, duration);
-    }
-
-    function removeToast(toast) {
-        if (toast && toast.parentElement) {
-            toast.style.animation = 'slideOutRight 0.3s ease-out';
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.parentElement.removeChild(toast);
-                }
-            }, 300);
-        }
-    }
+    // Mohammad Hassan - Removed custom toast notification system, using AIZ notification system instead
 
     // =========================
     // USER MODAL JS
@@ -630,9 +493,9 @@
             })
         }).then(res => res.json()).then(data => {
             if (data.user_type && (data.user_type === 'admin' || data.user_type === 'seller')) {
-                showToast(
-                    'This login method is only available for customers. Please use the appropriate login for your account type.',
-                    'error');
+                // Mohammad Hassan
+                AIZ.plugins.notify('error',
+                    'This login method is only available for customers. Please use the appropriate login for your account type.');
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
                 return;
@@ -653,14 +516,17 @@
                     document.getElementById('userEmailStep').classList.remove('active');
                     document.getElementById('userVerificationStep').classList.add('active');
                     document.getElementById('userEmailDisplay').textContent = email;
-                    showToast('Verification code sent to your email!', 'success');
+                    // Mohammad Hassan
+                    AIZ.plugins.notify('success', 'Verification code sent to your email!');
                 } else {
-                    showToast(Array.isArray(data.message) ? data.message[0] : data.message ||
-                        'Error sending verification code', 'error');
+                    // Mohammad Hassan
+                    AIZ.plugins.notify('error', Array.isArray(data.message) ? data.message[0] : data.message ||
+                        'Error sending verification code');
                 }
             }).catch(err => {
                 console.error(err);
-                showToast('Network error. Please check your connection.', 'error');
+                // Mohammad Hassan
+                AIZ.plugins.notify('error', 'Network error. Please check your connection.');
             }).finally(() => {
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
@@ -681,14 +547,17 @@
                     document.getElementById('userEmailStep').classList.remove('active');
                     document.getElementById('userVerificationStep').classList.add('active');
                     document.getElementById('userEmailDisplay').textContent = email;
-                    showToast('Verification code sent to your email!', 'success');
+                    // Mohammad Hassan
+                    AIZ.plugins.notify('success', 'Verification code sent to your email!');
                 } else {
-                    showToast(Array.isArray(data.message) ? data.message[0] : data.message ||
-                        'Error sending verification code', 'error');
+                    // Mohammad Hassan
+                    AIZ.plugins.notify('error', Array.isArray(data.message) ? data.message[0] : data.message ||
+                        'Error sending verification code');
                 }
             }).catch(err => {
                 console.error(err);
-                showToast('Network error. Please check your connection.', 'error');
+                // Mohammad Hassan
+                AIZ.plugins.notify('error', 'Network error. Please check your connection.');
             }).finally(() => {
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
@@ -724,7 +593,8 @@
                 // Set authentication cookie for Laravel session
                 document.cookie = `auth_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
 
-                showToast('Email verified successfully! Welcome to Urban Mart!', 'success');
+                // Mohammad Hassan
+                AIZ.plugins.notify('success', 'Email verified successfully! Welcome to Urban Mart!');
                 closeUserModal();
 
                 // Redirect with proper Laravel session authentication
@@ -734,12 +604,14 @@
                     window.location.reload();
                 }, 1000); // Reduced timeout since session is established server-side
             } else {
-                showToast(Array.isArray(data.message) ? data.message[0] : data.message ||
-                    'Invalid or expired verification code', 'error');
+                // Mohammad Hassan
+                AIZ.plugins.notify('error', Array.isArray(data.message) ? data.message[0] : data.message ||
+                    'Invalid or expired verification code');
             }
         }).catch(err => {
             console.error(err);
-            showToast('Network error. Please check your connection and try again.', 'error');
+            // Mohammad Hassan
+            AIZ.plugins.notify('error', 'Network error. Please check your connection and try again.');
         }).finally(() => {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
@@ -758,12 +630,14 @@
                 email: email
             })
         }).then(res => res.json()).then(data => {
-            if (data.result) showToast('Verification code resent successfully!', 'success');
-            else showToast(Array.isArray(data.message) ? data.message[0] : data.message ||
-                'Failed to resend code', 'error');
+            // Mohammad Hassan
+            if (data.result) AIZ.plugins.notify('success', 'Verification code resent successfully!');
+            else AIZ.plugins.notify('error', Array.isArray(data.message) ? data.message[0] : data.message ||
+                'Failed to resend code');
         }).catch(err => {
             console.error(err);
-            showToast('Network error. Please try again.', 'error');
+            // Mohammad Hassan
+            AIZ.plugins.notify('error', 'Network error. Please try again.');
         });
     }
 
@@ -791,7 +665,8 @@
                 }
             });
         } else {
-            showToast('Google OAuth is not properly configured. Please contact support.', 'error');
+            // Mohammad Hassan
+            AIZ.plugins.notify('error', 'Google OAuth is not properly configured. Please contact support.');
         }
     }
 
@@ -819,19 +694,22 @@
                     // Set authentication cookie for Laravel session
                     document.cookie = `auth_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
 
-                    showToast('Google login successful! Welcome to Urban Mart!', 'success');
+                    // Mohammad Hassan
+                    AIZ.plugins.notify('success', 'Google login successful! Welcome to Urban Mart!');
                     closeUserModal();
                     setTimeout(() => {
                         // Reload current page to reflect authentication state
                         window.location.reload();
                     }, 1000);
                 } else {
-                    showToast(data.message || 'Google login failed', 'error');
+                    // Mohammad Hassan
+                    AIZ.plugins.notify('error', data.message || 'Google login failed');
                 }
             })
             .catch(err => {
                 console.error(err);
-                showToast('Google login failed. Please try again.', 'error');
+                // Mohammad Hassan
+                AIZ.plugins.notify('error', 'Google login failed. Please try again.');
             });
     }
 
@@ -858,19 +736,22 @@
                         // Set authentication cookie for Laravel session
                         document.cookie = `auth_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
 
-                        showToast('Google login successful! Welcome to Urban Mart!', 'success');
+                        // Mohammad Hassan
+                        AIZ.plugins.notify('success', 'Google login successful! Welcome to Urban Mart!');
                         closeUserModal();
                         setTimeout(() => {
                             // Reload current page to reflect authentication state
                             window.location.reload();
                         }, 1000);
                     } else {
-                        showToast(data.message || 'Google login failed', 'error');
+                        // Mohammad Hassan
+                        AIZ.plugins.notify('error', data.message || 'Google login failed');
                     }
                 })
                 .catch(err => {
                     console.error(err);
-                    showToast('Google login failed. Please try again.', 'error');
+                    // Mohammad Hassan
+                    AIZ.plugins.notify('error', 'Google login failed. Please try again.');
                 });
         }
     }
@@ -928,23 +809,29 @@
         .then(res => res.json())
         .then(data => {
             if (data.result) {
+                // Mohammad Hassan
+                // Store auth token and user data
                 localStorage.setItem('auth_token', data.access_token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                
-                showToast('Login successful! Redirecting to dashboard...', 'success');
+
+                // Show success message with proper type
+                AIZ.plugins.notify(data.message_type || 'success', data.message || 'Login successful! Redirecting to dashboard...');
                 closeWholesalerModal();
 
-                // Direct redirect to dashboard
+                // Redirect to dashboard using the provided URL
                 setTimeout(() => {
-                    window.location.href = '/dashboard';
+                    window.location.href = data.redirect_url || '/dashboard';
                 }, 1000);
             } else {
-                showToast(data.message || 'Login failed', 'error');
+                // Show error message with proper type
+                // Mohammad Hassan
+                AIZ.plugins.notify(data.message_type || 'error', data.message || 'Login failed');
             }
         })
         .catch(err => {
             console.error(err);
-            showToast('Login failed. Please try again.', 'error');
+            // Mohammad Hassan
+            AIZ.plugins.notify('error', 'Login failed. Please try again.');
         })
         .finally(() => {
             submitBtn.textContent = originalText;
@@ -960,7 +847,8 @@
 
         // Validate password confirmation
         if (data.password !== data.confirmPassword) {
-            showToast('Passwords do not match!', 'error', 8000); // ৮ সেকেন্ডের জন্য এরর মেসেজ
+            // Mohammad Hassan
+            AIZ.plugins.notify('error', 'Passwords do not match!');
             return;
         }
 
@@ -983,32 +871,34 @@
                 // START: এই অংশটি পরিবর্তন করুন
                 if (data.result) {
                     // রেজিস্ট্রেশন সফল হলে এই বার্তাটি দেখানো হবে এবং এটি ১০ সেকেন্ড থাকবে।
-                    showToast(
-                        'Registration successful! Your account is pending approval. You will be notified once approved.',
-                        'success', 10000); // 10000ms = 10 seconds
+                    // Mohammad Hassan
+                    AIZ.plugins.notify('success', 
+                        'Registration successful! Your account is pending approval. You will be notified once approved.');
 
-                    // ফর্মটি রিসেট করে দেওয়া হচ্ছে
+                    // ফর্মটি রিসেট করে দেওয়া হচ্ছে
                     event.target.reset();
 
-                    // মডালটি বন্ধ করার আগে কিছুক্ষণ অপেক্ষা করা হচ্ছে যাতে ইউজার মেসেজটি পড়তে পারে।
+                    // মডালটি বন্ধ করার আগে কিছুক্ষণ অপেক্ষা করা হচ্ছে যাতে ইউজার মেসেজটি পড়তে পারে।
                     setTimeout(() => {
                         closeWholesalerModal();
-                        // লগইন ট্যাবে সুইচ করার প্রয়োজন নেই, কারণ ইউজারকে অনুমোদনের জন্য অপেক্ষা করতে হবে।
+                        // লগইন ট্যাবে সুইচ করার প্রয়োজন নেই, কারণ ইউজারকে অনুমোদনের জন্য অপেক্ষা করতে হবে।
                     }, 3000); // ৩ সেকেন্ড পর মডাল বন্ধ হবে
 
                 } else {
                     // রেজিস্ট্রেশন ফেইল হলে এরর মেসেজ দেখানো হবে, যা ৮ সেকেন্ড থাকবে।
-                    // data.message থেকে মূল এরর মেসেজটি নেওয়া হচ্ছে।
+                    // data.message থেকে মূল এরর মেসেজটি নেওয়া হচ্ছে।
                     const errorMessage = data.message || 'Registration failed';
                     const finalMessage = typeof errorMessage === 'object' ? Object.values(errorMessage).join(' ') :
                         errorMessage;
-                    showToast(finalMessage, 'error', 8000);
+                    // Mohammad Hassan
+                    AIZ.plugins.notify('error', finalMessage);
                 }
                 // END: এই অংশটি পরিবর্তন করুন
             })
             .catch(err => {
                 console.error(err);
-                showToast('Registration failed. Please try again.', 'error', 8000);
+                // Mohammad Hassan
+                AIZ.plugins.notify('error', 'Registration failed. Please try again.');
             })
             .finally(() => {
                 submitBtn.textContent = originalText;

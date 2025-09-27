@@ -19,8 +19,7 @@
                     {
                         // settings
                         showProgressbar: true,
-                        // Mohammad Hassan
-                        delay: 5000,
+                        delay: 2500,
                         mouse_over: "pause",
                         placement: {
                             from: "bottom",
@@ -132,4 +131,6 @@
 
             var url = '{{ route('send-otp') }}';
             $('.loginForm').attr('action', url);
-       
+        }
+    </script> 
+@endif

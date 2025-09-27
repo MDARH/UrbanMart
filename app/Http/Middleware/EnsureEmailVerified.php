@@ -15,6 +15,12 @@ class EnsureEmailVerified
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Mohammad Hassan
+        // Skip email verification for wholesalers
+        if ($request->user() && $request->user()->user_type == 'wholesaler') {
+            return $next($request);
+        }
+        
         if (!$request->user() || !$request->user()->is_verified) {
             return response()->json([
                 'success' => false,
