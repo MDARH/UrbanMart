@@ -274,7 +274,8 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
 
     Route::get('brands/top', 'App\Http\Controllers\Api\V2\BrandController@top');
     Route::get('all-brands', [ProductController::class, 'getBrands'])->name('allBrands');
-    Route::apiResource('brands', 'App\Http\Controllers\Api\V2\BrandController')->only('index');
+    // Mohammad Hassan - Changed route name to avoid conflict with admin brands resource route
+    Route::apiResource('brands', 'App\Http\Controllers\Api\V2\BrandController')->only('index')->names(['index' => 'api.brands.index']);
 
     Route::apiResource('business-settings', 'App\Http\Controllers\Api\V2\BusinessSettingController')->only('index');
 
@@ -282,14 +283,16 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
     Route::get('categories/featured', 'App\Http\Controllers\Api\V2\CategoryController@featured');
     Route::get('categories/home', 'App\Http\Controllers\Api\V2\CategoryController@home');
     Route::get('categories/top', 'App\Http\Controllers\Api\V2\CategoryController@top');
-    Route::apiResource('categories', 'App\Http\Controllers\Api\V2\CategoryController')->only('index');
+    // Mohammad Hassan - Changed route name to avoid conflict with admin categories resource route
+    Route::apiResource('categories', 'App\Http\Controllers\Api\V2\CategoryController')->only('index')->names(['index' => 'api.categories.index']);
     Route::get('sub-categories/{id}', 'App\Http\Controllers\Api\V2\SubCategoryController@index')->name('subCategories.index');
 
     Route::apiResource('colors', 'App\Http\Controllers\Api\V2\ColorController')->only('index');
 
     Route::apiResource('currencies', 'App\Http\Controllers\Api\V2\CurrencyController')->only('index');
 
-    Route::apiResource('customers', 'App\Http\Controllers\Api\V2\CustomerController')->only('show');
+    // Mohammad Hassan - Changed route name to avoid conflict with admin resource route
+Route::apiResource('customers', 'App\Http\Controllers\Api\V2\CustomerController')->only('show')->names(['show' => 'api.customers.show']);
 
     Route::apiResource('general-settings', 'App\Http\Controllers\Api\V2\GeneralSettingController')->only('index');
 
@@ -338,7 +341,8 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
     Route::get('shops/products/featured/{id}', 'App\Http\Controllers\Api\V2\ShopController@featuredProducts')->name('shops.featuredProducts');
     Route::get('shops/products/new/{id}', 'App\Http\Controllers\Api\V2\ShopController@newProducts')->name('shops.newProducts');
     Route::get('shops/brands/{id}', 'App\Http\Controllers\Api\V2\ShopController@brands')->name('shops.brands');
-    Route::apiResource('shops', 'App\Http\Controllers\Api\V2\ShopController')->only('index');
+    // Mohammad Hassan - Changed route name to avoid conflict with web.php shops resource
+    Route::apiResource('shops', 'App\Http\Controllers\Api\V2\ShopController')->only('index')->names(['index' => 'api.shops.index']);
 
     Route::get('sliders', 'App\Http\Controllers\Api\V2\SliderController@sliders');
     Route::get('banners-one', 'App\Http\Controllers\Api\V2\SliderController@bannerOne');
@@ -372,7 +376,8 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
     Route::any('amarpay', [AamarpayController::class, 'pay'])->name('api.amarpay.url');
     Route::any('khalti/payment/pay', 'App\Http\Controllers\Api\V2\KhaltiController@pay')->name('api.khalti.url');
     Route::any('razorpay/pay-with-razorpay', 'App\Http\Controllers\Api\V2\RazorpayController@payWithRazorpay')->name('api.razorpay.payment');
-    Route::any('razorpay/payment', 'App\Http\Controllers\Api\V2\RazorpayController@payment')->name('api.razorpay.payment');
+    // Mohammad Hassan - Fixed duplicate route name
+    Route::any('razorpay/payment', 'App\Http\Controllers\Api\V2\RazorpayController@payment')->name('api.razorpay.payment.callback');
     Route::any('paystack/init', 'App\Http\Controllers\Api\V2\PaystackController@init')->name('api.paystack.init');
     Route::any('iyzico/init', 'App\Http\Controllers\Api\V2\IyzicoController@init')->name('api.iyzico.init');
 
@@ -430,7 +435,8 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
 
     Route::withoutMiddleware([EnsureSystemKey::class])->group(function () {
         Route::controller(WholesaleProductController::class)->group(function () {
-            Route::get('/wholesale/all-products', 'all_wholesale_products')->name('wholesale_products.all');
+            // Mohammad Hassan - Commented out duplicate route name that conflicts with wholesale.php route
+            // Route::get('/wholesale/all-products', 'all_wholesale_products')->name('wholesale_products.all');
             Route::get('/wholesale/product-details/{id}', 'wholesale_product_details')->name('wholesale_products.show');
         });
 
@@ -465,10 +471,10 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
         Route::get('instamojo/failed', 'App\Http\Controllers\Api\V2\InstamojoController@failed');
 
         // Cybersource
-        Route::post('cyber-source/payment/pay', 'App\Http\Controllers\Api\V2\CybersourceController@pay')->name('cybersource.pay');
-        Route::any('cyber-source/payment/process', 'App\Http\Controllers\Api\V2\CybersourceController@process')->name('cybersource.process');
-        Route::any('cyber-source/payment/callback', 'App\Http\Controllers\Api\V2\CybersourceController@callback')->name('cybersource.callback');
-        Route::any('cyber-source/payment/webhook', 'App\Http\Controllers\Api\V2\CybersourceController@webhook')->name('cybersource.webhook');
+        // Route::post('cyber-source/payment/pay', 'App\Http\Controllers\Api\V2\CybersourceController@pay')->name('cybersource.pay');
+        // Route::any('cyber-source/payment/process', 'App\Http\Controllers\Api\V2\CybersourceController@process')->name('cybersource.process');
+        // Route::any('cyber-source/payment/callback', 'App\Http\Controllers\Api\V2\CybersourceController@callback')->name('cybersource.callback');
+        // Route::any('cyber-source/payment/webhook', 'App\Http\Controllers\Api\V2\CybersourceController@webhook')->name('cybersource.webhook');
 
         //Payfast routes <starts>
         Route::controller(PayfastController::class)->group(function () {

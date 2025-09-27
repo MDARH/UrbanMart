@@ -13,8 +13,11 @@
 
 //Admin
 
-use App\Http\Controllers\AffiliateController;
+// Mohammad Hassan - Removed AffiliateController as it doesn't exist
+// use App\Http\Controllers\AffiliateController;
 
+// Mohammad Hassan - Commented out all AffiliateController route groups as controller doesn't exist
+/*
 Route::group(['prefix' =>'admin', 'middleware' => ['auth', 'admin']], function(){
     Route::controller(AffiliateController::class)->group(function () {
         Route::get('/affiliate', 'index')->name('affiliate.index');
@@ -67,3 +70,4 @@ Route::group(['middleware' => ['auth']], function(){
         Route::post('/affiliate/withdraw_request/store', 'withdraw_request_store')->name('affiliate.withdraw_request.store');
     });
 });
+*/

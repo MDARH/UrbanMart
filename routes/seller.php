@@ -68,7 +68,8 @@ Route::group(['namespace' => 'App\Http\Controllers\Seller', 'prefix' => 'seller'
     // Note
     Route::resource('note', NoteController::class);
     Route::controller(NoteController::class)->group(function () {
-        Route::get('/note/edit/{id}', 'edit')->name('note.edit');
+        // Mohammad Hassan - Commented out duplicate route names that conflict with resource route
+        // Route::get('/note/edit/{id}', 'edit')->name('note.edit');
         Route::get('note/delete/{note}', 'destroy')->name('note.delete');
     });
 
@@ -77,7 +78,8 @@ Route::group(['namespace' => 'App\Http\Controllers\Seller', 'prefix' => 'seller'
     Route::controller(CouponController::class)->group(function () {
         Route::post('/coupon/get_form', 'get_coupon_form')->name('coupon.get_coupon_form');
         Route::post('/coupon/get_form_edit', 'get_coupon_form_edit')->name('coupon.get_coupon_form_edit');
-        Route::get('/coupon/destroy/{id}', 'destroy')->name('coupon.destroy');
+        // Mohammad Hassan - Commented out duplicate route name that conflicts with resource route
+        // Route::get('/coupon/destroy/{id}', 'destroy')->name('coupon.destroy');
     });
 
     //Order
@@ -125,8 +127,9 @@ Route::group(['namespace' => 'App\Http\Controllers\Seller', 'prefix' => 'seller'
     Route::controller(AddressController::class)->group(function () {
         Route::post('/get-states', 'getStates')->name('get-state');
         Route::post('/get-cities', 'getCities')->name('get-city');
-        Route::post('/address/update/{id}', 'update')->name('addresses.update');
-        Route::get('/addresses/destroy/{id}', 'destroy')->name('addresses.destroy');
+        // Mohammad Hassan - Commented out duplicate route names that conflict with resource route
+        // Route::post('/address/update/{id}', 'update')->name('addresses.update');
+        // Route::get('/addresses/destroy/{id}', 'destroy')->name('addresses.destroy');
         Route::get('/addresses/set_default/{id}', 'set_default')->name('addresses.set_default');
     });
 

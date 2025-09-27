@@ -25,7 +25,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\Payment\AamarpayController;
 use App\Http\Controllers\Payment\AuthorizenetController;
 use App\Http\Controllers\Payment\BkashController;
-use App\Http\Controllers\Payment\CybersourceController;
+// use App\Http\Controllers\Payment\CybersourceController;
 use App\Http\Controllers\Payment\InstamojoController;
 use App\Http\Controllers\Payment\IyzicoController;
 use App\Http\Controllers\Payment\MercadopagoController;
@@ -140,7 +140,8 @@ Route::controller(LoginController::class)->group(function () {
 Route::get('/verify-email/{token}', [VerificationController::class, 'verify'])->name('verify.email');
 
 Route::controller(VerificationController::class)->group(function () {
-    Route::get('/email/resend', 'resend')->name('verification.resend');
+    // Mohammad Hassan - Commented out duplicate route name that conflicts with Laravel's default verification route
+    // Route::get('/email/resend', 'resend')->name('verification.resend');
     Route::get('/verification-confirmation/{code}', 'verification_confirmation')->name('email.verification.confirmation');
 });
 
@@ -154,12 +155,15 @@ Route::controller(ShopController::class)->group(function () {
 });
 
 Route::controller(HomeController::class)->group(function () {
+    //Home Page
+    Route::get('/', 'index')->name('home');
     Route::get('/registration/verification', 'verifyRegEmailorPhone')->name('registration.verification');
     Route::post('/registration/verification-code-send', 'sendRegVerificationCode')->name('customer-reg.verification_code_send');
     Route::get('/registration/verify-code/{id}', 'regVerifyCode')->name('customer-reg.verify_code');
     Route::post('/registration/verification-code-confirmation', 'regVerifyCodeConfirmation')->name('customer-reg.verify_code_confirmation');
     Route::get('/email-change/callback', 'email_change_callback')->name('email_change.callback');
-    Route::post('/password/reset/email/submit', 'reset_password_with_code')->name('password.update');
+    // Mohammad Hassan - Changed route name to avoid conflict with Laravel's default password.update route
+    Route::post('/password/reset/email/submit', 'reset_password_with_code')->name('password.update.email');
 
     Route::get('/users/login', 'login')->name('user.login');
     Route::get('/seller/login', 'login')->name('seller.login');
@@ -169,8 +173,6 @@ Route::controller(HomeController::class)->group(function () {
 
     Route::post('/import-data', 'import_data');
 
-    //Home Page
-    Route::get('/', 'index')->name('home');
 
     Route::post('/home/section/featured', 'load_featured_section')->name('home.section.featured');
     Route::post('/home/section/todays-deal', 'load_todays_deal_section')->name('home.section.todays_deal');
@@ -261,12 +263,15 @@ Route::controller(PaypalController::class)->group(function () {
     Route::get('/paypal/payment/cancel', 'getCancel')->name('payment.cancel');
 });
 //Cybersource START
+// Mohammad Hassan - Commented out CybersourceController route group as controller doesn't exist
+/*
 Route::controller(CybersourceController::class)->group(function () {
     Route::post('/cyber-source/payment/process', 'process')->name('cybersource.process');
     Route::any('/cyber-source/payment/callback', 'callback')->name('cybersource.callback');
     Route::any('/cyber-source/payment/webhook', 'webhook')->name('cybersource.webhook');
     Route::get('/cyber-source/payment/cancel', 'getCancel')->name('cybersource.cancel');
 });
+*/
 
 //Mercadopago START
 Route::controller(MercadopagoController::class)->group(function () {
@@ -348,7 +353,8 @@ Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function ()
     Route::resource('purchase_history', PurchaseHistoryController::class);
     Route::controller(PurchaseHistoryController::class)->group(function () {
         Route::get('/purchase_history/details/{id}', 'purchase_history_details')->name('purchase_history.details');
-        Route::get('/purchase_history/destroy/{id}', 'order_cancel')->name('purchase_history.destroy');
+        // Mohammad Hassan - Changed route name to avoid conflict with resource route destroy method
+        Route::get('/purchase_history/destroy/{id}', 'order_cancel')->name('purchase_history.cancel');
         Route::get('digital-purchase-history', 'digital_index')->name('digital_purchase_history.index');
         Route::get('/digital-products/download/{id}', 'download')->name('digital-products.download');
 
@@ -384,10 +390,12 @@ Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function ()
     // Customer Product
     Route::resource('customer_products', CustomerProductController::class);
     Route::controller(CustomerProductController::class)->group(function () {
-        Route::get('/customer_products/{id}/edit', 'edit')->name('customer_products.edit');
+        // Mohammad Hassan - Commented out to avoid conflict with resource route edit method
+        // Route::get('/customer_products/{id}/edit', 'edit')->name('customer_products.edit');
         Route::post('/customer_products/published', 'updatePublished')->name('customer_products.published');
         Route::post('/customer_products/status', 'updateStatus')->name('customer_products.update.status');
-        Route::get('/customer_products/destroy/{id}', 'destroy')->name('customer_products.destroy');
+        // Mohammad Hassan - Commented out to avoid conflict with resource route destroy method
+        // Route::get('/customer_products/destroy/{id}', 'destroy')->name('customer_products.destroy');
     });
 
     // Product Review
@@ -416,7 +424,8 @@ Route::group(['middleware' => ['auth']], function () {
     // Product Conversation
     Route::resource('conversations', ConversationController::class);
     Route::controller(ConversationController::class)->group(function () {
-        Route::get('/conversations/destroy/{id}', 'destroy')->name('conversations.destroy');
+        // Mohammad Hassan - Commented out to avoid conflict with resource route destroy method
+        // Route::get('/conversations/destroy/{id}', 'destroy')->name('conversations.destroy');
         Route::post('conversations/refresh', 'refresh')->name('conversations.refresh');
     });
 
@@ -430,8 +439,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::controller(AddressController::class)->group(function () {
         // Route::post('/get-states', 'getStates')->name('get-state');
         // Route::post('/get-cities', 'getCities')->name('get-city');
-        Route::post('/addresses/update/{id}', 'update')->name('addresses.update');
-        Route::get('/addresses/destroy/{id}', 'destroy')->name('addresses.destroy');
+        // Mohammad Hassan - Commented out to avoid conflict with resource route update method
+        // Route::post('/addresses/update/{id}', 'update')->name('addresses.update');
+        // Mohammad Hassan - Commented out to avoid conflict with resource route destroy method
+        // Route::get('/addresses/destroy/{id}', 'destroy')->name('addresses.destroy');
         Route::get('/addresses/set-default/{id}', 'set_default')->name('addresses.set_default');
     });
 
@@ -460,12 +471,14 @@ Route::controller(VoguepayController::class)->group(function () {
 //Iyzico
 Route::any('/iyzico/payment/callback/{payment_type}/{amount?}/{payment_method?}/{combined_order_id?}/{customer_package_id?}/{seller_package_id?}', [IyzicoController::class, 'callback'])->name('iyzico.callback');
 
-Route::get('/customer-products/admin', [IyzicoController::class, 'initPayment'])->name('profile.edit');
+// Mohammad Hassan - Changed route name from 'profile.edit' to 'iyzico.init_payment' to resolve duplicate route name conflict
+Route::get('/customer-products/admin', [IyzicoController::class, 'initPayment'])->name('iyzico.init_payment');
 
 //payhere below
 Route::controller(PayhereController::class)->group(function () {
     Route::get('/payhere/checkout/testing', 'checkout_testing')->name('payhere.checkout.testing');
-    Route::get('/payhere/wallet/testing', 'wallet_testing')->name('payhere.checkout.testing');
+    // Mohammad Hassan - Changed route name from 'payhere.checkout.testing' to 'payhere.wallet.testing' to resolve duplicate route name conflict
+    Route::get('/payhere/wallet/testing', 'wallet_testing')->name('payhere.wallet.testing');
     Route::get('/payhere/customer_package/testing', 'customer_package_testing')->name('payhere.customer_package.testing');
 
     Route::any('/payhere/checkout/notify', 'checkout_notify')->name('payhere.checkout.notify');
@@ -566,5 +579,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::get('wholesale-orders/{id}/show', [$wholesaler_controller, 'wholesale_order_show'])->name('wholesale_orders.show'); // রুটের নাম 'wholesale_orders.show' নিশ্চিত করা হলো
     Route::get('wholesale-settings', [$wholesaler_controller, 'wholesale_settings_index'])->name('wholesale.settings');
     Route::post('wholesale-settings/update', [$wholesaler_controller, 'wholesale_settings_update'])->name('wholesale.settings.update');
-    Route::get('wholesale-products/all', [$wholesaler_controller, 'all_wholesale_products'])->name('wholesale_products.all');
+    // Mohammad Hassan - Commented out duplicate route name that conflicts with wholesale.php route
+    // Route::get('wholesale-products/all', [$wholesaler_controller, 'all_wholesale_products'])->name('wholesale_products.all');
 });

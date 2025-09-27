@@ -355,7 +355,7 @@
                 <div class="col-12 col-lg-12">
                     @php
                         // Limit flash deal products to, for example, 12 for the homepage section
-                        $flash_deal_products_for_homepage = collect(get_flash_deal_products($flash_deal->id))->take(12); 
+                        $flash_deal_products_for_homepage = collect(get_flash_deal_products($flash_deal->id))->take(12);
                     @endphp
 
                     <div class="products-grid">
@@ -417,7 +417,7 @@
 
     /* Outer container for countdown, to match the orange background from your image */
     .flash-countdown {
-        background-color: #ff4d00; 
+        background-color: #ff4d00;
         color: #fff;
         padding: 0px 10px;
         border-radius: 5px;
@@ -425,14 +425,14 @@
         font-size: 14px;
         display: flex;
         align-items: center;
-        margin: 0 15px; 
-        flex-shrink: 0; 
+        margin: 0 15px;
+        flex-shrink: 0;
     }
 
     /* Styles for the individual countdown values within aiz-count-down-circle */
     .flash-countdown .aiz-count-down-circle > div { /* Target each time unit container (days, hrs, min, sec) */
         background-color: transparent !important;
-        padding: 0 !important; 
+        padding: 0 !important;
        margin: -8px -11px 6px 6px !important;
     }
 
@@ -525,9 +525,9 @@
         margin-top: 16px;
         margin-bottom: 16px
     }
-    
+
     /* grid */
-    .products-grid { 
+    .products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 16px

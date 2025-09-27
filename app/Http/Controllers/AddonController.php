@@ -52,11 +52,6 @@ class AddonController extends Controller
 
         Cache::forget('addons');
 
-        if (env('DEMO_MODE') == 'On') {
-            flash(translate('This action is disabled in demo mode'))->error();
-            return back();
-        }
-
         if (class_exists('ZipArchive')) {
             if ($request->hasFile('addon_zip')) {
                 
@@ -258,147 +253,147 @@ class AddonController extends Controller
      * @param \App\Models\Addon $addon
      * @return \Illuminate\Http\Response
      */
-    public function activation(Request $request)
-    {
-        if (env('DEMO_MODE') == 'On') {
-            flash(translate('This action is disabled in demo mode'))->error();
-            return 0;
-        }
-        $addon = Addon::find($request->id);
-        $addon->activated = $request->status;
-        $addon->save();
+    // public function activation(Request $request)
+    // {
+    //     if (env('DEMO_MODE') == 'On') {
+    //         flash(translate('This action is disabled in demo mode'))->error();
+    //         return 0;
+    //     }
+    //     $addon = Addon::find($request->id);
+    //     $addon->activated = $request->status;
+    //     $addon->save();
 
-        Cache::forget('addons');
+    //     Cache::forget('addons');
 
-        return 1;
-    }
+    //     return 1;
+    // }
 
-    public function check_activation( $data){
-        return true;
-    }
+    // public function check_activation( $data){
+    //     return true;
+    // }
 
-    public static function checkVerification( $type, $key){
+    // public static function checkVerification( $type, $key){
 
-        $res  = self::script_activation_check($key);
-        return $res;
-    }
+    //     $res  = self::script_activation_check($key);
+    //     return $res;
+    // }
 
-    public static function checkActivation( $type, $key){
+    // public static function checkActivation( $type, $key){
 
-        if($type == 'item'){
-            $url = "https://activation.activeitzone.com/item_info/".$key;
-        }else{
-            $url = "https://activation.activeitzone.com/registered-addon-info/".$key;
-        }
-        $res = self::sendRequest( $url);
-        return $res ? true : false;
-    }
+    //     if($type == 'item'){
+    //         $url = "https://activation.activeitzone.com/item_info/".$key;
+    //     }else{
+    //         $url = "https://activation.activeitzone.com/registered-addon-info/".$key;
+    //     }
+    //     $res = self::sendRequest( $url);
+    //     return $res ? true : false;
+    // }
 
 
-    public static function sendRequest( $url) {
-        $ch = curl_init();
+    // public static function sendRequest( $url) {
+    //     $ch = curl_init();
         
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPGET, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    //     curl_setopt($ch, CURLOPT_URL, $url);
+    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //     curl_setopt($ch, CURLOPT_HTTPGET, true);
+    //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    //     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
-        $response = curl_exec($ch);
-        curl_close($ch);
-        return $response;
-    }
+    //     $response = curl_exec($ch);
+    //     curl_close($ch);
+    //     return $response;
+    // }
 
-    public static function script_activation_check($purchase_code) {
-        $url = "https://activeitzone.com/activation/verify-purchase-code/".$purchase_code;
-        $request_data_json = json_encode(['code' => $purchase_code]);
+    // public static function script_activation_check($purchase_code) {
+    //     $url = "https://activeitzone.com/activation/verify-purchase-code/".$purchase_code;
+    //     $request_data_json = json_encode(['code' => $purchase_code]);
 
-        $header = array(
-            'Content-Type:application/json'
-        );
-        $stream = curl_init();
+    //     $header = array(
+    //         'Content-Type:application/json'
+    //     );
+    //     $stream = curl_init();
 
-        curl_setopt($stream, CURLOPT_URL, $url);
-        curl_setopt($stream, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($stream, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($stream, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($stream, CURLOPT_POSTFIELDS, $request_data_json);
-        curl_setopt($stream, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($stream, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+    //     curl_setopt($stream, CURLOPT_URL, $url);
+    //     curl_setopt($stream, CURLOPT_HTTPHEADER, $header);
+    //     curl_setopt($stream, CURLOPT_CUSTOMREQUEST, "POST");
+    //     curl_setopt($stream, CURLOPT_RETURNTRANSFER, true);
+    //     curl_setopt($stream, CURLOPT_POSTFIELDS, $request_data_json);
+    //     curl_setopt($stream, CURLOPT_FOLLOWLOCATION, 1);
+    //     curl_setopt($stream, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-        $rn = curl_exec($stream);
-        curl_close($stream);
-        return $rn;
-    }
+    //     $rn = curl_exec($stream);
+    //     curl_close($stream);
+    //     return $rn;
+    // }
 
 
-    public static function check_registered_addon($purchase_code) {
-        $url = "https://activation.activeitzone.com/registered-addon-list/".$purchase_code;
+    // public static function check_registered_addon($purchase_code) {
+    //     $url = "https://activation.activeitzone.com/registered-addon-list/".$purchase_code;
 
-        $ch = curl_init();
+    //     $ch = curl_init();
         
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPGET, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    //     curl_setopt($ch, CURLOPT_URL, $url);
+    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //     curl_setopt($ch, CURLOPT_HTTPGET, true);
+    //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    //     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
-        $response = curl_exec($ch);
-        curl_close($ch);
-        return json_decode($response, true);
-    }
+    //     $response = curl_exec($ch);
+    //     curl_close($ch);
+    //     return json_decode($response, true);
+    // }
 
 
-    public static function normalizeDomain($domain){
-            $domain = preg_replace('/^https?:\/\//', '', $domain);
-            $domain = preg_replace('/^www\./', '', $domain);
-            $parts = explode('.', $domain);
-            $count = count($parts);
-            if ($count > 2) {
-                $domain = $parts[$count - 2] . '.' . $parts[$count - 1];
-            }
+    // public static function normalizeDomain($domain){
+    //         $domain = preg_replace('/^https?:\/\//', '', $domain);
+    //         $domain = preg_replace('/^www\./', '', $domain);
+    //         $parts = explode('.', $domain);
+    //         $count = count($parts);
+    //         if ($count > 2) {
+    //             $domain = $parts[$count - 2] . '.' . $parts[$count - 1];
+    //         }
 
-        return $domain;
-    }
+    //     return $domain;
+    // }
 
-    public static function isLocalhostDomain() {
-        if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {
-            return true;
-        }
-        return false;
-    }
+    // public static function isLocalhostDomain() {
+    //     if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
-    public function copyFolder($source, $destination) {
-        if (!is_dir($source)) {
-            return false;
-        }
+    // public function copyFolder($source, $destination) {
+    //     if (!is_dir($source)) {
+    //         return false;
+    //     }
     
-        // Create the destination directory if it doesn't exist
-        if (!is_dir($destination)) {
-            mkdir($destination, 0777, true);
-        }
+    //     // Create the destination directory if it doesn't exist
+    //     if (!is_dir($destination)) {
+    //         mkdir($destination, 0777, true);
+    //     }
     
-        $directory = opendir($source);
+    //     $directory = opendir($source);
     
-        while (($file = readdir($directory)) !== false) {
-            if ($file === '.' || $file === '..') {
-                continue; // Skip current and parent directory pointers
-            }
+    //     while (($file = readdir($directory)) !== false) {
+    //         if ($file === '.' || $file === '..') {
+    //             continue; // Skip current and parent directory pointers
+    //         }
     
-            $srcPath = $source . DIRECTORY_SEPARATOR . $file;
-            $destPath = $destination . DIRECTORY_SEPARATOR . $file;
+    //         $srcPath = $source . DIRECTORY_SEPARATOR . $file;
+    //         $destPath = $destination . DIRECTORY_SEPARATOR . $file;
     
-            if (is_dir($srcPath)) {
-                // Recursively copy subdirectory
-                $this->copyFolder($srcPath, $destPath);
-            } else {
-                // Copy file
-                copy($srcPath, $destPath);
-            }
-        }
+    //         if (is_dir($srcPath)) {
+    //             // Recursively copy subdirectory
+    //             $this->copyFolder($srcPath, $destPath);
+    //         } else {
+    //             // Copy file
+    //             copy($srcPath, $destPath);
+    //         }
+    //     }
     
-        closedir($directory);
-        return true;
-    }
+    //     closedir($directory);
+    //     return true;
+    // }
 
 }

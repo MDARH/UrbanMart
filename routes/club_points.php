@@ -13,8 +13,11 @@
 
 //Admin
 
-use App\Http\Controllers\ClubPointController;
+// Mohammad Hassan - Removed ClubPointController as it doesn't exist
+// use App\Http\Controllers\ClubPointController;
 
+// Mohammad Hassan - Commented out all ClubPointController route groups as controller doesn't exist
+/*
 Route::group(['prefix' =>'admin', 'middleware' => ['auth', 'admin']], function(){
     Route::controller(ClubPointController::class)->group(function () {
         Route::get('club-points/configuration', 'configure_index')->name('club_points.configs');
@@ -36,3 +39,4 @@ Route::group(['middleware' => ['user', 'verified']], function(){
         Route::post('convert-point-into-wallet', 'convert_point_into_wallet')->name('convert_point_into_wallet');
     });
 });
+*/
