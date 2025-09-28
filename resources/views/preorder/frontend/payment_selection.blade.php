@@ -89,28 +89,8 @@
                                 <div class="col-md-12">
                                     <h5 class="mb-3">{{ translate('Select Payment Method') }}</h5>
                                     
-                                    {{-- Mohammad Hassan - Hide cash on delivery for advance payment preorders --}}
-                                    @php
-                                        $has_advance_payment = false;
-                                        foreach($preorders as $preorder) {
-                                            $product = \App\Models\PreorderProduct::find($preorder->product_id);
-                                            if($product && $product->is_prepayment && $product->preorder_prepayment) {
-                                                $has_advance_payment = true;
-                                                break;
-                                            }
-                                        }
-                                    @endphp
-                                    
-                                    @if(get_setting('cash_payment') == 1 && !$has_advance_payment)
-                                        <div class="form-check mb-3">
-                                            <input class="form-check-input" type="radio" name="payment_option" 
-                                                   id="cash_on_delivery" value="cash_on_delivery">
-                                            <label class="form-check-label fw-600" for="cash_on_delivery">
-                                                {{ translate('Cash on Delivery') }}
-                                            </label>
-                                            <div class="text-muted small">{{ translate('Pay when products arrive') }}</div>
-                                        </div>
-                                    @endif
+                                    {{-- Mohammad Hassan - Hide Cash on Delivery for all preorder products --}}
+                                    {{-- COD is not available for preorder products as advance payment is required --}}
 
                                     @if(get_setting('paypal_payment_activation') == 1)
                                         <div class="form-check mb-3">

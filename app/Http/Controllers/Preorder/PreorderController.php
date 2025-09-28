@@ -7,6 +7,8 @@ use App\Models\Address;
 use App\Models\Carrier;
 use App\Models\Cart;
 use App\Models\Country;
+use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Preorder;
 use App\Models\PreorderCoupon;
 use App\Models\PreorderProduct;
@@ -713,11 +715,47 @@ class PreorderController extends Controller
     // Mohammad Hassan
     private function create_order_from_preorder($preorder)
     {
-        // This method would create a regular order from the completed preorder
-        // Implementation depends on your existing order creation logic
-        // For now, we'll just update the preorder status
+        // Create a regular order from the completed preorder
+        $order = new Order();
+        $order->user_id = $preorder->user_id;
+        $order->guest_id = $preorder->guest_id ?? null;
+        $order->seller_id = $preorder->product_owner_id;
+        $order->code = 'ORD-' . date('Ymd-His') . rand(10, 99);
+        $order->date = now();
+        $order->payment_type = 'preorder_completed';
+        $order->payment_status = 'paid';
+        $order->delivery_status = 'pending';
+        $order->grand_total = $preorder->unit_price * $preorder->quantity;
+        $order->coupon_discount = 0;
+        $order->shipping_cost = 0;
+        $order->is_preorder = true;
+        $order->preorder_status = 'completed';
+        $order->paid_amount = $preorder->unit_price * $preorder->quantity;
+        $order->preorder_notes = 'Order created from completed preorder #' . $preorder->order_code;
+        $order->completed_at = now();
+        $order->save();
+
+        // Create order detail
+        $order_detail = new OrderDetail();
+        $order_detail->order_id = $order->id;
+        $order_detail->product_id = $preorder->product_id;
+        $order_detail->variation = '';
+        $order_detail->price = $preorder->unit_price;
+        $order_detail->tax = 0;
+        $order_detail->shipping_cost = 0;
+        $order_detail->quantity = $preorder->quantity;
+        $order_detail->payment_status = 'paid';
+        $order_detail->delivery_status = 'pending';
+        $order_detail->shipping_type = null;
+        $order_detail->product_referral_code = null;
+        $order_detail->save();
+
+        // Update preorder to mark as converted
         $preorder->converted_to_order = 1;
+        $preorder->order_id = $order->id;
         $preorder->save();
+
+        return $order;
     }
 
 }
