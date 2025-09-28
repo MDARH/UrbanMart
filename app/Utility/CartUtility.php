@@ -18,10 +18,12 @@ class CartUtility
         if (isset($product->choice_options) && count(json_decode($product->choice_options)) > 0) {
             //Gets all the choice values of customer choice option and generate a string like Black-S-Cotton
             foreach (json_decode($product->choice_options) as $key => $choice) {
-                if ($str != null) {
-                    $str .= '-' . str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
-                } else {
-                    $str .= str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
+                if (isset($request['attribute_id_' . $choice->attribute_id])) {
+                    if ($str != null) {
+                        $str .= '-' . str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
+                    } else {
+                        $str .= str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
+                    }
                 }
             }
         }
@@ -30,6 +32,9 @@ class CartUtility
 
     public static function get_price($product, $product_stock, $quantity)
     {
+        if (!$product_stock) {
+            return 0; // or handle as you see fit
+        }
         $price = $product_stock->price;
         if ($product->auction_product == 1) {
             $price = $product->bids->max('amount');

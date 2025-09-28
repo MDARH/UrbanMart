@@ -63,7 +63,26 @@
                         <!-- Stock Images First -->
                         @if (!empty($stockImages))
                             @foreach ($stockImages as $index => $stock)
-                                <div class="carousel-box img-zoom rounded-0">
+                                @php
+                                    // Mohammad Hassan
+                                    // Extract color from variant string to match with color selection
+                                    $stockColor = '';
+                                    if (isset($stock->variant)) {
+                                        // Try to match variant with available colors
+                                        if ($detailedProduct->colors != null && count(json_decode($detailedProduct->colors)) > 0) {
+                                            foreach (json_decode($detailedProduct->colors) as $color_value) {
+                                                $color_name = get_single_color_name($color_value);
+                                                if (stripos($stock->variant, $color_name) !== false) { // Match color name in variant string
+                                                    $stockColor = $color_value; // Store hex color value
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                <div class="carousel-box img-zoom rounded-0 gallery-image" 
+                                     data-color="{{ $stockColor }}" 
+                                     data-variant="{{ $stock->variant ?? '' }}">
                                     <div class="image-wrapper">
                                         <img class="img-fluid h-auto lazyload mx-auto main-product-image"
                                             src="{{ static_asset('assets/img/placeholder.jpg') }}"
@@ -85,8 +104,18 @@
                         
                         <!-- Regular Product Photos -->
                         @if (!empty($photos))
+                            @php
+                                // Mohammad Hassan
+                                // Assign first available color to regular photos for color synchronization
+                                $defaultColor = '';
+                                if ($detailedProduct->colors != null && count(json_decode($detailedProduct->colors)) > 0) {
+                                    $defaultColor = json_decode($detailedProduct->colors)[0];
+                                }
+                            @endphp
                             @foreach ($photos as $index => $photo)
-                                <div class="carousel-box img-zoom rounded-0">
+                                <div class="carousel-box img-zoom rounded-0 gallery-image" 
+                                     data-color="{{ $defaultColor }}" 
+                                     data-variant="general">
                                     <div class="image-wrapper">
                                         <img class="img-fluid h-auto lazyload mx-auto main-product-image"
                                             src="{{ static_asset('assets/img/placeholder.jpg') }}" 
@@ -133,8 +162,26 @@
                     <!-- Stock Thumbnails -->
                     @if (!empty($stockImages))
                         @foreach ($stockImages as $index => $stock)
-                            <div class="carousel-box c-pointer rounded-0 thumbnail-item" 
+                            @php
+                                // Mohammad Hassan
+                                // Extract color from variant string to match with color selection
+                                $thumbColor = '';
+                                if (isset($stock->variant)) {
+                                    // Try to match variant with available colors
+                                    if ($detailedProduct->colors != null && count(json_decode($detailedProduct->colors)) > 0) {
+                                        foreach (json_decode($detailedProduct->colors) as $color_value) {
+                                            $color_name = get_single_color_name($color_value);
+                                            if (stripos($stock->variant, $color_name) !== false) { // Match color name in variant string
+                                                $thumbColor = $color_value; // Store hex color value
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            @endphp
+                            <div class="carousel-box c-pointer rounded-0 thumbnail-item gallery-thumbnail" 
                                  data-variation="{{ $stock->variant ?? '' }}"
+                                 data-color="{{ $thumbColor }}" {{-- This holds the hex color for sync --}}
                                  data-index="{{ $index }}"
                                  title="{{ $stock->variant ?? 'Variant ' . ($index + 1) }}">
                                 <div class="thumbnail-wrapper">
@@ -154,9 +201,19 @@
 
                     <!-- Regular Photo Thumbnails -->
                     @if (!empty($photos))
+                        @php
+                            // Mohammad Hassan
+                            // Use the same default color for thumbnails as main images
+                            $thumbnailDefaultColor = '';
+                            if ($detailedProduct->colors != null && count(json_decode($detailedProduct->colors)) > 0) {
+                                $thumbnailDefaultColor = json_decode($detailedProduct->colors)[0];
+                            }
+                        @endphp
                         @foreach ($photos as $index => $photo)
-                            <div class="carousel-box c-pointer rounded-0 thumbnail-item" 
+                            <div class="carousel-box c-pointer rounded-0 thumbnail-item gallery-thumbnail" 
                                  data-index="{{ count($stockImages) + $index }}"
+                                 data-color="{{ $thumbnailDefaultColor }}" {{-- This holds the hex color for sync --}}
+                                 data-variant="general"
                                  title="Image {{ $index + 1 }}">
                                 <div class="thumbnail-wrapper">
                                     <img class="lazyload mw-100 size-60px mx-auto border p-1 thumbnail-image"
@@ -295,15 +352,253 @@
 
 <script>
 $(document).ready(function() {
-    // Update image counter on slide change
-    $('.product-gallery').on('afterChange', function(event, slick, currentSlide) {
-        $('.current-image').text(currentSlide + 1);
+    // Mohammad Hassan
+    // Enhanced color-based image filtering functionality
+    function filterImagesByColor(selectedColor) {
+        console.log('Filtering images by color:', selectedColor);
+        
+        const galleryImages = $('.product-gallery .carousel-box.gallery-image');
+        const galleryThumbnails = $('.product-gallery-thumb .carousel-box.gallery-thumbnail');
+        let firstMatchingIndex = -1;
+        
+        // Hide all images and thumbnails initially
+        galleryImages.hide();
+        galleryThumbnails.hide();
+
+        if (!selectedColor || selectedColor === '') {
+            // If no color selected (or default), show all images/thumbnails
+            galleryImages.show();
+            galleryThumbnails.show();
+            firstMatchingIndex = 0; // Select the very first image
+        } else {
+            // Show images that match the selected color
+            galleryImages.each(function(index) {
+                const imageColor = $(this).data('color');
+                if (imageColor === selectedColor) {
+                    $(this).show();
+                    if (firstMatchingIndex === -1) {
+                        firstMatchingIndex = index;
+                    }
+                }
+            });
+
+            // If no images specifically tagged with the selected color, show general images
+            if (firstMatchingIndex === -1) {
+                galleryImages.each(function(index) {
+                    const imageVariant = $(this).data('variant'); // Assuming 'general' for images not tied to a specific color variant
+                    if (imageVariant === 'general') {
+                        $(this).show();
+                        if (firstMatchingIndex === -1) { // Set first general image as the target
+                            firstMatchingIndex = index;
+                        }
+                    }
+                });
+            }
+
+            // Show thumbnails that match the selected color
+            galleryThumbnails.each(function(index) {
+                const thumbColor = $(this).data('color');
+                if (thumbColor === selectedColor) {
+                    $(this).show();
+                }
+            });
+
+            // If no thumbnails specifically tagged with the selected color, show general thumbnails
+            // This is important to ensure users can still navigate if a color has no specific thumbnail.
+            galleryThumbnails.each(function() {
+                const thumbVariant = $(this).data('variant');
+                if (thumbVariant === 'general' && $(this).css('display') === 'none') {
+                    $(this).show();
+                }
+            });
+        }
+        
+        // Refresh carousel and navigate to first matching image
+        setTimeout(function() {
+            $('.product-gallery').slick('refresh');
+            $('.product-gallery-thumb').slick('refresh');
+            
+            // Navigate to first matching image if found
+            if (firstMatchingIndex >= 0) {
+                $('.product-gallery').slick('slickGoTo', firstMatchingIndex);
+            } else {
+                // If no images are left after filtering (unlikely but safe fallback), go to first slide.
+                $('.product-gallery').slick('slickGoTo', 0);
+            }
+        }, 100);
+    }
+    
+    // Mohammad Hassan
+    // Listen for color selection changes from details.blade.php
+    $(document).on('colorChanged', function(event, colorValue) {
+        filterImagesByColor(colorValue);
     });
     
-    // Handle image loading errors
-    $('.main-product-image, .thumbnail-image').on('error', function() {
-        $(this).closest('.carousel-box').addClass('image-error')
-               .html('<i class="las la-image"></i><span>Image not available</span>');
+    // Mohammad Hassan
+    // Enhanced thumbnail click functionality using event delegation - ROBUST SOLUTION
+    $(document).on('click', '.gallery-thumbnail', function() {
+        const index = $(this).data('index');
+        const clickedThumbnailColorHex = $(this).data('color'); // This is the hex color value from the thumbnail
+        const variant = $(this).data('variation'); // Get variant information
+        
+        console.log('Thumbnail clicked - Index:', index, 'Color:', clickedThumbnailColorHex, 'Variant:', variant);
+        
+        // Go to specific main image slide
+        $('.product-gallery').slick('slickGoTo', index);
+        
+        // Synchronize color selection in the details section if selectColor function exists
+        if (typeof selectColor === 'function') {
+            let matchingColorOption = null;
+            
+            // Method 1: Try to match by exact hex color value
+            if (clickedThumbnailColorHex && clickedThumbnailColorHex !== '') {
+                matchingColorOption = $('#color-options .color-option[data-color-value="' + clickedThumbnailColorHex + '"]');
+                console.log('Method 1 - Exact hex match for:', clickedThumbnailColorHex, 'Found:', matchingColorOption.length > 0);
+            }
+            
+            // Method 2: If no exact match, try to match by color name in variant
+            if ((!matchingColorOption || matchingColorOption.length === 0) && variant) {
+                $('#color-options .color-option').each(function() {
+                    const colorName = $(this).data('color');
+                    if (colorName && variant.toLowerCase().includes(colorName.toLowerCase())) {
+                        matchingColorOption = $(this);
+                        console.log('Method 2 - Color name match:', colorName, 'in variant:', variant);
+                        return false; // Break the loop
+                    }
+                });
+            }
+            
+            // Method 3: If still no match, try case-insensitive hex comparison
+            if ((!matchingColorOption || matchingColorOption.length === 0) && clickedThumbnailColorHex) {
+                $('#color-options .color-option').each(function() {
+                    const optionColorValue = $(this).data('color-value');
+                    if (optionColorValue && optionColorValue.toLowerCase() === clickedThumbnailColorHex.toLowerCase()) {
+                        matchingColorOption = $(this);
+                        console.log('Method 3 - Case-insensitive hex match:', optionColorValue);
+                        return false; // Break the loop
+                    }
+                });
+            }
+            
+            // If we found a matching color option, select it
+            if (matchingColorOption && matchingColorOption.length > 0) {
+                const colorName = matchingColorOption.data('color');
+                const colorValue = matchingColorOption.data('color-value');
+                
+                console.log('Selecting color:', colorName, 'with value:', colorValue);
+                selectColor(matchingColorOption[0], colorName, colorValue);
+            } else {
+                console.log('No matching color option found for thumbnail. Available colors:');
+                $('#color-options .color-option').each(function() {
+                    console.log('- Color:', $(this).data('color'), 'Value:', $(this).data('color-value'));
+                });
+            }
+        } else {
+            console.log('selectColor function not available');
+        }
     });
+    
+    // Mohammad Hassan
+    // Main gallery image change event (using slick's afterChange) - ROBUST SOLUTION
+    $('.product-gallery').on('afterChange', function(event, slick, currentSlide) {
+        const $currentSlideElement = $(slick.$slides[currentSlide]);
+        const mainImageColorHex = $currentSlideElement.data('color');
+        const variant = $currentSlideElement.data('variant');
+        
+        console.log('Main gallery slide changed - Color:', mainImageColorHex, 'Variant:', variant);
+        
+        // Update color selection if selectColor function exists
+        if (typeof selectColor === 'function') {
+            let matchingColorOption = null;
+            
+            // Method 1: Try to match by exact hex color value
+            if (mainImageColorHex && mainImageColorHex !== '') {
+                matchingColorOption = $('#color-options .color-option[data-color-value="' + mainImageColorHex + '"]');
+                console.log('Main image - Method 1 exact hex match for:', mainImageColorHex, 'Found:', matchingColorOption.length > 0);
+            }
+            
+            // Method 2: If no exact match, try to match by color name in variant
+            if ((!matchingColorOption || matchingColorOption.length === 0) && variant) {
+                $('#color-options .color-option').each(function() {
+                    const colorName = $(this).data('color');
+                    if (colorName && variant.toLowerCase().includes(colorName.toLowerCase())) {
+                        matchingColorOption = $(this);
+                        console.log('Main image - Method 2 color name match:', colorName, 'in variant:', variant);
+                        return false; // Break the loop
+                    }
+                });
+            }
+            
+            // Method 3: If still no match, try case-insensitive hex comparison
+            if ((!matchingColorOption || matchingColorOption.length === 0) && mainImageColorHex) {
+                $('#color-options .color-option').each(function() {
+                    const optionColorValue = $(this).data('color-value');
+                    if (optionColorValue && optionColorValue.toLowerCase() === mainImageColorHex.toLowerCase()) {
+                        matchingColorOption = $(this);
+                        console.log('Main image - Method 3 case-insensitive hex match:', optionColorValue);
+                        return false; // Break the loop
+                    }
+                });
+            }
+            
+            // If we found a matching color option, select it
+            if (matchingColorOption && matchingColorOption.length > 0) {
+                const colorName = matchingColorOption.data('color');
+                const colorValue = matchingColorOption.data('color-value');
+                console.log('Main image - Selecting color:', colorName, 'with value:', colorValue);
+                selectColor(matchingColorOption[0], colorName, colorValue);
+            } else {
+                console.log('Main image - No matching color option found');
+            }
+        }
+
+        // Update image counter
+        const totalImages = slick.slideCount;
+        const currentImage = currentSlide + 1;
+        $('.image-counter .current-image').text(currentImage);
+        $('.image-counter .total-images').text(totalImages);
+    });
+
+
+    // Mohammad Hassan
+    // Initialize color assignments for images without color data
+    function initializeImageColors() {
+        const availableColors = [];
+        $('#color-options .color-option').each(function() {
+            availableColors.push($(this).data('color-value'));
+        });
+        
+        if (availableColors.length > 0) {
+            // Assign colors to gallery images that don't have color data
+            $('.gallery-image').each(function(index) {
+                const currentColor = $(this).data('color');
+                if (!currentColor || currentColor === '') {
+                    const assignedColor = availableColors[index % availableColors.length];
+                    $(this).attr('data-color', assignedColor);
+                    console.log('Assigned color', assignedColor, 'to gallery image', index);
+                }
+            });
+            
+            // Assign colors to thumbnail images that don't have color data
+            $('.gallery-thumbnail').each(function(index) {
+                const currentColor = $(this).data('color');
+                if (!currentColor || currentColor === '') {
+                    const assignedColor = availableColors[index % availableColors.length];
+                    $(this).attr('data-color', assignedColor);
+                    console.log('Assigned color', assignedColor, 'to thumbnail', index);
+                }
+            });
+        }
+    }
+    
+    // Initialize color assignments on page load
+    initializeImageColors();
+
+    // Initialize image counter on load for the first slide
+    if ($('.product-gallery').hasClass('slick-initialized')) {
+        const totalImages = $('.product-gallery').slick('getSlick').slideCount;
+        $('.image-counter .current-image').text(1);
+        $('.image-counter .total-images').text(totalImages);
+    }
 });
 </script>

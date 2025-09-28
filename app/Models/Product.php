@@ -9,7 +9,7 @@ use App\Traits\PreventDemoModeChanges;
 class Product extends Model
 {
     use PreventDemoModeChanges;
-    
+
     protected $guarded = ['choice_attributes'];
 
     protected $with = ['product_translations', 'taxes', 'thumbnail'];
@@ -30,7 +30,7 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
-    
+
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'product_categories');
@@ -115,7 +115,7 @@ class Product extends Model
     {
         return $this->hasMany(Cart::class);
     }
-    
+
     public function scopeIsApprovedPublished($query)
     {
         return $query->where('approved', '1')->where('published', 1);
@@ -141,37 +141,9 @@ class Product extends Model
         return $this->belongsTo(Note::class, 'refund_note_id');
     }
 
-    // Mohammad Hassan
-    public function isOutOfStock()
-    {
-        return $this->current_stock <= 0;
-    }
-
-    // Mohammad Hassan
-    public function isPreorderAvailable()
-    {
-        // Always return true for out of stock products, regardless of preorder system activation
-        return $this->isOutOfStock();
-    }
-
-    // Mohammad Hassan
-    public function preorders()
-    {
-        return $this->hasMany(Preorder::class, 'product_id');
-    }
-
-    // Mohammad Hassan
-    public function getPreorderPrice()
-    {
-        // 50% of the unit price for pre-order
-        return $this->unit_price * 0.5;
-    }
-
-    // Mohammad Hassan
-    public function getRemainingPrice()
-    {
-        // Remaining 50% to be paid after product arrival
-        return $this->unit_price - $this->getPreorderPrice();
-    }
+    public function priceTiers()
+{
+    return $this->hasMany(ProductPriceTier::class)->orderBy('min_qty', 'asc');
+}
 
 }

@@ -48,6 +48,28 @@
 - **Changes**:
   - Updated imports to use official SSLCommerz library
   - Replaced custom SSLCommerz implementation with official library
+
+// Mohammad Hassan
+
+### 2025-01-28 - Dynamic Product Details Table Implementation
+
+#### 1. Created Dynamic Size/Price Table with Advanced Features
+- **File**: `resources/views/frontend/product_details/details.blade.php`
+- **Changes**:
+  - Replaced static color selection with dynamic table showing Size/Model/Fabric, Unit Price, Total Price, and Add/Quantity columns
+  - Implemented price tier integration - unit prices update automatically when different price tiers are selected
+  - Added quantity management with +/- buttons for each table row
+  - Implemented grand total calculation showing total quantity and total price across all selected rows
+  - Updated Add to Cart and Buy Now buttons to work with the new table functionality
+  - Added JavaScript functions for:
+    - `updateGrandTotal()` - Calculates and displays grand totals
+    - `addToCartFromTable()` - Handles cart addition from table selections
+    - `buyNowFromTable()` - Handles buy now from table selections
+    - `addToCartRow()` - Manages individual row cart additions
+    - `increaseQuantity()` and `decreaseQuantity()` - Quantity controls
+    - `updateTotal()` - Updates individual row totals
+  - Integrated with existing cart system by updating form data with selected items
+  - Added responsive design with scroll functionality for large tables
   - Added proper payment validation in success method
   - Implemented error handling for failed payment validation
 

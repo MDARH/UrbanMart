@@ -2105,6 +2105,26 @@ if (!function_exists('get_single_color_name')) {
     }
 }
 
+// Mohammad Hassan
+// Check if a color is dark for proper text contrast
+if (!function_exists('isDarkColor')) {
+    function isDarkColor($color) {
+        // Remove # if present
+        $color = ltrim($color, '#');
+        
+        // Convert to RGB
+        $r = hexdec(substr($color, 0, 2));
+        $g = hexdec(substr($color, 2, 2));
+        $b = hexdec(substr($color, 4, 2));
+        
+        // Calculate luminance using the relative luminance formula
+        $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
+        
+        // Return true if dark (luminance < 0.5)
+        return $luminance < 0.5;
+    }
+}
+
 // Get single Attribute
 if (!function_exists('get_single_attribute_name')) {
     function get_single_attribute_name($attribute)

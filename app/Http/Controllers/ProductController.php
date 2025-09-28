@@ -27,6 +27,7 @@ use App\Services\FrequentlyBoughtProductService;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -207,7 +208,7 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ProductRequest $request)
+     public function store(ProductRequest $request)
     {
         $product = $this->productService->store($request->except([
             '_token', 'sku', 'choice', 'tax_id', 'tax', 'tax_type', 'flash_deal_id', 'flash_discount', 'flash_discount_type'
@@ -238,13 +239,44 @@ class ProductController extends Controller
         $this->frequentlyBoughtProductService->store($request->only([
             'product_id', 'frequently_bought_selection_type', 'fq_bought_product_ids', 'fq_bought_product_category_id'
         ]));
-       
+
         // Product Translations
         $request->merge(['lang' => env('DEFAULT_LANGUAGE')]);
         ProductTranslation::create($request->only([
             'lang', 'name', 'unit', 'description', 'product_id'
         ]));
-        
+
+                    // START: Save Price Tiers
+        if ($request->has('price_tiers') && is_array($request->price_tiers['min_qty'])) {
+            $processedTiers = [];
+            foreach ($request->price_tiers['min_qty'] as $key => $min_qty) {
+                if (isset($request->price_tiers['price'][$key]) && (int)$min_qty > 0) {
+                    $current_qty = (int)$min_qty;
+                    if (!isset($processedTiers[$current_qty])) {
+                         $processedTiers[$current_qty] = (float)$request->price_tiers['price'][$key];
+                    }
+                }
+            }
+
+            $tiersToInsert = [];
+            $timestamp = now();
+            foreach ($processedTiers as $min_qty => $price) {
+                $tiersToInsert[] = [
+                    'product_id' => $product->id,
+                    'min_qty'    => $min_qty,
+                    'price'      => $price,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ];
+            }
+
+            if (!empty($tiersToInsert)) {
+                // এই লাইনটি পরিবর্তন করা হয়েছে
+                DB::table('product_price_tiers')->insert($tiersToInsert);
+            }
+        }
+        // END: Save Price Tiers
+
         flash(translate('Product has been inserted successfully'))->success();
 
         Artisan::call('view:clear');
@@ -318,9 +350,8 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(ProductRequest $request, Product $product)
+     public function update(ProductRequest $request, Product $product)
     {
-
         //Product
         $product = $this->productService->update($request->except([
             '_token', 'sku', 'choice', 'tax_id', 'tax', 'tax_type', 'flash_deal_id', 'flash_discount', 'flash_discount_type'
@@ -330,7 +361,6 @@ class ProductController extends Controller
 
         //Product categories
         $product->categories()->sync($request->category_ids);
-
 
         //Product Stock
         $product->stocks()->delete();
@@ -367,6 +397,38 @@ class ProductController extends Controller
             ])
         );
 
+                    // START: Update Price Tiers
+        $product->priceTiers()->delete();
+        if ($request->has('price_tiers') && is_array($request->price_tiers['min_qty'])) {
+            $processedTiers = [];
+            foreach ($request->price_tiers['min_qty'] as $key => $min_qty) {
+                if (isset($request->price_tiers['price'][$key]) && (int)$min_qty > 0) {
+                    $current_qty = (int)$min_qty;
+                    if (!isset($processedTiers[$current_qty])) {
+                         $processedTiers[$current_qty] = (float)$request->price_tiers['price'][$key];
+                    }
+                }
+            }
+
+            $tiersToInsert = [];
+            $timestamp = now();
+            foreach ($processedTiers as $min_qty => $price) {
+                $tiersToInsert[] = [
+                    'product_id' => $product->id,
+                    'min_qty'    => $min_qty,
+                    'price'      => $price,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ];
+            }
+
+            if (!empty($tiersToInsert)) {
+                // এই লাইনটি পরিবর্তন করা হয়েছে
+                DB::table('product_price_tiers')->insert($tiersToInsert);
+            }
+        }
+        // END: Update Price Tiers
+
         flash(translate('Product has been updated successfully'))->success();
 
         Artisan::call('view:clear');
@@ -376,6 +438,7 @@ class ProductController extends Controller
         }
         return back();
     }
+
 
     /**
      * Remove the specified resource from storage.

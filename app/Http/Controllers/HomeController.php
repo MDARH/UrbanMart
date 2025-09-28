@@ -643,7 +643,7 @@ class HomeController extends Controller
 
         $product_stock = $product->stocks->where('variant', $str)->first();
 
-        $price = $product_stock->price;
+        $price = $product_stock ? $product_stock->price : 0;
 
         if ($product->wholesale_product) {
             $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $request->quantity)->where('max_qty', '>=', $request->quantity)->first();

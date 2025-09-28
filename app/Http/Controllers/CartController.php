@@ -132,7 +132,7 @@ class CartController extends Controller
                 );
             }
             // Skip stock validation for preorder products
-            if (!$is_preorder && $product_stock->qty < $cart->quantity + $request['quantity']) {
+            if (!$is_preorder && $product_stock && $product_stock->qty < $cart->quantity + $request['quantity']) {
                 return array(
                     'status' => 0,
                     'cart_count' => count($carts),
