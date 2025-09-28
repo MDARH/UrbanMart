@@ -33,26 +33,14 @@
     <!-- Country - Mohammad Hassan: Set Bangladesh as default -->
     <input type="hidden" name="country_id" value="18">
 
-    <!-- State/Division - Mohammad Hassan: Always show for Bangladesh -->
+    <!-- City - Mohammad Hassan: Renamed from District, loads all Bangladesh cities -->
     <div class="row">
         <div class="col-md-2 mt-md-2">
-            <label>{{ translate('Division')}} <span class="text-danger">*</span></label>
-        </div>
-        <div class="col-md-10">
-            <select class="form-control mb-3 aiz-selectpicker rounded-0" data-live-search="true" name="state_id" id="guest_state" required>
-                <option value="">{{ translate('Select Division') }}</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- City/District - Mohammad Hassan: Enhanced with search functionality -->
-    <div class="row">
-        <div class="col-md-2 mt-md-2">
-            <label>{{ translate('District')}} <span class="text-danger">*</span></label>
+            <label>{{ translate('City')}} <span class="text-danger">*</span></label>
         </div>
         <div class="col-md-10">
             <select class="form-control mb-3 aiz-selectpicker rounded-0" data-live-search="true" name="city_id" id="guest_city" required>
-                <option value="">{{ translate('Select District') }}</option>
+                <option value="">{{ translate('Select City') }}</option>
             </select>
         </div>
     </div>
@@ -135,21 +123,11 @@
 </div>
 
 <script>
-// Mohammad Hassan - Guest checkout JavaScript for Bangladesh states and cities
+// Mohammad Hassan - Guest checkout JavaScript for Bangladesh cities only (no divisions)
+// Mohammad Hassan
 $(document).ready(function() {
-    // Automatically load states for Bangladesh (country_id = 18) on page load
-    get_guest_states(18);
-    
-    // Handle state change to load cities
-    $('#guest_state').on('change', function() {
-        var state_id = $(this).val();
-        if (state_id) {
-            get_guest_cities(state_id);
-        } else {
-            $('#guest_city').html('<option value="">{{ translate("Select District") }}</option>');
-            AIZ.plugins.bootstrapSelect('refresh');
-        }
-    });
+    // Load cities by country for Bangladesh since cities exist at country level
+    get_guest_cities_by_country(18);
     
     // Handle city change to load areas
     $('#guest_city').on('change', function() {
@@ -159,51 +137,6 @@ $(document).ready(function() {
         }
     });
 });
-
-function get_guest_states(country_id) {
-    $.ajax({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        url: "{{route('get-state')}}",
-        type: 'POST',
-        data: {
-            country_id: country_id
-        },
-        success: function (response) {
-            var obj = JSON.parse(response);
-            if(obj != '') {
-                $('#guest_state').html(obj);
-                AIZ.plugins.bootstrapSelect('refresh');
-            }
-        }
-    });
-}
-
-function get_guest_cities(state_id) {
-    $.ajax({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        url: "{{route('get-city')}}",
-        type: 'POST',
-        data: {
-            state_id: state_id
-        },
-        success: function (response) {
-            var obj = JSON.parse(response);
-            if(obj != '' && $('<select></select>').html(obj).find('option').length > 1) {
-                $('#guest_city').attr('disabled', false);
-                $('#guest_city').html(obj);
-                AIZ.plugins.bootstrapSelect('refresh');
-            } else {
-                $('#guest_city').html('<option value="">{{ translate("No districts are available under this division.") }}</option>');
-                $('#guest_city').attr('disabled', true);
-                AIZ.plugins.bootstrapSelect('refresh');
-            }
-        }
-    });
-}
 
 function get_guest_areas(city_id) {
     $.ajax({
@@ -224,6 +157,32 @@ function get_guest_areas(city_id) {
             } else {
                 $('[name="area_id"]').removeAttr('required');
                 $('.area-field').addClass('d-none');
+            }
+        }
+    });
+}
+
+// Mohammad Hassan - Function to load cities by country_id for Bangladesh
+function get_guest_cities_by_country(country_id) {
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: "{{route('get-city-by-country')}}",
+        type: 'POST',
+        data: {
+            country_id: country_id
+        },
+        success: function (response) {
+            var obj = JSON.parse(response);
+            if(obj != '' && $('<select></select>').html(obj).find('option').length > 1) {
+                $('#guest_city').attr('disabled', false);
+                $('#guest_city').html(obj);
+                AIZ.plugins.bootstrapSelect('refresh');
+            } else {
+                $('#guest_city').html('<option value="">{{ translate("No cities are available.") }}</option>');
+                $('#guest_city').attr('disabled', true);
+                AIZ.plugins.bootstrapSelect('refresh');
             }
         }
     });

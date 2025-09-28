@@ -365,13 +365,43 @@ class CheckoutController extends Controller
     //redirects to this method after a successfull checkout
     public function checkout_done($combined_order_id, $payment)
     {
+        // Mohammad Hassan - Add debugging for checkout completion
+        \Log::info('Checkout Done Called', [
+            'combined_order_id' => $combined_order_id,
+            'payment_data' => $payment,
+            'session_data' => [
+                'payment_type' => Session::get('payment_type'),
+                'combined_order_id' => Session::get('combined_order_id'),
+                'user_id' => auth()->id()
+            ]
+        ]);
+        
         $combined_order = CombinedOrder::findOrFail($combined_order_id);
+        
+        \Log::info('Combined Order Found', [
+            'combined_order_id' => $combined_order->id,
+            'grand_total' => $combined_order->grand_total,
+            'orders_count' => $combined_order->orders->count()
+        ]);
 
         foreach ($combined_order->orders as $key => $order) {
             $order = Order::findOrFail($order->id);
+            
+            \Log::info('Processing Order', [
+                'order_id' => $order->id,
+                'order_code' => $order->code,
+                'current_payment_status' => $order->payment_status,
+                'grand_total' => $order->grand_total
+            ]);
+            
             $order->payment_status = 'paid';
             $order->payment_details = $payment;
             $order->save();
+            
+            \Log::info('Order Payment Status Updated', [
+                'order_id' => $order->id,
+                'new_payment_status' => $order->payment_status
+            ]);
 
             // Order paid notification to Customer, Seller, & Admin
             EmailUtility::order_email($order, 'paid'); 
@@ -379,6 +409,9 @@ class CheckoutController extends Controller
             // Calculate Commission from seller, Customer Affiliate earning and Customers Club Point
             calculateCommissionAffilationClubPoint($order);
         }
+        
+        \Log::info('All Orders Processed Successfully', ['combined_order_id' => $combined_order_id]);
+        
         Session::put('combined_order_id', $combined_order_id);
         return redirect()->route('order_confirmed');
     }
@@ -429,9 +462,17 @@ class CheckoutController extends Controller
         }
         else{
             if(get_setting('guest_checkout_activation') == 1){
-                if($request->name == null || $request->email == null || $request->address == null ||
-                    $request->country_id == null || $request->state_id == null || $request->city_id == null ||
-                        $request->postal_code == null || $request->phone == null) {
+                // Mohammad Hassan - Modified validation to make state_id optional for Bangladesh
+                $required_fields_missing = $request->name == null || $request->email == null || $request->address == null ||
+                    $request->country_id == null || $request->city_id == null ||
+                    $request->postal_code == null || $request->phone == null;
+                
+                // For countries other than Bangladesh, state_id is still required
+                if($request->country_id != 18 && $request->state_id == null) {
+                    $required_fields_missing = true;
+                }
+                
+                if($required_fields_missing) {
                     flash(translate("Please add shipping address"))->warning();
                     return redirect()->route('checkout.shipping_info');
                 }
