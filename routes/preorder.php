@@ -75,6 +75,18 @@ Route::group([ 'middleware' => ['isPreorder', ]], function () {
             Route::get('/preorder-settings', 'preorderSettings')->name('preorder-settings');
         });
 
+        // Mohammad Hassan - New Pre-order Management Routes
+        Route::controller(PreorderController::class)->group(function() {
+            Route::get('/preorders', 'index')->name('preorders.index');
+            Route::get('/preorders/{id}', 'show')->name('preorders.show');
+            Route::post('/preorders/mark-arrived', 'markArrived')->name('preorders.mark_arrived');
+            Route::post('/preorders/notify-customer', 'notifyCustomer')->name('preorders.notify_customer');
+            Route::post('/preorders/{id}/update-status', 'updateStatus')->name('preorders.update_status');
+            Route::post('/preorders/bulk-mark-arrived', 'bulkMarkArrived')->name('preorders.bulk_mark_arrived');
+            Route::post('/preorders/bulk-notify-customers', 'bulkNotifyCustomers')->name('preorders.bulk_notify_customers');
+            Route::get('/preorders/stats', 'getStats')->name('preorders.stats');
+        });
+
         // Seller Commission History
         Route::controller(PreorderCommissionHistoryController::class)->group(function() {
             Route::get('preorder-commission-history', 'index')->name('preorder-commission-history');
@@ -192,6 +204,11 @@ Route::group([ 'middleware' => ['isPreorder', ]], function () {
                 Route::put('/order-details/{id}', 'order_update')->name('preorder.order_update');
                 Route::post('/apply-coupon-code', 'apply_coupon_code')->name('preorder.apply_coupon_code');
                 Route::post('/remove-coupon-code', 'remove_coupon_code')->name('preorder.remove_coupon_code');
+                // Mohammad Hassan - Payment routes for preorders
+                Route::get('/payment-selection', 'payment_selection')->name('preorder.payment_selection');
+                Route::post('/process-payment', 'process_payment')->name('preorder.process_payment');
+                Route::get('/payment-success', 'payment_success')->name('preorder.payment_success');
+                Route::get('/payment-cancel', 'payment_cancel')->name('preorder.payment_cancel');
             });
 
             // Product Review

@@ -701,13 +701,15 @@ class HomeController extends Controller
 
         $price += $tax;
 
+        // Mohammad Hassan
         return array(
             'price' => single_price($price * $request->quantity),
             'quantity' => $quantity,
             'digital' => $product->digital,
             'variation' => $str,
             'max_limit' => $max_limit,
-            'in_stock' => $in_stock
+            'in_stock' => $in_stock,
+            'allow_preorder' => $product->allow_preorder ?? 0
         );
     }
 

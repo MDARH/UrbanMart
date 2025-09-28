@@ -118,6 +118,10 @@ class CartController extends Controller
             ]);
         }
 
+        // Mohammad Hassan
+        // Check if this is a preorder request
+        $is_preorder = $request->has('is_preorder') && $request->is_preorder == 1;
+        
         if ($cart->exists && $product->digital == 0) {
             if ($product->auction_product == 1 && ($cart->product_id == $product->id)) {
                 return array(
@@ -127,7 +131,8 @@ class CartController extends Controller
                     'nav_cart_view' => view('frontend.partials.cart.cart')->render(),
                 );
             }
-            if ($product_stock->qty < $cart->quantity + $request['quantity']) {
+            // Skip stock validation for preorder products
+            if (!$is_preorder && $product_stock->qty < $cart->quantity + $request['quantity']) {
                 return array(
                     'status' => 0,
                     'cart_count' => count($carts),

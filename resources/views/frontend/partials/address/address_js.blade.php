@@ -25,6 +25,13 @@
         });
     }
 
+    // Mohammad Hassan - Load Bangladesh states on page load for guest checkout
+    $(document).ready(function() {
+        if ($('#guest_state').length > 0) {
+            get_states(18); // Bangladesh country ID is 18
+        }
+    });
+
     function add_new_address(){
         $('#new-address-modal').modal('show');
     }
@@ -63,6 +70,17 @@
             }
         });
     }
+
+    // Mohammad Hassan - Initialize states and cities for guest checkout
+    @if(get_active_countries()->count() == 1)
+        $(document).ready(function() {
+            @if(get_setting('has_state') == 1)
+                get_states(@json(get_active_countries()[0]->id));
+            @else
+                get_city_by_country(@json(get_active_countries()[0]->id));
+            @endif
+        });
+    @endif
 
     $(document).on('change', '[name=country_id]', function() {
         var country_id = $(this).val();

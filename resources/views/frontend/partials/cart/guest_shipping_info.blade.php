@@ -30,6 +30,33 @@
         </div>
     </div>
 
+    <!-- Country - Mohammad Hassan: Set Bangladesh as default -->
+    <input type="hidden" name="country_id" value="18">
+
+    <!-- State/Division - Mohammad Hassan: Always show for Bangladesh -->
+    <div class="row">
+        <div class="col-md-2 mt-md-2">
+            <label>{{ translate('Division')}} <span class="text-danger">*</span></label>
+        </div>
+        <div class="col-md-10">
+            <select class="form-control mb-3 aiz-selectpicker rounded-0" data-live-search="true" name="state_id" id="guest_state" required>
+                <option value="">{{ translate('Select Division') }}</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- City/District - Mohammad Hassan: Enhanced with search functionality -->
+    <div class="row">
+        <div class="col-md-2 mt-md-2">
+            <label>{{ translate('District')}} <span class="text-danger">*</span></label>
+        </div>
+        <div class="col-md-10">
+            <select class="form-control mb-3 aiz-selectpicker rounded-0" data-live-search="true" name="city_id" id="guest_city" required>
+                <option value="">{{ translate('Select District') }}</option>
+            </select>
+        </div>
+    </div>
+
     <!-- Address -->
     <div class="row">
         <div class="col-md-2 mt-md-2">
@@ -37,52 +64,6 @@
         </div>
         <div class="col-md-10">
             <textarea class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Full Address')}}" rows="3" name="address" required></textarea>
-        </div>
-    </div>
-
-    <!-- Country -->
-    @if (get_active_countries()->count() > 1)
-    <div class="row">
-        <div class="col-md-2 mt-md-2">
-            <label>{{ translate('Country')}} <span class="text-danger">*</span></label>
-        </div>
-        <div class="col-md-10">
-            <div class="mb-3">
-                <select class="form-control aiz-selectpicker rounded-0" @if (get_setting('shipping_type') == 'carrier_wise_shipping') onchange="updateDeliveryAddress(this.value)" @endif
-                    data-live-search="true" data-placeholder="{{ translate('Select your country') }}" name="country_id" required>
-                    <option value="">{{ translate('Select your country') }}</option>
-                    @foreach (get_active_countries() as $key => $country)
-                        <option value="{{ $country->id }}" {{ $country->name == 'Bangladesh' ? 'selected' : '' }}>{{ $country->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-    </div>
-    @elseif(get_active_countries()->count() == 1)
-    <input type="hidden" name="country_id" value="{{get_active_countries()[0]->id }}">
-    @endif
-
-    @if(get_setting('has_state') == 1)
-    <!-- State -->
-    <div class="row">
-        <div class="col-md-2 mt-md-2">
-            <label>{{ translate('State')}} <span class="text-danger">*</span></label>
-        </div>
-        <div class="col-md-10">
-            <select class="form-control mb-3 aiz-selectpicker rounded-0" data-live-search="true" name="state_id" required>
-
-            </select>
-        </div>
-    </div>
-    @endif
-
-    <!-- City (Optional) -->
-    <div class="row">
-        <div class="col-md-2 mt-md-2">
-            <label>{{ translate('City')}} <span class="text-muted">({{ translate('Optional') }})</span></label>
-        </div>
-        <div class="col-md-10">
-            <input type="text" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your City')}}" name="city" value="">
         </div>
     </div>
 
@@ -152,3 +133,99 @@
         </div>
     </div>
 </div>
+
+<script>
+// Mohammad Hassan - Guest checkout JavaScript for Bangladesh states and cities
+$(document).ready(function() {
+    // Automatically load states for Bangladesh (country_id = 18) on page load
+    get_guest_states(18);
+    
+    // Handle state change to load cities
+    $('#guest_state').on('change', function() {
+        var state_id = $(this).val();
+        if (state_id) {
+            get_guest_cities(state_id);
+        } else {
+            $('#guest_city').html('<option value="">{{ translate("Select District") }}</option>');
+            AIZ.plugins.bootstrapSelect('refresh');
+        }
+    });
+    
+    // Handle city change to load areas
+    $('#guest_city').on('change', function() {
+        var city_id = $(this).val();
+        if (city_id) {
+            get_guest_areas(city_id);
+        }
+    });
+});
+
+function get_guest_states(country_id) {
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: "{{route('get-state')}}",
+        type: 'POST',
+        data: {
+            country_id: country_id
+        },
+        success: function (response) {
+            var obj = JSON.parse(response);
+            if(obj != '') {
+                $('#guest_state').html(obj);
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+        }
+    });
+}
+
+function get_guest_cities(state_id) {
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: "{{route('get-city')}}",
+        type: 'POST',
+        data: {
+            state_id: state_id
+        },
+        success: function (response) {
+            var obj = JSON.parse(response);
+            if(obj != '' && $('<select></select>').html(obj).find('option').length > 1) {
+                $('#guest_city').attr('disabled', false);
+                $('#guest_city').html(obj);
+                AIZ.plugins.bootstrapSelect('refresh');
+            } else {
+                $('#guest_city').html('<option value="">{{ translate("No districts are available under this division.") }}</option>');
+                $('#guest_city').attr('disabled', true);
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+        }
+    });
+}
+
+function get_guest_areas(city_id) {
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: "{{route('get-area')}}",
+        type: 'POST',
+        data: {
+            city_id: city_id
+        },
+        success: function (response) {
+            var obj = JSON.parse(response);
+            $('[name="area_id"]').html(obj);
+            AIZ.plugins.bootstrapSelect('refresh');
+            if (obj.includes('<option') && !obj.includes('disabled selected')) {
+                $('.area-field').removeClass('d-none'); 
+            } else {
+                $('[name="area_id"]').removeAttr('required');
+                $('.area-field').addClass('d-none');
+            }
+        }
+    });
+}
+</script>

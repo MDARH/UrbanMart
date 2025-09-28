@@ -110,7 +110,17 @@ class BkashController extends Controller
         $resultdata = curl_exec($url);
         curl_close($url);
 
-        $token = json_decode($resultdata)->id_token;
+        // Mohammad Hassan
+        $response = json_decode($resultdata);
+        
+        // Check if the response is valid and contains the token
+        if (!$response || !isset($response->id_token)) {
+            // Log the error for debugging
+            \Log::error('bKash Token Error: ' . $resultdata);
+            throw new \Exception('Failed to get bKash token. Please check your bKash credentials.');
+        }
+
+        $token = $response->id_token;
         return $token;
     }
 
