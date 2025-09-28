@@ -1,6 +1,77 @@
 # FILE CHANGES HISTORY
 
-## Latest Changes - January 27, 2025 (Session 18)
+## Latest Changes - January 27, 2025 (Session 19)
+**Developer:** Mohammad Hassan
+
+### Pre-order System Implementation
+
+#### Files Modified/Created
+
+##### 1. [database/migrations/2025_09_27_154428_add_preorder_fields_to_orders_table.php](database/migrations/2025_09_27_154428_add_preorder_fields_to_orders_table.php)
+**Changes:**
+- Created migration to add pre-order fields to orders table
+- Added `is_preorder` boolean field
+- Added `preorder_status` enum field (pending, confirmed, product_arrived, payment_completed, cancelled)
+- Added `paid_amount` decimal field for tracking partial payments
+- Added `preorder_notes` text field for order notes
+- Added timestamp fields: `confirmed_at`, `product_arrived_at`, `completed_at`, `cancelled_at`
+
+##### 2. [app/Models/Order.php](app/Models/Order.php)
+**Changes:**
+- Added fillable fields for pre-order functionality
+- Added date casting for timestamp fields (`confirmed_at`, `product_arrived_at`, `completed_at`, `cancelled_at`)
+- Added boolean casting for `is_preorder` field
+- Added helper methods: `isPreorder()`, `getRemainingAmount()`, `getPreorderStatusLabel()`, `canMarkAsArrived()`, `canCompletePayment()`
+
+##### 3. [app/Models/Preorder.php](app/Models/Preorder.php)
+**Changes:**
+- Added relationship with regular Product model via `product()` method
+- Added date casting for timestamp fields
+- Added helper methods: `getStatusLabel()`, `canMarkAsArrived()`, `getRemainingAmount()`, `isFinalPaymentDue()`
+
+##### 4. [routes/preorder.php](routes/preorder.php)
+**Changes:**
+- Added admin pre-order management routes (list, show, mark arrived, notify customers, statistics)
+- Added frontend payment routes (payment selection, processing, success, cancellation)
+
+##### 5. [app/Http/Controllers/Preorder/PreorderController.php](app/Http/Controllers/Preorder/PreorderController.php)
+**Changes:**
+- Added payment selection method
+- Added payment processing methods for various gateways (Stripe, PayPal, Razorpay, etc.)
+- Added COD payment processing
+- Added payment success and cancellation handlers
+
+##### 6. [resources/views/preorder/frontend/payment_selection.blade.php](resources/views/preorder/frontend/payment_selection.blade.php)
+**Changes:**
+- Created comprehensive payment method selection interface
+- Added pre-order summary and process explanation
+- Added support for multiple payment gateways
+- Added step indicator for checkout process
+
+##### 7. [resources/views/preorder/frontend/payment_success.blade.php](resources/views/preorder/frontend/payment_success.blade.php)
+**Changes:**
+- Created payment success confirmation page
+- Added timeline showing pre-order process stages
+- Added links to track orders and continue shopping
+- Added helpful next steps information
+
+##### 8. [resources/views/preorder/frontend/payment_cancel.blade.php](resources/views/preorder/frontend/payment_cancel.blade.php)
+**Changes:**
+- Created payment cancellation page with retry options
+- Added troubleshooting information for common payment issues
+- Added alternative payment methods display
+- Added support contact information
+
+### Features Implemented
+- **50% Prepayment System**: Customers pay 50% upfront for out-of-stock items
+- **Admin Management**: Bulk operations for marking products as arrived and customer notifications
+- **Payment Integration**: Support for multiple payment gateways and COD
+- **Customer Experience**: Clear process timeline and comprehensive error handling
+- **Seamless Integration**: Works with existing cart and checkout systems
+
+---
+
+## Previous Changes - January 27, 2025 (Session 18)
 **Developer:** Mohammad Hassan
 
 ### Files Modified

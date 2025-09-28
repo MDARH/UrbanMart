@@ -329,4 +329,395 @@ class PreorderController extends Controller
         flash(translate('Coupon Removed Successfully!!'))->success();
         return redirect()->back();
     }
+
+    // Mohammad Hassan
+    public function create_preorder_from_cart(Request $request)
+    {
+        $user = auth()->user();
+        $temp_user_id = $request->session()->get('temp_user_id');
+        
+        if ($user) {
+            $carts = Cart::where('user_id', $user->id)->get();
+        } else {
+            $carts = $temp_user_id ? Cart::where('temp_user_id', $temp_user_id)->get() : collect();
+        }
+
+        if ($carts->isEmpty()) {
+            flash(translate('Your cart is empty'))->error();
+            return redirect()->route('home');
+        }
+
+        // Check if all products are out of stock
+        $out_of_stock_products = [];
+        foreach ($carts as $cart) {
+            $product = Product::find($cart->product_id);
+            if ($product && $product->isOutOfStock()) {
+                $out_of_stock_products[] = $cart;
+            }
+        }
+
+        if (empty($out_of_stock_products)) {
+            flash(translate('No out of stock products found in cart'))->error();
+            return redirect()->route('checkout.shipping_info');
+        }
+
+        $total_amount = 0;
+        $preorders = [];
+
+        foreach ($out_of_stock_products as $cart) {
+            $product = Product::find($cart->product_id);
+            $preorder_price = $product->getPreorderPrice(); // 50% of unit price
+            $quantity = $cart->quantity;
+            $subtotal = $preorder_price * $quantity;
+            
+            $preorder = new Preorder();
+            $preorder->user_id = $user ? $user->id : null;
+            $preorder->product_id = $product->id;
+            $preorder->product_owner_id = $product->user_id;
+            $preorder->product_owner = $product->user->user_type ?? 'seller';
+            $preorder->quantity = $quantity;
+            $preorder->unit_price = $product->unit_price;
+            $preorder->subtotal = $subtotal;
+            $preorder->grand_total = $subtotal;
+            $preorder->prepayment = $subtotal; // 50% payment
+            $preorder->order_code = date('Ymd-His') . rand(10, 99);
+            $preorder->status = 'pending_payment';
+            $preorder->prepayment_confirm_status = 0;
+            $preorder->final_order_status = 0;
+            $preorder->created_at = now();
+            $preorder->updated_at = now();
+            
+            // Store guest shipping info if applicable
+            if (!$user && $request->session()->has('guest_shipping_info')) {
+                $shipping_info = $request->session()->get('guest_shipping_info');
+                $preorder->guest_shipping_info = json_encode($shipping_info);
+            } elseif ($user && $cart->address_id) {
+                $preorder->address_id = $cart->address_id;
+            }
+            
+            $preorder->save();
+            $preorders[] = $preorder;
+            $total_amount += $subtotal;
+            
+            // Remove from cart
+            $cart->delete();
+        }
+
+        // Store preorder IDs in session for payment processing
+        $request->session()->put('preorder_ids', collect($preorders)->pluck('id')->toArray());
+        $request->session()->put('preorder_total', $total_amount);
+
+        return redirect()->route('preorder.payment_selection');
+    }
+
+    // Mohammad Hassan
+    public function payment_selection()
+    {
+        $preorder_ids = session('preorder_ids');
+        $total_amount = session('preorder_total');
+        
+        if (!$preorder_ids || !$total_amount) {
+            flash(translate('No preorder found'))->error();
+            return redirect()->route('home');
+        }
+
+        $preorders = Preorder::whereIn('id', $preorder_ids)->get();
+        
+        return view('preorder.frontend.payment_selection', compact('preorders', 'total_amount'));
+    }
+
+    // Mohammad Hassan
+    public function process_payment(Request $request)
+    {
+        $preorder_ids = session('preorder_ids');
+        $payment_option = $request->payment_option;
+        
+        if (!$preorder_ids) {
+            flash(translate('No preorder found'))->error();
+            return redirect()->route('home');
+        }
+
+        // Update preorders with payment method
+        Preorder::whereIn('id', $preorder_ids)->update([
+            'payment_method' => $payment_option,
+            'status' => 'payment_processing'
+        ]);
+
+        // Handle cash on delivery
+        if ($payment_option === 'cash_on_delivery') {
+            return $this->process_cod_payment();
+        }
+
+        // Redirect to appropriate payment gateway
+        switch ($payment_option) {
+            case 'stripe':
+                return redirect()->route('stripe.payment', ['type' => 'preorder']);
+            case 'paypal':
+                return redirect()->route('paypal.payment', ['type' => 'preorder']);
+            case 'razorpay':
+                return redirect()->route('razorpay.payment', ['type' => 'preorder']);
+            case 'sslcommerz':
+                return redirect()->route('sslcommerz.payment', ['type' => 'preorder']);
+            case 'paystack':
+                return redirect()->route('paystack.payment', ['type' => 'preorder']);
+            case 'bkash':
+                return redirect()->route('bkash.payment', ['type' => 'preorder']);
+            case 'nagad':
+                return redirect()->route('nagad.payment', ['type' => 'preorder']);
+            case 'wallet':
+                return $this->process_wallet_payment();
+            default:
+                flash(translate('Invalid payment method'))->error();
+                return redirect()->back();
+        }
+    }
+
+    // Mohammad Hassan
+    private function process_cod_payment()
+    {
+        $preorder_ids = session('preorder_ids');
+        
+        // Update preorders as confirmed with COD
+        Preorder::whereIn('id', $preorder_ids)->update([
+            'prepayment_confirm_status' => 1,
+            'prepayment_confirm_time' => now(),
+            'status' => 'confirmed',
+            'payment_details' => json_encode(['method' => 'cash_on_delivery'])
+        ]);
+
+        // Send notifications
+        $preorders = Preorder::whereIn('id', $preorder_ids)->get();
+        foreach ($preorders as $preorder) {
+            // Send notification to seller about new preorder
+            if (class_exists('App\Utility\PreorderNotificationUtility')) {
+                \App\Utility\PreorderNotificationUtility::preorderNotification($preorder, 'prepayment_confirmed');
+            }
+        }
+
+        // Clear session
+        session()->forget(['preorder_ids', 'preorder_total']);
+
+        flash(translate('Preorder confirmed successfully! You will be notified when products are available.'))->success();
+        return redirect()->route('preorder.payment_success');
+    }
+
+    // Mohammad Hassan
+    public function payment_success()
+    {
+        return view('preorder.frontend.payment_success');
+    }
+
+    // Mohammad Hassan
+    public function payment_cancel()
+    {
+        $preorder_ids = session('preorder_ids');
+        
+        if ($preorder_ids) {
+            // Reset preorder status
+            Preorder::whereIn('id', $preorder_ids)->update([
+                'status' => 'pending_payment'
+            ]);
+        }
+
+        flash(translate('Payment was cancelled. You can try again.'))->warning();
+        return redirect()->route('preorder.payment_selection');
+    }
+
+    // Mohammad Hassan
+    private function process_wallet_payment()
+    {
+        $user = auth()->user();
+        $preorder_ids = session('preorder_ids');
+        $total_amount = session('preorder_total');
+        
+        if (!$user) {
+            flash(translate('Please login to use wallet payment'))->error();
+            return redirect()->route('user.login');
+        }
+
+        if ($user->balance < $total_amount) {
+            flash(translate('Insufficient wallet balance'))->error();
+            return redirect()->back();
+        }
+
+        // Deduct from wallet
+        $user->balance -= $total_amount;
+        $user->save();
+
+        // Update preorders
+        Preorder::whereIn('id', $preorder_ids)->update([
+            'prepayment_confirm_status' => 1,
+            'prepayment_confirmation_time' => now(),
+            'status' => 'confirmed',
+            'payment_details' => json_encode(['method' => 'wallet', 'amount' => $total_amount])
+        ]);
+
+        // Clear session
+        session()->forget(['preorder_ids', 'preorder_total']);
+
+        flash(translate('Preorder payment successful! You will be notified when products are available.'))->success();
+        return redirect()->route('preorder.order_list');
+    }
+
+    // Mohammad Hassan
+    public function preorder_payment_success($payment_details = null)
+    {
+        $preorder_ids = session('preorder_ids');
+        
+        if (!$preorder_ids) {
+            flash(translate('No preorder found'))->error();
+            return redirect()->route('home');
+        }
+
+        // Update preorders as paid
+        Preorder::whereIn('id', $preorder_ids)->update([
+            'prepayment_confirm_status' => 1,
+            'prepayment_confirmation_time' => now(),
+            'status' => 'confirmed',
+            'payment_details' => $payment_details
+        ]);
+
+        // Send notifications
+        $preorders = Preorder::whereIn('id', $preorder_ids)->get();
+        foreach ($preorders as $preorder) {
+            PreorderNotificationUtility::preorderNotification($preorder, 'prepayment_confirmed');
+        }
+
+        // Clear session
+        session()->forget(['preorder_ids', 'preorder_total']);
+
+        flash(translate('Preorder payment successful! You will be notified when products are available.'))->success();
+        return redirect()->route('preorder.order_list');
+    }
+
+    // Mohammad Hassan
+    public function notify_product_arrival(Request $request)
+    {
+        $preorder_ids = $request->preorder_ids;
+        
+        if (empty($preorder_ids)) {
+            flash(translate('No preorders selected'))->error();
+            return back();
+        }
+        
+        foreach ($preorder_ids as $preorder_id) {
+            $preorder = Preorder::find($preorder_id);
+            if ($preorder && $preorder->prepayment_confirm_status == 'confirmed') {
+                $preorder->status = 'product_available';
+                $preorder->save();
+                
+                // Send comprehensive notification to customer
+                \App\Utility\PreorderArrivalNotificationUtility::sendProductArrivalNotification($preorder);
+            }
+        }
+        
+        flash(translate('Product arrival notifications sent successfully'))->success();
+        return back();
+    }
+
+    // Mohammad Hassan
+    public function complete_preorder_payment(Request $request, $preorder_id)
+    {
+        $preorder = Preorder::findOrFail($preorder_id);
+        
+        if ($preorder->user_id !== auth()->id()) {
+            flash(translate('Unauthorized access'))->error();
+            return redirect()->back();
+        }
+
+        if ($preorder->status !== 'product_available') {
+            flash(translate('Product is not yet available'))->error();
+            return redirect()->back();
+        }
+
+        $remaining_amount = $preorder->getRemainingPrice() * $preorder->quantity;
+        
+        return view('preorder.frontend.complete_payment', compact('preorder', 'remaining_amount'));
+    }
+
+    // Mohammad Hassan
+    public function process_final_payment(Request $request, $preorder_id)
+    {
+        $preorder = Preorder::findOrFail($preorder_id);
+        $payment_method = $request->payment_method;
+        $remaining_amount = $preorder->getRemainingPrice() * $preorder->quantity;
+
+        // Store in session for payment processing
+        session(['final_payment_preorder_id' => $preorder_id, 'final_payment_amount' => $remaining_amount]);
+
+        // Redirect to payment gateway
+        switch ($payment_method) {
+            case 'stripe':
+                return redirect()->route('stripe.payment', ['type' => 'preorder_final']);
+            case 'paypal':
+                return redirect()->route('paypal.payment', ['type' => 'preorder_final']);
+            case 'wallet':
+                return $this->process_final_wallet_payment($preorder_id, $remaining_amount);
+            default:
+                flash(translate('Invalid payment method'))->error();
+                return redirect()->back();
+        }
+    }
+
+    // Mohammad Hassan
+    private function process_final_wallet_payment($preorder_id, $amount)
+    {
+        $user = auth()->user();
+        $preorder = Preorder::findOrFail($preorder_id);
+        
+        if ($user->balance < $amount) {
+            flash(translate('Insufficient wallet balance'))->error();
+            return redirect()->back();
+        }
+
+        // Deduct from wallet
+        $user->balance -= $amount;
+        $user->save();
+
+        // Update preorder
+        $preorder->final_order_status = 1;
+        $preorder->final_payment_confirmation_time = now();
+        $preorder->status = 'completed';
+        $preorder->final_payment_details = json_encode(['method' => 'wallet', 'amount' => $amount]);
+        $preorder->save();
+
+        // Create regular order from preorder
+        $this->create_order_from_preorder($preorder);
+
+        flash(translate('Final payment successful! Your order has been placed.'))->success();
+        return redirect()->route('preorder.order_list');
+    }
+
+    // Mohammad Hassan
+    public function final_payment_success($preorder_id, $payment_details = null)
+    {
+        $preorder = Preorder::findOrFail($preorder_id);
+        
+        // Update preorder
+        $preorder->final_order_status = 1;
+        $preorder->final_payment_confirmation_time = now();
+        $preorder->status = 'completed';
+        $preorder->final_payment_details = $payment_details;
+        $preorder->save();
+
+        // Create regular order from preorder
+        $this->create_order_from_preorder($preorder);
+
+        // Clear session
+        session()->forget(['final_payment_preorder_id', 'final_payment_amount']);
+
+        flash(translate('Final payment successful! Your order has been placed.'))->success();
+        return redirect()->route('preorder.order_list');
+    }
+
+    // Mohammad Hassan
+    private function create_order_from_preorder($preorder)
+    {
+        // This method would create a regular order from the completed preorder
+        // Implementation depends on your existing order creation logic
+        // For now, we'll just update the preorder status
+        $preorder->converted_to_order = 1;
+        $preorder->save();
+    }
+
 }

@@ -41,7 +41,8 @@
                     }
                 }
             @endphp
-            @if ($digital != 1 && $cod_on == 1)
+            {{-- Mohammad Hassan - Hide COD for preorder products --}}
+            @if ($digital != 1 && $cod_on == 1 && !isset($has_preorder_products) || !$has_preorder_products)
                 <div class="col-xl-4 col-md-6">
                     <label class="aiz-megabox d-block mb-3">
                         <input value="cash_on_delivery" class="online_payment" type="radio"

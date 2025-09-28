@@ -121,7 +121,18 @@ class CheckoutController extends Controller
 
             $carts = $carts->fresh();
 
-            return view('frontend.checkout', compact('carts', 'address_id', 'total', 'carrier_list', 'shipping_info'));
+            // Mohammad Hassan
+            // Check if any cart items are preorder products
+            $has_preorder_products = false;
+            foreach ($carts as $cartItem) {
+                $product = Product::find($cartItem['product_id']);
+                if ($product && $product->isOutOfStock() && $product->isPreorderAvailable()) {
+                    $has_preorder_products = true;
+                    break;
+                }
+            }
+
+            return view('frontend.checkout', compact('carts', 'address_id', 'total', 'carrier_list', 'shipping_info', 'has_preorder_products'));
         }
         flash(translate('Please Select cart items to Proceed'))->error();
         return back();
@@ -161,6 +172,31 @@ class CheckoutController extends Controller
             }
             $user = User::find($guest_user_id);
             $carts = Cart::where('user_id', $user->id)->active()->get();
+        }
+
+        // Mohammad Hassan
+        // Check for out-of-stock products and handle pre-orders
+        $out_of_stock_products = [];
+        $in_stock_carts = [];
+        
+        foreach ($carts as $cartItem) {
+            $product = Product::find($cartItem['product_id']);
+            if ($product && $product->isOutOfStock() && $product->isPreorderAvailable()) {
+                $out_of_stock_products[] = $cartItem;
+            } else {
+                $in_stock_carts[] = $cartItem;
+            }
+        }
+
+        // If there are out-of-stock products that can be pre-ordered
+        if (!empty($out_of_stock_products)) {
+            // Store shipping info and payment method in session for preorder processing
+            $request->session()->put('preorder_payment_method', $request->payment_option);
+            $request->session()->put('preorder_shipping_info', $request->except('_token', 'payment_option'));
+            
+            // Create preorders for out-of-stock products
+            $preorderController = new \App\Http\Controllers\Preorder\PreorderController();
+            return $preorderController->create_preorder_from_cart($request);
         }
 
 

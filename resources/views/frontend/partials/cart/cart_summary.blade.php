@@ -10,7 +10,14 @@
             $coupon_code = null;
             $coupon_discount = 0;
             $total_point = 0;
+            // Mohammad Hassan
+            $has_preorder_products = false;
+            $preorder_total = 0;
+            $preorder_advance_payment = 0;
+            $preorder_due_amount = 0;
+            $shipping_info = session('shipping_info');
         @endphp
+
         @foreach ($carts as $key => $cartItem)
             @php
                 $product = get_single_product($cartItem['product_id']);
@@ -25,6 +32,16 @@
                 }
                 if (addon_is_activated('club_point')) {
                     $total_point += $product->earn_point * $cartItem['quantity'];
+                }
+                
+                // Mohammad Hassan
+                // Check if product is out of stock and can be preordered
+                if ($product && $product->isOutOfStock() && $product->isPreorderAvailable()) {
+                    $has_preorder_products = true;
+                    $item_total = $product->unit_price * $cartItem['quantity'];
+                    $preorder_total += $item_total;
+                    $preorder_advance_payment += $item_total * 0.5; // 50% advance payment
+                    $preorder_due_amount += $item_total * 0.5; // 50% due on delivery
                 }
             @endphp
         @endforeach
@@ -107,11 +124,43 @@
                             $total -= $coupon_discount;
                         }
                     @endphp
-                    <!-- Total -->
-                    <tr class="cart-total">
-                        <th class="pl-0 fs-14 text-dark fw-700 border-top-0 pt-3 text-uppercase">{{ translate('Total') }}</th>
-                        <td class="text-right pr-0 fs-16 fw-700 text-primary border-top-0 pt-3">{{ single_price($total) }}</td>
-                    </tr>
+                    
+                    @if($has_preorder_products)
+                        <!-- Mohammad Hassan -->
+                        <!-- Preorder Payment Breakdown -->
+                        <tr class="preorder-breakdown-header">
+                            <th colspan="2" class="pl-0 fs-14 fw-700 text-primary border-top pt-3 text-uppercase">{{ translate('Pre-order Payment Details') }}</th>
+                        </tr>
+                        <tr class="preorder-total-value">
+                            <th class="pl-0 fs-14 fw-400 pt-2 pb-2 text-dark border-top-0">{{ translate('Total Order Value') }}</th>
+                            <td class="text-right pr-0 fs-14 pt-2 pb-2 text-dark border-top-0">{{ single_price($preorder_total) }}</td>
+                        </tr>
+                        <tr class="preorder-advance-payment">
+                            <th class="pl-0 fs-14 fw-400 pt-0 pb-2 text-dark border-top-0">{{ translate('Advance Payment (50%)') }}</th>
+                            <td class="text-right pr-0 fs-14 pt-0 pb-2 text-primary border-top-0 fw-700">{{ single_price($preorder_advance_payment) }}</td>
+                        </tr>
+                        <tr class="preorder-due-amount">
+                            <th class="pl-0 fs-14 fw-400 pt-0 pb-2 text-dark border-top-0">{{ translate('Due on Delivery (50%)') }}</th>
+                            <td class="text-right pr-0 fs-14 pt-0 pb-2 text-muted border-top-0">{{ single_price($preorder_due_amount) }}</td>
+                        </tr>
+                        <tr class="preorder-pay-now">
+                            <th class="pl-0 fs-14 text-dark fw-700 border-top-0 pt-3 text-uppercase">{{ translate('Pay Now') }}</th>
+                            <td class="text-right pr-0 fs-16 fw-700 text-primary border-top-0 pt-3">{{ single_price($preorder_advance_payment) }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="pl-0 pr-0 pt-2 pb-0 border-top-0">
+                                <small class="text-muted">{{ translate('You will pay the remaining amount upon delivery') }}</small>
+                            </td>
+                        </tr>
+                    @else
+                        <!-- Mohammad Hassan -->
+                        <!-- Regular Total -->
+                        <tr class="cart-total">
+                            <th class="pl-0 fs-14 text-dark fw-700 border-top-0 pt-3 text-uppercase">{{ translate('Total') }}</th>
+                            <td class="text-right pr-0 fs-16 fw-700 text-primary border-top-0 pt-3">{{ single_price($total) }}</td>
+                        </tr>
+                    @endif
+
                 </tfoot>
             </table>
 
