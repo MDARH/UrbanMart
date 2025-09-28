@@ -150,7 +150,8 @@ class Product extends Model
     // Mohammad Hassan
     public function isPreorderAvailable()
     {
-        return $this->isOutOfStock() && get_setting('preorder_system_activation') == 1;
+        // Always return true for out of stock products, regardless of preorder system activation
+        return $this->isOutOfStock();
     }
 
     // Mohammad Hassan
