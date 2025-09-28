@@ -15,7 +15,8 @@
             },
             success: function (response) {
                 if(response ==  1){
-                    $('#login_modal').modal();
+                    // Mohammad Hassan
+$('#customerAuthModal').modal('show');
                     AIZ.plugins.notify('warning', '{{ translate('You already have an account with this information. Please Login first.') }}');
                 }
                 else{
@@ -203,4 +204,6 @@
         });
     }
 
+    // Mohammad Hassan
+    $('#customerAuthModal').modal('show');
 </script>

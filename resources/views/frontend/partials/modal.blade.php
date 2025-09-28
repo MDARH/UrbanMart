@@ -28,7 +28,9 @@
 </div>
 
 <!-- Login Modal -->
-@include('frontend.partials.login_modal')
+<!-- Mohammad Hassan -->
+@include('auth.customer_login_modals')
+@include('auth.wholesaler_login_modals')
 
 <!-- Bid Modal -->
 <div class="modal fade" id="bid_for_product" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

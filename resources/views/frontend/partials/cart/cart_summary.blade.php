@@ -209,9 +209,16 @@
             @if ($proceed == 1)
             <!-- Continue to Shipping -->
             <div class="mt-4">
-                <a href="{{ route('checkout') }}" class="btn btn-primary btn-block fs-14 fw-700 rounded-0 px-4">
-                    {{ translate('Proceed to Checkout')}} ({{ sprintf("%02d", count($carts)) }})
-                </a>
+                {{-- Mohammad Hassan --}}
+                @if(Auth::check())
+                    <a href="{{ route('checkout') }}" class="btn btn-primary btn-block fs-14 fw-700 rounded-0 px-4">
+                        {{ translate('Proceed to Checkout')}} ({{ sprintf("%02d", count($carts)) }})
+                    </a>
+                @else
+                    <button class="btn btn-primary btn-block fs-14 fw-700 rounded-0 px-4" onclick="showLoginOptions()">
+                        {{ translate('Proceed to Checkout')}} ({{ sprintf("%02d", count($carts)) }})
+                    </button>
+                @endif
             </div>
             @endif
 

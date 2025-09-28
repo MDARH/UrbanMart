@@ -58,6 +58,9 @@
             });
         }
 
+        // Mohammad Hassan
+        $('#customerAuthModal').modal('show');
+
         // coupon apply
         $(document).on("click", "#coupon-apply", function() {
             @if (Auth::check())
@@ -83,7 +86,8 @@
                     }
                 });
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+$('#customerAuthModal').modal('show');
             @endif
         });
 

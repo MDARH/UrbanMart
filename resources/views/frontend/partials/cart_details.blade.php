@@ -111,12 +111,13 @@
                         <!-- Continue to Shipping -->
                         <div class="col-md-6 text-center text-md-right">
 
-                            @if(get_setting('guest_checkout_activation') == 1 || Auth::check())
+                            {{-- Mohammad Hassan --}}
+                            @if(Auth::check())
                                 <a href="{{ route('checkout.shipping_info') }}" class="btn btn-primary fs-14 fw-700 rounded-0 px-4">
                                     {{ translate('Continue to Shipping')}}
                                 </a>
                             @else
-                                <button class="btn btn-primary fs-14 fw-700 rounded-0 px-4" onclick="showLoginModal()">{{ translate('Continue to Shipping')}}</button>
+                                <button class="btn btn-primary fs-14 fw-700 rounded-0 px-4" onclick="showLoginOptions()">{{ translate('Continue to Shipping')}}</button>
                             @endif
                         </div>
                     </div>

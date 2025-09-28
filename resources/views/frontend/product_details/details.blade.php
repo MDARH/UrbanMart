@@ -122,7 +122,9 @@
 
     function promptLogin() {
         AIZ.plugins.notify('warning', '{{ translate('Please log in to continue') }}');
-        openUserLogin();
+        // Mohammad Hassan - Use customer login for buy now/add to cart
+                // Mohammad Hassan
+showUserTypeModal();
     }
 
     // This is the main function called by buttons
@@ -860,14 +862,16 @@ function addToCartPromise(item) {
                         <i class="la la-share"></i> {{ translate($detailedProduct->external_link_btn) }}
                     </a>
                 @else
+                    {{-- Mohammad Hassan --}}
                     <button type="button"
                         class="btn btn-secondary-base mr-2 add-to-cart fw-600 min-w-150px rounded-0 text-white"
-                        @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCart()" @else onclick="showLoginModal()" @endif>
+                        onclick="addToCart()">
                         <i class="las la-shopping-bag"></i> {{ translate('Add to cart') }}
                     </button>
+                    {{-- Mohammad Hassan --}}
                     <button type="button"
                         class="btn btn-primary mr-2 buy-now fw-600 add-to-cart min-w-150px rounded-0"
-                        @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCart()" @else onclick="showLoginModal()" @endif>
+                        @if (Auth::check()) onclick="buyNow()" @else onclick="showLoginOptions()" @endif>
                         <i class="la la-shopping-cart"></i> {{ translate('Buy Now') }}
                     </button>
                 @endif
@@ -876,19 +880,22 @@ function addToCartPromise(item) {
                 <button type="button" class="btn btn-secondary out-of-stock fw-600 d-none" disabled>
                     <i class="la la-cart-arrow-down"></i> {{ translate('Out of Stock') }}
                 </button>
+                {{-- Mohammad Hassan --}}
                 <button type="button" class="btn btn-warning out-of-stock fw-600 d-none min-w-150px rounded-0"
-                    @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) data-toggle="modal" data-target="#preOrderModal" @else onclick="showLoginModal()" @endif>
+                    @if (Auth::check()) data-toggle="modal" data-target="#preOrderModal" @else onclick="showLoginOptions()" @endif>
                     <i class="la la-clock"></i> {{ translate('Pre-Order') }}
                 </button>
                 <!-- END NEW -->
             @elseif ($detailedProduct->digital == 1)
+                {{-- Mohammad Hassan --}}
                 <button type="button"
                     class="btn btn-secondary-base mr-2 add-to-cart fw-600 min-w-150px rounded-0 text-white"
-                    @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCart()" @else onclick="showLoginModal()" @endif>
+                    onclick="addToCart()">
                     <i class="las la-shopping-bag"></i> {{ translate('Add to cart') }}
                 </button>
+                {{-- Mohammad Hassan --}}
                 <button type="button" class="btn btn-primary mr-2 buy-now fw-600 add-to-cart min-w-150px rounded-0"
-                    @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCart()" @else onclick="showLoginModal()" @endif>
+                    @if (Auth::check()) onclick="buyNow()" @else onclick="showLoginOptions()" @endif>
                     <i class="la la-shopping-cart"></i> {{ translate('Buy Now') }}
                 </button>
             @endif

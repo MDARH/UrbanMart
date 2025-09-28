@@ -739,7 +739,7 @@
 
         <!-- NEW: Authentication Modal (for both Login and Register) -->
         {{-- @includeIf('frontend.classic.partials.authentication') --}}
-        @include('auth.modals')
+        {{-- Mohammad Hassan - Removed deprecated auth.modals include --}}
         <!-- End NEW: Authentication Modal -->
     </div> {{-- NEW: End of dynamic-content-wrapper --}}
 

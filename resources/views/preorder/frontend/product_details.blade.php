@@ -213,7 +213,8 @@
           	@elseif (isAdmin())
                 AIZ.plugins.notify('warning', '{{ translate("Sorry, Only customers & Sellers can Bid.") }}');
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+$('#customerAuthModal').modal('show');
             @endif
         }
 
@@ -238,18 +239,16 @@
             @elseif (Auth::check() && !isCustomer())
                 AIZ.plugins.notify('warning', '{{ translate("Sorry, Only customers can give review.") }}');
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+                $('#customerAuthModal').modal('show');
             @endif
         }
 
-        // function showPlacePreorderModal(){
-        // alert('ok');
-        //     if(!$('#modal-size').hasClass('modal-lg')){
-        //         $('#modal-size').addClass('modal-lg');
-        //     }
-        //     $('#placePreorder').modal();
-        //     $('.c-preloader').show();
-        // }
+        // Mohammad Hassan
+        // Mohammad Hassan
+    function showLoginModal() {
+        showUserTypeModal();
+    }
 
 
         function show_conversation_modal(product_id) {
@@ -266,7 +265,8 @@
             @elseif (Auth::check() && !isCustomer())
                 AIZ.plugins.notify('warning', '{{ translate("Sorry, Only customers can give review.") }}');
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+                $('#customerAuthModal').modal('show');
             @endif
         }
 

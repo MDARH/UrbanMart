@@ -116,7 +116,9 @@
     <div class="col-md-10">
         <div class="bg-soft-info p-2">
             {{ translate('If you have already used the same email address or phone number before, please ') }}
-            <a href="javascript:void(0);" onclick="openUserLogin()" class="fw-700 animate-underline-primary">{{ translate('Login') }}</a>
+            {{-- Mohammad Hassan --}}
+                    <!-- Mohammad Hassan -->
+<a href="javascript:void(0);" onclick="showUserTypeModal()" class="fw-700 animate-underline-primary">{{ translate('Login') }}</a>
             {{ translate(' first to continue') }}
         </div>
     </div>

@@ -1,0 +1,337 @@
+{{-- Mohammad Hassan --}}
+{{-- Reusable Login Cards Component --}}
+
+@if(auth()->check())
+    {{-- Alternative content for logged-in users --}}
+    <div class="user-dashboard-cards">
+        <div class="dashboard-card">
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" style="width: 80% !important;" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <h3>{{ translate('My Account') }}</h3>
+            <p>{{ translate('Welcome back') }}, {{ auth()->user()->name }}!</p>
+        </div>
+        <div class="dashboard-card">
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" style="width: 80% !important;" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2h-2" />
+                </svg>
+            </div>
+            <h3>{{ translate('Quick Actions') }}</h3>
+            <p>{{ translate('Manage orders, wishlist, and profile') }}</p>
+        </div>
+    </div>
+@else
+    {{-- Login cards for non-authenticated users --}}
+    <div class="login-cards-container">
+    {{-- Mohammad Hassan --}}
+    <div class="login-card customer-login" onclick="{{ $userLoginFunction ?? 'openUserLogin' }}()">
+        <div class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20"
+                style="width: 80% !important;" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                    clip-rule="evenodd" />
+            </svg>
+        </div>
+        {{-- Mohammad Hassan --}}
+        <h3>{{ translate('Customer Login') }}</h3>
+        <p>{{ translate('Access your account, track orders, and manage your profile') }}</p>
+    </div>
+    <div class="login-card wholesaler-login" onclick="{{ $wholesalerLoginFunction ?? 'openWholesalerLogin' }}()">
+        <div class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none"
+                viewBox="0 0 24 24" style="width: 80% !important;" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+        </div>
+        <h3>{{ translate('Wholesaler Login') }}</h3>
+        <p>{{ translate('Get wholesale prices, bulk discounts, and business solutions') }}</p>
+    </div>
+</div>
+@endif
+
+{{-- Login Cards Styles --}}
+<style>
+    {{-- User Dashboard Cards for Logged-in Users --}}
+    .user-dashboard-cards {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        height: 100%;
+        max-width: 100%;
+    }
+
+    .dashboard-card {
+        flex: 1;
+        border-radius: 15px;
+        padding: 25px 20px;
+        text-align: center;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 160px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    {{-- Login Cards Container --}}
+    .login-cards-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        height: 100%;
+        max-width: 100%;
+    }
+
+    {{-- Individual Login Cards --}}
+    .login-card {
+        flex: 1;
+        border-radius: 15px;
+        padding: 25px 20px;
+        text-align: center;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 160px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .login-card:active {
+        transform: translateY(-2px) scale(1.01);
+    }
+
+    {{-- Card Background Gradients --}}
+    {{-- Mohammad Hassan --}}
+    .customer-login {
+        background: linear-gradient(135deg, #7c71f8, #b116f9);
+    }
+
+    .wholesaler-login {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    {{-- Card Content Styles --}}
+    .login-card h3 {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        margin-top: 10px;
+    }
+
+    .login-card p {
+        font-size: 14px;
+        opacity: 0.9;
+        max-width: 280px;
+        line-height: 1.4;
+        margin-bottom: 0;
+    }
+
+    .login-card .icon {
+        margin-bottom: 15px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .login-card:hover .icon {
+        background-color: rgba(255, 255, 255, 0.25);
+        transform: scale(1.1);
+    }
+
+    {{-- Responsive Design --}}
+    @media (max-width: 1200px) {
+        .login-cards-container {
+            gap: 18px;
+        }
+
+        .login-card {
+            padding: 22px 18px;
+            min-height: 150px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .welcome-title {
+            font-size: 24px;
+        }
+
+        .welcome-subtitle {
+            font-size: 15px;
+        }
+
+        .login-cards-container {
+            gap: 16px;
+        }
+
+        .login-card {
+            padding: 20px 16px;
+            min-height: 140px;
+        }
+
+        .login-card h3 {
+            font-size: 20px;
+        }
+
+        .login-card p {
+            font-size: 13px;
+            max-width: 250px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .welcome-title {
+            font-size: 22px;
+        }
+
+        .welcome-subtitle {
+            font-size: 14px;
+        }
+
+        .login-cards-container {
+            flex: auto;
+            height: auto;
+            gap: 15px;
+        }
+
+        .login-card {
+            padding: 18px 15px;
+            min-height: 130px;
+        }
+
+        .login-card h3 {
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .login-card p {
+            font-size: 12px;
+            max-width: 220px;
+        }
+
+        .login-card .icon {
+            width: 45px;
+            height: 45px;
+            margin-bottom: 12px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .welcome-message {
+            margin-bottom: 20px;
+        }
+
+        .welcome-title {
+            font-size: 20px;
+        }
+
+        .welcome-subtitle {
+            font-size: 13px;
+        }
+
+        .login-cards-container {
+            gap: 12px;
+        }
+
+        .login-card {
+            padding: 16px 12px;
+            min-height: 120px;
+            border-radius: 12px;
+        }
+
+        .login-card h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .login-card p {
+            font-size: 11px;
+            max-width: 200px;
+            line-height: 1.3;
+        }
+
+        .login-card .icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .welcome-title {
+            font-size: 18px;
+        }
+
+        .login-card {
+            padding: 14px 10px;
+            min-height: 110px;
+        }
+
+        .login-card h3 {
+            font-size: 15px;
+        }
+
+        .login-card p {
+            font-size: 10px;
+            max-width: 180px;
+        }
+
+        .login-card .icon {
+            width: 35px;
+            height: 35px;
+        }
+    }
+
+    {{-- High DPI Display Support --}}
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .login-card {
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .login-card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+    }
+
+    {{-- Dark Mode Support (if needed) --}}
+    @media (prefers-color-scheme: dark) {
+        .welcome-title {
+            color: #ecf0f1;
+        }
+
+        .welcome-subtitle {
+            color: #bdc3c7;
+        }
+    }
+</style>

@@ -22,7 +22,8 @@
         @if (Auth::check())
             $('#chat_modal').modal('show');
         @else
-            $('#login_modal').modal('show');
+            // Mohammad Hassan
+$('#customerAuthModal').modal('show');
         @endif
     }
 
@@ -78,7 +79,8 @@
         @elseif (isAdmin())
             AIZ.plugins.notify('warning', '{{ translate("Sorry, Only customers & Sellers can Bid.") }}');
         @else
-            $('#login_modal').modal('show');
+            // Mohammad Hassan
+                $('#customerAuthModal').modal('show');
         @endif
     }
 
@@ -101,7 +103,8 @@
         @elseif (Auth::check() && !isCustomer())
             AIZ.plugins.notify('warning', '{{ translate("Sorry, Only customers can give review.") }}');
         @else
-            $('#login_modal').modal('show');
+            // Mohammad Hassan
+                $('#customerAuthModal').modal('show');
         @endif
     }
 
@@ -122,5 +125,10 @@
                 $('#size-chart-show-modal').modal('show');
             }
         });
+    }
+
+    // Mohammad Hassan
+    function showLoginModal() {
+        showUserTypeModal();
     }
 </script>
