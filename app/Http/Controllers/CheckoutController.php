@@ -121,7 +121,18 @@ class CheckoutController extends Controller
 
             $carts = $carts->fresh();
 
-            return view('frontend.checkout', compact('carts', 'address_id', 'total', 'carrier_list', 'shipping_info'));
+            // Mohammad Hassan
+            // Check if any cart items are preorder products
+            $has_preorder_products = false;
+            foreach ($carts as $cartItem) {
+                $product = Product::find($cartItem['product_id']);
+                if ($product && $product->isOutOfStock() && $product->isPreorderAvailable()) {
+                    $has_preorder_products = true;
+                    break;
+                }
+            }
+
+            return view('frontend.checkout', compact('carts', 'address_id', 'total', 'carrier_list', 'shipping_info', 'has_preorder_products'));
         }
         flash(translate('Please Select cart items to Proceed'))->error();
         return back();
@@ -161,6 +172,31 @@ class CheckoutController extends Controller
             }
             $user = User::find($guest_user_id);
             $carts = Cart::where('user_id', $user->id)->active()->get();
+        }
+
+        // Mohammad Hassan
+        // Check for out-of-stock products and handle pre-orders
+        $out_of_stock_products = [];
+        $in_stock_carts = [];
+        
+        foreach ($carts as $cartItem) {
+            $product = Product::find($cartItem['product_id']);
+            if ($product && $product->isOutOfStock() && $product->isPreorderAvailable()) {
+                $out_of_stock_products[] = $cartItem;
+            } else {
+                $in_stock_carts[] = $cartItem;
+            }
+        }
+
+        // If there are out-of-stock products that can be pre-ordered
+        if (!empty($out_of_stock_products)) {
+            // Store shipping info and payment method in session for preorder processing
+            $request->session()->put('preorder_payment_method', $request->payment_option);
+            $request->session()->put('preorder_shipping_info', $request->except('_token', 'payment_option'));
+            
+            // Create preorders for out-of-stock products
+            $preorderController = new \App\Http\Controllers\Preorder\PreorderController();
+            return $preorderController->create_preorder_from_cart($request);
         }
 
 
@@ -329,13 +365,43 @@ class CheckoutController extends Controller
     //redirects to this method after a successfull checkout
     public function checkout_done($combined_order_id, $payment)
     {
+        // Mohammad Hassan - Add debugging for checkout completion
+        \Log::info('Checkout Done Called', [
+            'combined_order_id' => $combined_order_id,
+            'payment_data' => $payment,
+            'session_data' => [
+                'payment_type' => Session::get('payment_type'),
+                'combined_order_id' => Session::get('combined_order_id'),
+                'user_id' => auth()->id()
+            ]
+        ]);
+        
         $combined_order = CombinedOrder::findOrFail($combined_order_id);
+        
+        \Log::info('Combined Order Found', [
+            'combined_order_id' => $combined_order->id,
+            'grand_total' => $combined_order->grand_total,
+            'orders_count' => $combined_order->orders->count()
+        ]);
 
         foreach ($combined_order->orders as $key => $order) {
             $order = Order::findOrFail($order->id);
+            
+            \Log::info('Processing Order', [
+                'order_id' => $order->id,
+                'order_code' => $order->code,
+                'current_payment_status' => $order->payment_status,
+                'grand_total' => $order->grand_total
+            ]);
+            
             $order->payment_status = 'paid';
             $order->payment_details = $payment;
             $order->save();
+            
+            \Log::info('Order Payment Status Updated', [
+                'order_id' => $order->id,
+                'new_payment_status' => $order->payment_status
+            ]);
 
             // Order paid notification to Customer, Seller, & Admin
             EmailUtility::order_email($order, 'paid'); 
@@ -343,6 +409,9 @@ class CheckoutController extends Controller
             // Calculate Commission from seller, Customer Affiliate earning and Customers Club Point
             calculateCommissionAffilationClubPoint($order);
         }
+        
+        \Log::info('All Orders Processed Successfully', ['combined_order_id' => $combined_order_id]);
+        
         Session::put('combined_order_id', $combined_order_id);
         return redirect()->route('order_confirmed');
     }
@@ -393,9 +462,17 @@ class CheckoutController extends Controller
         }
         else{
             if(get_setting('guest_checkout_activation') == 1){
-                if($request->name == null || $request->email == null || $request->address == null ||
-                    $request->country_id == null || $request->state_id == null || $request->city_id == null ||
-                        $request->postal_code == null || $request->phone == null) {
+                // Mohammad Hassan - Modified validation to make state_id optional for Bangladesh
+                $required_fields_missing = $request->name == null || $request->email == null || $request->address == null ||
+                    $request->country_id == null || $request->city_id == null ||
+                    $request->postal_code == null || $request->phone == null;
+                
+                // For countries other than Bangladesh, state_id is still required
+                if($request->country_id != 18 && $request->state_id == null) {
+                    $required_fields_missing = true;
+                }
+                
+                if($required_fields_missing) {
                     flash(translate("Please add shipping address"))->warning();
                     return redirect()->route('checkout.shipping_info');
                 }

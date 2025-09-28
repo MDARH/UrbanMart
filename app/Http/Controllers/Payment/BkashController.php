@@ -110,14 +110,37 @@ class BkashController extends Controller
         $resultdata = curl_exec($url);
         curl_close($url);
 
-        $token = json_decode($resultdata)->id_token;
+        // Mohammad Hassan
+        $response = json_decode($resultdata);
+        
+        // Check if the response is valid and contains the token
+        if (!$response || !isset($response->id_token)) {
+            // Log the error for debugging
+            \Log::error('bKash Token Error: ' . $resultdata);
+            throw new \Exception('Failed to get bKash token. Please check your bKash credentials.');
+        }
+
+        $token = $response->id_token;
         return $token;
     }
 
     public function callback(Request $request)
     {
+        // Mohammad Hassan - Add debugging for bKash callback
+        \Log::info('bKash Callback Received', [
+            'request_data' => $request->all(),
+            'session_data' => [
+                'payment_type' => Session::get('payment_type'),
+                'payment_data' => Session::get('payment_data'),
+                'combined_order_id' => Session::get('combined_order_id'),
+                'amount' => Session::get('amount')
+            ]
+        ]);
+        
         $allRequest = $request->all();
         if (isset($allRequest['status']) && $allRequest['status'] == 'success'){
+            \Log::info('bKash Payment Status: Success', ['paymentID' => $allRequest['paymentID'] ?? 'unknown']);
+            
             $resultdata = $this->execute($allRequest['paymentID']);
             if (!$resultdata){
                 $resultdata = $this->query($allRequest['paymentID']);
@@ -126,17 +149,32 @@ class BkashController extends Controller
             Session::forget('payment_details');
             Session::put('payment_details', $resultdata);
             $response = json_decode($resultdata, true);
+            
+            // Mohammad Hassan - Log payment execution result
+            \Log::info('bKash Payment Execution Result', [
+                'paymentID' => $allRequest['paymentID'] ?? 'unknown',
+                'response' => $response
+            ]);
 
             if (isset($response['statusCode']) && $response['statusCode'] == "0000" && $response['transactionStatus'] == "Completed") {
+                \Log::info('bKash Payment Completed Successfully', ['paymentID' => $allRequest['paymentID'] ?? 'unknown']);
                 return redirect()->route('bkash.success');
             } else if (isset($response['transactionStatus']) && $response['transactionStatus'] == "Initiated") {
+                \Log::warning('bKash Payment Still Initiated, Redirecting to Create Payment', ['paymentID' => $allRequest['paymentID'] ?? 'unknown']);
                 return redirect()->route('bkash.create_payment');
             }
+            
+            \Log::error('bKash Payment Failed', [
+                'paymentID' => $allRequest['paymentID'] ?? 'unknown',
+                'statusMessage' => $response['statusMessage'] ?? 'Unknown error'
+            ]);
             return view('frontend.bkash.fail')->with(['errorMessage' => $response['statusMessage']]);
             
         } else if (isset($allRequest['status']) && $allRequest['status'] == 'cancel'){
+            \Log::warning('bKash Payment Cancelled by User', $allRequest);
             return view('frontend.bkash.fail')->with(['errorMessage' => 'Payment Cancelled']);
         } else{
+            \Log::error('bKash Payment Failed', $allRequest);
             return view('frontend.bkash.fail')->with(['errorMessage' => 'Payment Failure']);
         }
         
@@ -235,23 +273,42 @@ class BkashController extends Controller
 
     public function success(Request $request)
     {
+        // Mohammad Hassan - Add debugging for bKash success
+        \Log::info('bKash Success Method Called', [
+            'session_data' => [
+                'payment_type' => Session::get('payment_type'),
+                'payment_data' => Session::get('payment_data'),
+                'payment_details' => Session::get('payment_details'),
+                'combined_order_id' => Session::get('combined_order_id')
+            ]
+        ]);
+        
         $payment_type = Session::get('payment_type');
         $paymentData = Session::get('payment_data');
         
+        \Log::info('bKash Processing Payment Type', ['payment_type' => $payment_type]);
+        
         if ($payment_type == 'cart_payment') {
+            \Log::info('bKash Cart Payment - Calling checkout_done', ['combined_order_id' => Session::get('combined_order_id')]);
             return (new CheckoutController)->checkout_done(Session::get('combined_order_id'), Session::get('payment_details'));
         }
         elseif ($payment_type == 'order_re_payment') {
+            \Log::info('bKash Order Re-payment', ['payment_data' => $paymentData]);
             return (new CheckoutController)->orderRePaymentDone($paymentData, Session::get('payment_details'));
         }
         elseif ($payment_type == 'wallet_payment') {
+            \Log::info('bKash Wallet Payment', ['payment_data' => $paymentData]);
             return (new WalletController)->wallet_payment_done($paymentData, Session::get('payment_details'));
         }
         elseif ($payment_type == 'customer_package_payment') {
+            \Log::info('bKash Customer Package Payment', ['payment_data' => $paymentData]);
             return (new CustomerPackageController)->purchase_payment_done($paymentData, Session::get('payment_details'));
         }
         elseif ($payment_type == 'seller_package_payment') {
+            \Log::info('bKash Seller Package Payment', ['payment_data' => $paymentData]);
             return (new SellerPackageController)->purchase_payment_done($paymentData, Session::get('payment_details'));
         }
+        
+        \Log::error('bKash Success: Unknown payment type', ['payment_type' => $payment_type]);
     }
 }

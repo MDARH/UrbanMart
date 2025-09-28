@@ -2317,12 +2317,19 @@
 
                         $('#option-choice-form #chosen_price_div').removeClass('d-none');
                         $('#option-choice-form #chosen_price_div #chosen_price').html(data.price);
+                        // Mohammad Hassan
                         $('#available-quantity').html(data.quantity);
                         $('.input-number').prop('max', data.max_limit);
                         if(parseInt(data.in_stock) == 0 && data.digital  == 0){
                            $('.buy-now').addClass('d-none');
                            $('.add-to-cart').addClass('d-none');
-                           $('.out-of-stock').removeClass('d-none');
+                           // Show pre-order button if product allows pre-orders
+                           if(data.allow_preorder && data.allow_preorder == 1) {
+                               $('.out-of-stock[disabled]').addClass('d-none');
+                               $('.out-of-stock[data-toggle="modal"]').removeClass('d-none');
+                           } else {
+                               $('.out-of-stock').removeClass('d-none');
+                           }
                         }
                         else{
                            $('.buy-now').removeClass('d-none');

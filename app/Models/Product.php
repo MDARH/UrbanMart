@@ -141,4 +141,36 @@ class Product extends Model
         return $this->belongsTo(Note::class, 'refund_note_id');
     }
 
+    // Mohammad Hassan
+    public function isOutOfStock()
+    {
+        return $this->current_stock <= 0;
+    }
+
+    // Mohammad Hassan
+    public function isPreorderAvailable()
+    {
+        return $this->isOutOfStock() && get_setting('preorder_system_activation') == 1;
+    }
+
+    // Mohammad Hassan
+    public function preorders()
+    {
+        return $this->hasMany(Preorder::class, 'product_id');
+    }
+
+    // Mohammad Hassan
+    public function getPreorderPrice()
+    {
+        // 50% of the unit price for pre-order
+        return $this->unit_price * 0.5;
+    }
+
+    // Mohammad Hassan
+    public function getRemainingPrice()
+    {
+        // Remaining 50% to be paid after product arrival
+        return $this->unit_price - $this->getPreorderPrice();
+    }
+
 }

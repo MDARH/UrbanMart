@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Payment;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\CombinedOrder;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\WalletController;
@@ -11,11 +11,14 @@ use App\Models\CustomerPackage;
 use App\Models\SellerPackage;
 use App\Http\Controllers\CustomerPackageController;
 use App\Http\Controllers\SellerPackageController;
-use App\Http\Controllers\SSLCommerz;
 use App\Models\Order;
+use App\Models\Cart;
+use App\Models\Product;
 use App\Models\User;
 use Session;
 use Auth;
+// Mohammad Hassan - Import the official SSLCommerz library
+use App\Library\SslCommerz\SslCommerzNotification;
 
 session_start();
 
@@ -27,7 +30,20 @@ class SslcommerzController extends Controller
         # Lets your oder trnsaction informations are saving in a table called "orders"
         # In orders table order uniq identity is "order_id","order_status" field contain status of the transaction, "grand_total" is the order amount to be paid and "currency" is for storing Site Currency which will be checked with paid currency.
         if (Session::has('payment_type')) {
-            $userID = Auth::user()->id;
+            // Mohammad Hassan
+            $user = Auth::user();
+            if (!$user) {
+                // Check if guest user ID is stored in session (created during checkout)
+                if (Session::has('guest_user_id')) {
+                    $user = User::find(Session::get('guest_user_id'));
+                    if (!$user) {
+                        return redirect()->route('user.login')->with('error', 'Please login to continue payment.');
+                    }
+                } else {
+                    return redirect()->route('user.login')->with('error', 'Please login to continue payment.');
+                }
+            }
+            $userID = $user->id;
             $paymentType = Session::get('payment_type');
             $paymentData = $request->session()->get('payment_data');
             $post_data = array();
@@ -59,16 +75,21 @@ class SslcommerzController extends Controller
             
             $post_data['value_c'] = $paymentType;
             $post_data['value_d'] = $userID;
+            
+            // Mohammad Hassan - Add required product_category to fix SSLCommerz error
+            $post_data['product_category'] = 'general';
+            $post_data['product_name'] = 'E-commerce Products';
+            $post_data['product_profile'] = 'general';
 
             # CUSTOMER INFORMATION
-            $user = Auth::user();
+            // Mohammad Hassan - Use the user object we already retrieved above
             $post_data['cus_name'] = $user->name;
-            $post_data['cus_add1'] = $user->address;
-            $post_data['cus_city'] = $user->city;
-            $post_data['cus_postcode'] = $user->postal_code;
-            $post_data['cus_country'] = $user->country;
+            $post_data['cus_add1'] = $user->address ?? 'N/A';
+            $post_data['cus_city'] = $user->city ?? 'N/A';
+            $post_data['cus_postcode'] = $user->postal_code ?? '0000';
+            $post_data['cus_country'] = $user->country ?? 'Bangladesh';
             $post_data['cus_phone'] = $user->phone;
-            $post_data['cus_email'] = $user->email;
+            $post_data['cus_email'] = $user->email ?? 'guest@example.com';
         }
 
         $server_name = $request->root() . "/";
@@ -91,10 +112,12 @@ class SslcommerzController extends Controller
         // $post_data['value_c'] = "ref003";
         // $post_data['value_d'] = "ref004";
 
-        $sslc = new SSLCommerz();
+        // Mohammad Hassan - Use the official SSLCommerz library
+        $sslc = new SslCommerzNotification();
 
-        # initiate(Transaction Data , false: Redirect to SSLCOMMERZ gateway/ true: Show all the Payement gateway here )
-        $payment_options = $sslc->initiate($post_data, false);
+        # initiate payment with the official library
+        $payment_options = $sslc->makePayment($post_data, 'hosted');
+        
         if (!is_array($payment_options)) {
             print_r($payment_options);
             $payment_options = array();
@@ -103,47 +126,93 @@ class SslcommerzController extends Controller
 
     public function success(Request $request)
     {
-        //echo "Transaction is Successful";
-
-        $sslc = new SSLCommerz();
+        // Mohammad Hassan - Use official SSLCommerz validation with debugging
+        $sslc = new SslCommerzNotification();
+        
+        // Mohammad Hassan - Add debugging logs
+        \Log::info('SSLCommerz Success Callback', [
+            'request_data' => $request->all(),
+            'session_data' => [
+                'payment_type' => Session::get('payment_type'),
+                'combined_order_id' => Session::get('combined_order_id'),
+                'payment_data' => Session::get('payment_data')
+            ]
+        ]);
+        
         #Start to received these value from session. which was saved in index function.
         $tran_id = $request->value_a;
         #End to received these value from session. which was saved in index function.
         $payment = json_encode($request->all());
 
-        if (isset($request->value_c)) {
-            if ($request->value_c == 'cart_payment') {
-                return (new CheckoutController)->checkout_done($request->value_b, $payment);
-            } elseif ($request->value_c == 'order_re_payment') {
-                $data['order_id'] = $request->value_b;
-                $data['payment_method'] = 'sslcommerz';
-                Auth::login(User::find($request->value_d));
+        # Validate the payment with official library
+        $validation = $sslc->orderValidate($request->all(), $tran_id, 0, 'BDT');
+        
+        // Mohammad Hassan - Log validation result
+        \Log::info('SSLCommerz Payment Validation', [
+            'tran_id' => $tran_id,
+            'validation_result' => $validation,
+            'payment_status' => $request->status ?? 'unknown'
+        ]);
+        
+        if ($validation == TRUE) {
+            \Log::info('SSLCommerz Payment Validated Successfully', ['tran_id' => $tran_id]);
+            
+            if (isset($request->value_c)) {
+                \Log::info('Processing payment type', ['payment_type' => $request->value_c]);
                 
-                return (new CheckoutController)->orderRePaymentDone($data, $payment);
-            } elseif ($request->value_c == 'wallet_payment') {
-                $data['amount'] = $request->value_b;
-                $data['payment_method'] = 'sslcommerz';
-                Auth::login(User::find($request->value_d));
+                if ($request->value_c == 'cart_payment') {
+                    return (new CheckoutController)->checkout_done($request->value_b, $payment);
+                } elseif ($request->value_c == 'order_re_payment') {
+                    $data['order_id'] = $request->value_b;
+                    $data['payment_method'] = 'sslcommerz';
+                    Auth::login(User::find($request->value_d));
+                    
+                    return (new CheckoutController)->orderRePaymentDone($data, $payment);
+                } elseif ($request->value_c == 'wallet_payment') {
+                    $data['amount'] = $request->value_b;
+                    $data['payment_method'] = 'sslcommerz';
+                    Auth::login(User::find($request->value_d));
 
-                return (new WalletController)->wallet_payment_done($data, $payment);
-            } elseif ($request->value_c == 'customer_package_payment') {
-                $data['customer_package_id'] = $request->value_b;
-                $data['payment_method'] = 'sslcommerz';
-                Auth::login(User::find($request->value_d));
+                    return (new WalletController)->wallet_payment_done($data, $payment);
+                } elseif ($request->value_c == 'customer_package_payment') {
+                    $data['customer_package_id'] = $request->value_b;
+                    $data['payment_method'] = 'sslcommerz';
+                    Auth::login(User::find($request->value_d));
 
-                return (new CustomerPackageController)->purchase_payment_done($data, $payment);
-            } elseif ($request->value_c == 'seller_package_payment') {
-                $data['seller_package_id'] = $request->value_b;
-                $data['payment_method'] = 'sslcommerz';
-                Auth::login(User::find($request->value_d));
+                    return (new CustomerPackageController)->purchase_payment_done($data, $payment);
+                } elseif ($request->value_c == 'seller_package_payment') {
+                    $data['seller_package_id'] = $request->value_b;
+                    $data['payment_method'] = 'sslcommerz';
+                    Auth::login(User::find($request->value_d));
 
-                return (new SellerPackageController)->purchase_payment_done(json_decode($request->value_b), $payment);
+                    return (new SellerPackageController)->purchase_payment_done(json_decode($request->value_b), $payment);
+                }
+            } else {
+                \Log::warning('SSLCommerz Success: No payment type found in request', ['request' => $request->all()]);
             }
+        } else {
+            // Payment validation failed
+            \Log::error('SSLCommerz Payment Validation Failed', [
+                'tran_id' => $tran_id,
+                'request_data' => $request->all()
+            ]);
+            flash(translate('Payment validation failed'))->error();
+            return redirect()->route('home');
         }
     }
 
     public function fail(Request $request)
     {
+        // Mohammad Hassan - Add debugging for payment failures
+        \Log::error('SSLCommerz Payment Failed', [
+            'request_data' => $request->all(),
+            'session_data' => [
+                'order_id' => $request->session()->get('order_id'),
+                'payment_data' => $request->session()->get('payment_data'),
+                'combined_order_id' => $request->session()->get('combined_order_id')
+            ]
+        ]);
+        
         $request->session()->forget('order_id');
         $request->session()->forget('payment_data');
         flash(translate('Payment Failed'))->warning();
@@ -152,6 +221,16 @@ class SslcommerzController extends Controller
 
     public function cancel(Request $request)
     {
+        // Mohammad Hassan - Add debugging for payment cancellations
+        \Log::warning('SSLCommerz Payment Cancelled', [
+            'request_data' => $request->all(),
+            'session_data' => [
+                'order_id' => $request->session()->get('order_id'),
+                'payment_data' => $request->session()->get('payment_data'),
+                'combined_order_id' => $request->session()->get('combined_order_id')
+            ]
+        ]);
+        
         $request->session()->forget('order_id');
         $request->session()->forget('payment_data');
         flash(translate('Payment cancelled'))->error();

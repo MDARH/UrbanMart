@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\CombinedOrder;
 use App\Models\SmsTemplate;
 use Auth;
+use Session; // Mohammad Hassan
 use Mail;
 use App\Mail\InvoiceEmailManager;
 use App\Models\OrdersExport;
@@ -148,7 +149,17 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        $carts = Cart::where('user_id', Auth::user()->id)->active()->get();
+        // Mohammad Hassan
+        // Handle both authenticated users and guest users
+        $user_id = Auth::check() ? Auth::user()->id : Session::get('guest_user_id');
+        $user = Auth::check() ? Auth::user() : User::find($user_id);
+        
+        if (!$user_id || !$user) {
+            flash(translate('User not found'))->error();
+            return redirect()->route('home');
+        }
+
+        $carts = Cart::where('user_id', $user_id)->active()->get();
 
         if ($carts->isEmpty()) {
             flash(translate('Your cart is empty'))->warning();
@@ -159,8 +170,8 @@ class OrderController extends Controller
 
         $shippingAddress = [];
         if ($address != null) {
-            $shippingAddress['name']        = Auth::user()->name;
-            $shippingAddress['email']       = Auth::user()->email;
+            $shippingAddress['name']        = $user->name;
+            $shippingAddress['email']       = $user->email;
             $shippingAddress['address']     = $address->address. (isset($address->area) ? ', ' . $address->area->name : '');
             $shippingAddress['country']     = optional($address->country)->name ?? 'Bangladesh';
             if(get_setting('has_state') == 1){
@@ -175,7 +186,8 @@ class OrderController extends Controller
         }
 
         $combined_order = new CombinedOrder;
-        $combined_order->user_id = Auth::user()->id;
+        // Mohammad Hassan
+        $combined_order->user_id = $user_id;
         $combined_order->shipping_address = json_encode($shippingAddress);
         $combined_order->save();
 
@@ -193,7 +205,8 @@ class OrderController extends Controller
         foreach ($seller_products as $seller_product) {
             $order = new Order;
             $order->combined_order_id = $combined_order->id;
-            $order->user_id = Auth::user()->id;
+            // Mohammad Hassan
+            $order->user_id = $user_id;
             $order->shipping_address = $combined_order->shipping_address;
             $order->additional_info = $request->additional_info;
             $order->payment_type = $request->payment_option;
