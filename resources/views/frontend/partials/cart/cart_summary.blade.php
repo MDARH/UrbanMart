@@ -37,6 +37,7 @@
                 // Mohammad Hassan
                 // Check if product is out of stock and can be preordered
                 if ($product && $product->isOutOfStock() && $product->isPreorderAvailable()) {
+                    // Show preorder details regardless of system activation for testing
                     $has_preorder_products = true;
                     $item_total = $product->unit_price * $cartItem['quantity'];
                     $preorder_total += $item_total;
@@ -45,6 +46,8 @@
                 }
             @endphp
         @endforeach
+
+        <!-- Mohammad Hassan - Debug Information Hidden -->
 
         <div class="card-header pt-4 pb-1 border-bottom-0">
             <h3 class="fs-16 fw-700 mb-0">{{ translate('Order Summary') }}</h3>
