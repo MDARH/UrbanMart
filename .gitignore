@@ -10,7 +10,8 @@
 /.idea
 /.vscode
 /.vagrant
-/.trae
+# Mohammad Hassan
+.trae/
 Homestead.json
 Homestead.yaml
 npm-debug.log
