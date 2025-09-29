@@ -2,6 +2,36 @@
 
 ## Recent Changes Log
 
+### 2025-10-01 - Authentication UI Enhancements
+- `resources/views/auth/wholesaler_login_modals.blade.php`
+- `resources/views/auth/customer_login_modals.blade.php`
+
+**Improvements Implemented:**
+1. **Wholesaler Login Modal**:
+   - Increased modal width to `modal-lg` for better user experience
+   - Reorganized registration form into a two-column layout
+   - Added "Continue with Google" authentication buttons to both login and registration tabs
+   - Applied `btn-info` class to login and account creation buttons
+   - Implemented Google SVG icon with brand colors and hover effects
+
+2. **Customer Login Modal**:
+   - Added "Continue with Google" authentication button with SVG icon
+   - Applied `btn-info` class to login buttons
+   - Implemented hover effects for Google sign-in button
+   - Added separator between traditional login and social login options
+
+3. **Visual Consistency**:
+   - Ensured consistent styling across both authentication modals
+   - Added appropriate CSS with Mohammad Hassan attribution comments
+   - Implemented Google brand colors in SVG icon (red, blue, yellow, green)
+   - Added smooth transitions for hover effects
+
+// Mohammad Hassan
+
+### 2025-09-30 - Wholesaler Registration System Implementation
+- `resources/views/auth/wholesaler_register.blade.php`
+- `resources/views/auth/wholesaler_login_modals.blade.php`
+
 ### 2025-09-29 - Address Form Improvements
 - `resources/views/frontend/partials/address/address_modal.blade.php`
 - `resources/views/frontend/partials/address/address_edit_modal.blade.php`
