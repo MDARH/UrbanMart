@@ -33,8 +33,15 @@
                         </div>
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-3">
                         <button type="submit" class="btn btn-primary btn-block fw-600">{{ translate('Login')}}</button>
+                    </div>
+
+                    <!-- Mohammad Hassan -->
+                    <div class="text-center mt-2">
+                        <small class="text-muted">{{ translate("Don't have a wholesaler account?") }}</small>
+                        <br>
+                        <a href="{{ route('user.registration') }}" class="text-primary">{{ translate('Register Now') }}</a>
                     </div>
                 </form>
             </div>
@@ -44,6 +51,7 @@
 
 <script>
 function openWholesalerLogin() {
+    // Mohammad Hassan
     $('#wholesalerAuthModal').modal('show');
 }
 </script>

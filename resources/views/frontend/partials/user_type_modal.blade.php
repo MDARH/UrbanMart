@@ -18,8 +18,9 @@
 {{-- Mohammad Hassan --}}
 {{-- Include reusable login cards with custom function names --}}
 @include('frontend.partials.login_cards', [
-    'userLoginFunction' => 'openCustomerLogin',
-    'wholesalerLoginFunction' => 'openWholesalerLogin'
+    // Mohammad Hassan
+    'userLoginFunction' => 'triggerCustomerLogin',
+    'wholesalerLoginFunction' => 'triggerWholesalerLogin'
 ])
                     
                     <div class="text-center mt-3">
@@ -45,23 +46,22 @@
     }
     
     // Mohammad Hassan
-    function openCustomerLogin() {
+    function triggerCustomerLogin() {
         $('#user_type_modal').modal('hide');
         setTimeout(function() {
-            $('#customerAuthModal').modal('show');
+            if (typeof openCustomerLogin === 'function') {
+                openCustomerLogin();
+            } else {
+                $('#customerAuthModal').modal('show');
+            }
         }, 300);
     }
     
-    function openWholesalerLogin() {
+    // Mohammad Hassan
+    function triggerWholesalerLogin() {
         $('#user_type_modal').modal('hide');
         setTimeout(function() {
-            if (typeof openWholesalerModal === 'function') {
-                openWholesalerModal();
-            } else {
-                // Fallback to regular login if wholesaler modal not available
-                // Mohammad Hassan
-                $('#customerAuthModal').modal('show');
-            }
+            $('#wholesalerAuthModal').modal('show');
         }, 300);
     }
 </script>

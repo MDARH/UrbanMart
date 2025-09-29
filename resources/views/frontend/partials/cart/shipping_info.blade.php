@@ -8,8 +8,9 @@
     </div>
 @endif
 @if (Auth::check())
-    @foreach (Auth::user()->addresses as $key => $address)
+    @foreach (($addresses ?? Auth::user()->addresses) as $key => $address)
         @php
+
             // Get the city from the address relationship
             $city = $address->city;
 
@@ -27,13 +28,14 @@
             $has_area_id = !is_null($area_id);
             $area_status = $has_area_id ? optional($address->area)->status : 1;
 
-            $is_disabled =
+            // Mohammad Hassan - Adjusted disabling logic to allow selection for Bangladesh (country ID 18)
+            $is_disabled = (optional($address->country)->id != 18) && (
                 $city_status === 0 ||
                 ($has_area_id && $area_status === 0) ||
                 ($active_area_exists && !$has_area_id) ||
-                ($address->state_id == null && get_setting('has_state') == 1);
+                ($address->state_id == null && get_setting('has_state') == 1)
+            );
         @endphp
-
         <div class="border mb-4 {{ $is_disabled ? ' border-danger' : '' }}">
             <div class="row">
                 <div class="col-md-8">
@@ -45,13 +47,38 @@
                             <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
                             <span class="flex-grow-1 pl-3 text-left">
                                 <div class="row">
-                                    <span class="fs-14 text-secondary col-md-3 col-5">{{ translate('Address') }}</span>
-                                    <span class="fs-14 text-dark fw-500 ml-2 col">{{ $address->address }}</span>
+                                    <span class="fs-14 text-secondary col-md-3 col-5">{{ translate('Name') }}</span>
+                                    <span class="fs-14 text-dark fw-500 ml-2 col">{{-- Mohammad Hassan --}} {{ $address->name ?? '' }}</span>
                                 </div>
                                 <div class="row">
-                                    <span
-                                        class="fs-14 text-secondary col-md-3 col-5">{{ translate('Postal Code') }}</span>
-                                    <span class="fs-14 text-dark fw-500 ml-2 col">{{ $address->postal_code }}</span>
+                                    <span class="fs-14 text-secondary col-md-3 col-5">{{ translate('Phone') }}</span>
+                                    <span class="fs-14 text-dark fw-500 ml-2 col">{{ $address->phone }}</span>
+                                </div>
+                                <div class="row">
+                                    <span class="fs-14 text-secondary col-md-3 col-5">{{ translate('City') }}</span>
+                                    <span class="fs-14 text-dark fw-500 ml-2 col">
+                                        {{-- Mohammad Hassan - Fetch city correctly using city_id --}}
+                                        @php
+                                            $city_name = 'Unknown';
+                                            // Try to get city from relationship first
+                                            if ($address->relationLoaded('city') && $address->city) {
+                                                if (is_object($address->city)) {
+                                                    $city_name = $address->city->name;
+                                                } elseif (is_array($address->city)) {
+                                                    $city_name = $address->city['name'] ?? 'Unknown';
+                                                }
+                                            } else {
+                                                // Fallback: fetch city directly by city_id
+                                                $city_by_id = \App\Models\City::find($address->city_id);
+                                                $city_name = $city_by_id ? $city_by_id->name : 'Unknown';
+                                            }
+                                        @endphp
+                                        {{ $city_name }}
+                                    </span>
+                                </div>
+                                <div class="row">
+                                    <span class="fs-14 text-secondary col-md-3 col-5">{{ translate('Address') }}</span>
+                                    <span class="fs-14 text-dark fw-500 ml-2 col">{{ $address->address }}</span>
                                 </div>
                                 @if ($address->area)
                                     <div class="row">
@@ -60,11 +87,6 @@
                                             class="fs-14 text-dark fw-500 ml-2 col">{{ optional($address->area)->name }}</span>
                                     </div>
                                 @endif
-                                <div class="row">
-                                    <span class="fs-14 text-secondary col-md-3 col-5">{{ translate('City') }}</span>
-                                    <span
-                                        class="fs-14 text-dark fw-500 ml-2 col">{{ optional($address->city)->name }}</span>
-                                </div>
                                 @if (get_setting('has_state') == 1)
                                     <div class="row">
                                         <span
@@ -73,15 +95,6 @@
                                             class="fs-14 text-dark fw-500 ml-2 col">{{ optional($address->state)->name }}</span>
                                     </div>
                                 @endif
-                                <div class="row">
-                                    <span class="fs-14 text-secondary col-md-3 col-5">{{ translate('Country') }}</span>
-                                    <span
-                                        class="fs-14 text-dark fw-500 ml-2 col">{{ optional($address->country)->name }}</span>
-                                </div>
-                                <div class="row">
-                                    <span class="fs-14 text-secondary col-md-3 col-5">{{ translate('Phone') }}</span>
-                                    <span class="fs-14 text-dark fw-500 ml-2 col">{{ $address->phone }}</span>
-                                </div>
 
                             </span>
                         </span>
@@ -95,7 +108,7 @@
                         {{ translate('Change') }}
                     </a>
                 </div>
-                @if ($is_disabled)
+                @if ($is_disabled && optional($address->country)->id != 18)
                     <div class="col-md-12">
                         <div class="text-center text-danger">
                             <span>{{ translate('We no longer deliver in this area.') }}</span>

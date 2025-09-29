@@ -16,7 +16,7 @@
             success: function (response) {
                 if(response ==  1){
                     // Mohammad Hassan
-$('#customerAuthModal').modal('show');
+                    $('#customerAuthModal').modal('show');
                     AIZ.plugins.notify('warning', '{{ translate('You already have an account with this information. Please Login first.') }}');
                 }
                 else{
@@ -205,5 +205,5 @@ $('#customerAuthModal').modal('show');
     }
 
     // Mohammad Hassan
-    $('#customerAuthModal').modal('show');
+    // Removed automatic opening of Customer Login modal on checkout page.
 </script>

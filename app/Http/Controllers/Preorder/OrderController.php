@@ -37,7 +37,7 @@ class OrderController extends Controller
         $data['date']   = $request->date;
         $data['sort_search'] = $request->search ?? null;
         $status = $request->order_status ?? 'all';
-        
+
         $canSendNotification =  false;
 
         // All Preorders
@@ -51,7 +51,7 @@ class OrderController extends Controller
         elseif ($routeName == 'inhouse_preorder.list') {
             $orders = $orders->whereProductOwnerId($adminId);
         }
-        
+
         // Sellers Preorders
         elseif ($routeName == 'seller_preorder.list') {
             $orders = $orders->where('product_owner_id', '!=', $adminId);
@@ -93,8 +93,8 @@ class OrderController extends Controller
 
             $canSendNotification =  get_notification_type('preorder_final_order_reminder_customer', 'type')?->status == 1 ? true : false;
         }
-        
-        // Filter by Status 
+
+        // Filter by Status
         if($status != null){
 
             if($status == 'requested'){
@@ -123,7 +123,7 @@ class OrderController extends Controller
             }
         }
         $data['status'] = $status;
-        
+
         // Filter By date
         if ($data['date'] != null) {
             $orders = $orders->where('created_at', '>=', date('Y-m-d', strtotime(explode(" to ", $data['date'])[0])) . '  00:00:00')
@@ -134,11 +134,11 @@ class OrderController extends Controller
         if ($data['sort_search']) {
             $orders = $orders->where('order_code', 'like', '%' .  $data['sort_search'] . '%');
         }
-        
+
         $data['orders'] = $orders->paginate(15);
         $data['canSendNotification'] = $canSendNotification;
 
-        
+
         $preorder_count = Preorder::query();
         $preorder_request_count = Preorder::where('request_preorder_status',1);
         $accepted_request_count = Preorder::where('request_preorder_status',2)->where('prepayment_confirm_status', 0);
@@ -202,7 +202,7 @@ class OrderController extends Controller
         $sort_search = '';
         return view('preorder.backend.orders.show', compact('sort_search', 'order'));
     }
-    
+
     public function customer_order_list()
     {
         $order = new Preorder();
@@ -231,7 +231,8 @@ class OrderController extends Controller
         if (auth()->check()) {
             $user_id = Auth::user()->id;
             $carts = Cart::where('user_id', $user_id)->active()->get();
-            $addresses = Address::where('user_id', $user_id)->get();
+            // Mohammad Hassan - Added eager loading for city relationship to fix empty city field issue
+            $addresses = Address::where('user_id', $user_id)->with('city')->get();
             if (count($addresses)) {
                 $address = $addresses->toQuery()->first();
                 $address_id = $address->id;
@@ -256,7 +257,7 @@ class OrderController extends Controller
 
         $carrier_list = Carrier::where('status', 1)->get();
         $review_status = (auth()->check() && (Preorder::whereProductId($order->preorder_product->id)->where('user_id', auth()->user()->id)->whereDeliveryStatus(2)->count() > 0) ) ? 1 : 0;
-        
+
         return view('preorder.frontend.order.show', compact('sort_search', 'order',  'address_id',  'carrier_list', 'shipping_info','review_status'));
     }
 

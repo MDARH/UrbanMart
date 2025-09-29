@@ -2,6 +2,35 @@
 
 ## Recent Changes Log
 
+### 2025-09-29 - Address Form Improvements
+- `resources/views/frontend/partials/address/address_modal.blade.php`
+- `resources/views/frontend/partials/address/address_edit_modal.blade.php`
+- `resources/views/frontend/partials/cart/shipping_info.blade.php`
+
+**Fixes Applied:**
+1. **address_edit_modal.blade.php**: 
+   - Removed postal code as required field (hidden field)
+   - Reordered form fields to place City before Address
+   - Removed Country Code field
+   - Implemented frontend phone validation (11 digits, numbers only, starts with "01")
+   - Added Name field to address database
+   - Added phone validation pattern and maxlength attributes
+
+2. **address_modal.blade.php**:
+   - Removed postal code as required field (hidden field)
+   - Reordered form fields to place City before Address
+   - Removed Country Code field
+   - Implemented frontend phone validation (11 digits, numbers only, starts with "01")
+   - Added Name field to address database
+   - Added phone validation pattern and maxlength attributes
+
+3. **shipping_info.blade.php**:
+   - Removed Country and Postal Code display from shipping address view
+   - Modified delivery warning to exclude Bangladesh (country_id != 18)
+   - Maintained field order: Name → Phone → City → Address
+
+4. **JavaScript**: Added dynamic loading of Bangladesh cities (state_id = 18) for edit modal
+
 ### 2025-01-23 - System Recovery & Composer Autoload Fix
 
 #### Issue: Laravel Application Fatal Error
@@ -63,4 +92,16 @@
 3. ✅ Installed official SSLCommerz library from GitHub repository
 4. ✅ Implemented proper payment validation to prevent order confirmation without payment
 
-All changes include proper commenting with "Mohammad Hassan" as required.
+All changes include proper commenting with "Mohammad Hassan" as required.\n\n### 2025-09-29 - Additional Address Form Fixes\n- `app/Http/Controllers/AddressController.php`\n- `resources/views/frontend/partials/address/address_edit_modal.blade.php`\n- `resources/views/frontend/partials/address/address_modal.blade.php`\n\n**Fixes Applied:**\n1. **AddressController.php**:\n   - Added saving of 'name' field in store and update methods\n   - Fixed phone number storage to use +880 prefix and remove leading zero\n\n2. **address_edit_modal.blade.php** and **address_modal.blade.php**:\n   - Fixed city loading to use country_id 18 (Bangladesh) via get-city-by-country route\n   - Hid the entire postal code row (label and input)\n   - Preserved selected city in edit modal after loading
+
+### 2025-09-29 - Name Display Fixes
+- `resources/views/frontend/partials/address/address_edit_modal.blade.php`
+- `resources/views/frontend/partials/cart/shipping_info.blade.php`
+
+**Fixes Applied:**
+1. **address_edit_modal.blade.php**:
+   - Fixed syntax error by correcting escaped HTML and script tags
+   - Removed duplicate invalid JavaScript code
+
+2. **shipping_info.blade.php**:
+   - Changed name display from ?? 'N/A' to ?? '' to avoid showing 'N/A' when name is null

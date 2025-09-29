@@ -219,9 +219,8 @@
                <!-- Cart Icon -->
 <div class="d-none d-xl-block has-transition" data-hover="dropdown">
     <div class="nav-cart-box dropdown h-100" id="cart_items">
-        @if (Auth::check() && (auth()->user()->user_type == 'customer' || auth()->user()->user_type == 'wholesaler'))
-            @include('frontend.partials.cart.cart')
-        @endif
+        {{-- Mohammad Hassan --}}
+        @include('frontend.partials.cart.cart')
     </div>
 </div>
 
@@ -253,7 +252,7 @@
                             </div>
                         </span>
                         <!-- User Dropdown Menu on Click - For authenticated users -->
-                        {{-- এই অংশটি সরানো হয়েছে এবং সহজ করা হয়েছে --}}
+                        {{-- এই অংশটি সরানো হয়েছে এবর করা হয়েছে --}}
                         <div class="hover-user-top-menu position-absolute top-100 right-0 z-3"> {{-- 'left-0' সরানো হয়েছে
                             --}}
                             <div class="aiz-user-top-menu bg-white rounded-0 border-top shadow-sm"> {{-- inline style
@@ -321,9 +320,8 @@
                                         transform="translate(-2.064 -1.995)" fill="#91919b" />
                                 </svg>
                             </span>
-                            <a href="javascript:void(0)" onclick="openUserLogin()"
-                                class="text-reset hov-text-primary fs-14 d-inline-block  border-soft-light border-width-2 pr-2 ml-3"
-                                style="color: #FFFFFF!important; font-weight: 700;">{{ translate('Login') }}</a>
+                            <a href="javascript:void(0)" onclick="openCustomerLogin()"
+                                 class="text-reset hov-text-primary fs-14 d-inline-block border-soft-light border-width-2 pr-2 ml-3" style="color: #FFFFFF!important; font-weight: 700;">{{ translate('Login') }}</a> <!-- Mohammad Hassan -->
                         </span>
                     @endauth
                 </div>
@@ -439,8 +437,8 @@
                                 transform="translate(-2.064 -1.995)" fill="#91919b" />
                         </svg>
                     </span>
-                    <a href="javascript:void(0)" onclick="openUserLogin()"
-                        class="text-reset opacity-60 hov-opacity-100 hov-text-primary fs-12 d-inline-block border-right border-soft-light border-width-2 pr-2 ml-3">{{ translate('Login') }}</a>
+                    <a href="javascript:void(0)" onclick="openCustomerLogin()"
+                         class="text-reset opacity-60 hov-opacity-100 hov-text-primary fs-12 d-inline-block border-right border-soft-light border-width-2 pr-2 ml-3">{{ translate('Login') }}</a> <!-- Mohammad Hassan -->
                     <a href="{{ route(get_setting('customer_registration_verify') === '1' ? 'registration.verification' : 'user.registration') }}"
                         class="text-reset opacity-60 hov-opacity-100 hov-text-primary fs-12 d-inline-block py-2 pl-2">{{ translate('Registration') }}</a>
 

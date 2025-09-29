@@ -4,23 +4,36 @@
 @if(auth()->check())
     {{-- Alternative content for logged-in users --}}
     <div class="user-dashboard-cards">
-        <div class="dashboard-card">
+        <!-- Mohammad Hassan -->
+        <a href="{{ route('dashboard') }}" class="dashboard-card">
             <div class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" style="width: 80% !important;" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                 </svg>
             </div>
-            <h3>{{ translate('My Account') }}</h3>
-            <p>{{ translate('Welcome back') }}, {{ auth()->user()->name }}!</p>
-        </div>
-        <div class="dashboard-card">
+            <h3 class="welcome-title">{{ translate('My Account') }}</h3>
+            <p class="welcome-subtitle">{{ translate('Welcome back') }}, {{ auth()->user()->name }}!</p>
+        </a>
+        <!-- Mohammad Hassan -->
+        <div class="dashboard-card quick-actions-card">
             <div class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" style="width: 80% !important;" stroke="currentColor" stroke-width="2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2h-2" />
                 </svg>
             </div>
-            <h3>{{ translate('Quick Actions') }}</h3>
-            <p>{{ translate('Manage orders, wishlist, and profile') }}</p>
+            <h3 class="welcome-title">{{ translate('Quick Actions') }}</h3>
+            <p class="welcome-subtitle">{{ translate('Manage orders, wishlist, and profile') }}</p>
+            <div class="quick-links">
+                <a href="{{ route('purchase_history.index') }}" class="quick-link-item">
+                    <i class="las la-box"></i> {{ translate('Orders') }}
+                </a>
+                <a href="{{ route('wishlists.index') }}" class="quick-link-item">
+                    <i class="las la-heart"></i> {{ translate('Wishlist') }}
+                </a>
+                <a href="{{ route('profile') }}" class="quick-link-item">
+                    <i class="las la-user-circle"></i> {{ translate('Profile') }}
+                </a>
+            </div>
         </div>
     </div>
 @else
@@ -57,6 +70,7 @@
 {{-- Login Cards Styles --}}
 <style>
     {{-- User Dashboard Cards for Logged-in Users --}}
+    /* Mohammad Hassan */
     .user-dashboard-cards {
         flex: 1;
         display: flex;
@@ -82,11 +96,149 @@
         position: relative;
         overflow: hidden;
         background: linear-gradient(135deg, #28a745, #20c997);
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* Mohammad Hassan */
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Mohammad Hassan */
+    .welcome-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 15px 0 5px;
+    }
+
+    /* Mohammad Hassan */
+    .welcome-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 10px;
+    }
+
+    /* Mohammad Hassan */
+    .quick-actions-card {
+        background: linear-gradient(135deg, #17a2b8, #0dcaf0);
+    }
+
+    /* Mohammad Hassan */
+    .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    /* Mohammad Hassan */
+    .quick-link-item {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    /* Mohammad Hassan */
+    .quick-link-item:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
     }
 
     .dashboard-card:hover {
         transform: translateY(-5px) scale(1.02);
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .welcome-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: white;
+    }
+
+    .welcome-subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+        color: white;
+    }
+
+    .quick-actions-card {
+        position: relative;
+        background: linear-gradient(135deg, #17a2b8, #0056b3);
+    }
+
+    .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    .quick-link-item {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .quick-link-item:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Responsive adjustments */
+
+    @media (max-width: 576px) {
+        .welcome-title {
+            font-size: 1.3rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 0.85rem;
+        }
+
+        .quick-link-item {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-card {
+            padding: 20px 15px;
+            min-height: 140px;
+        }
+    }
+
+    /* High DPI and dark mode support */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .dashboard-card {
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
+        }
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .dashboard-card {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
     }
 
     {{-- Login Cards Container --}}

@@ -19,7 +19,8 @@ class AddressController extends Controller
 {
     public function addresses()
     {
-        return new AddressCollection(Address::where('user_id', auth()->user()->id)->get());
+        // Mohammad Hassan - Added eager loading for city relationship to fix empty city field issue
+        return new AddressCollection(Address::where('user_id', auth()->user()->id)->with('city')->get());
     }
 
     public function createShippingAddress(Request $request)
