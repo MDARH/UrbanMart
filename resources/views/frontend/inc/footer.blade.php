@@ -681,12 +681,6 @@
     .mobile-fab-wrapper .text-primary { /* Active text for cart label */
         color: #3498db !important;
     }
-
-    /* Override any default Aizoon padding/margin that might cause issues */
-    body {
-        padding-bottom: 65px; /* Ensure body content is not hidden by fixed nav bar */
-    }
-
     /* Ensure specific SVG colors are set */
     .aiz-mobile-bottom-nav .nav-item-wrapper svg path {
         fill: #b5b5bf; /* Default icon color */

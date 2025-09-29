@@ -2244,7 +2244,7 @@
         }
 
         function addToWishList(id){
-            @if (Auth::check() && Auth::user()->user_type == 'customer')
+            @if (Auth::check() && Auth::user()->user_type == 'customer' && Auth::user()->user_type != 'wholesaler')
                 $.post('{{ route('wishlists.store') }}', {_token: AIZ.data.csrf, id:id}, function(data){
                     if(data != 0){
                         $('#wishlist').html(data);
@@ -2254,7 +2254,7 @@
                         AIZ.plugins.notify('warning', "{{ translate('Please login first') }}");
                     }
                 });
-            @elseif(Auth::check() && Auth::user()->user_type != 'customer')
+            @elseif(Auth::check() && Auth::user()->user_type != 'customer' && Auth::user()->user_type != 'wholesaler')
                 AIZ.plugins.notify('warning', "{{ translate('Please Login as a customer to add products to the WishList.') }}");
             @else
                 AIZ.plugins.notify('warning', "{{ translate('Please login first') }}");
@@ -2365,7 +2365,7 @@
         }
 
         function addToCart(){
-            @if (Auth::check() && Auth::user()->user_type != 'customer')
+            @if (Auth::check() && Auth::user()->user_type != 'customer' && Auth::user()->user_type != 'wholesaler')
                 AIZ.plugins.notify('warning', "{{ translate('Please Login as a customer to add products to the Cart.') }}");
                 return false;
             @endif
@@ -2400,7 +2400,7 @@
         }
 
         function buyNow(){
-            @if (Auth::check() && Auth::user()->user_type != 'customer')
+            @if (Auth::check() && Auth::user()->user_type != 'customer' && Auth::user()->user_type != 'wholesaler')
                 AIZ.plugins.notify('warning', "{{ translate('Please Login as a customer to add products to the Cart.') }}");
                 return false;
             @endif

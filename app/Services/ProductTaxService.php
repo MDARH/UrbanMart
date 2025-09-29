@@ -15,7 +15,8 @@ class ProductTaxService
                 $product_tax = new ProductTax();
                 $product_tax->tax_id = $val;
                 $product_tax->product_id = $collection['product_id'];
-                $product_tax->tax = $collection['tax'][$key];
+                // Ensure tax value is not null, set default to 0.00 if null or empty
+                $product_tax->tax = isset($collection['tax'][$key]) && $collection['tax'][$key] !== null ? $collection['tax'][$key] : 0.00;
                 $product_tax->tax_type = $collection['tax_type'][$key];
                 $product_tax->save();
             }
@@ -29,7 +30,8 @@ class ProductTaxService
             $product_tax = new ProductTax;
             $product_tax->product_id = $product_new->id;
             $product_tax->tax_id = $tax->tax_id;
-            $product_tax->tax = $tax->tax;
+            // Ensure tax value is not null, set default to 0.00 if null
+            $product_tax->tax = $tax->tax !== null ? $tax->tax : 0.00;
             $product_tax->tax_type = $tax->tax_type;
             $product_tax->save();
         }

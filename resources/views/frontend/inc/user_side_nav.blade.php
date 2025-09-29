@@ -380,7 +380,7 @@
                 </li>
 
                 <!-- Manage Profile -->
-                {{-- <li class="aiz-side-nav-item">
+                <li class="aiz-side-nav-item">
                     <a href="{{ route('profile') }}" class="aiz-side-nav-link {{ areActiveRoutes(['profile']) }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
                             <g id="Group_8094" data-name="Group 8094" transform="translate(3176 -602)">
@@ -390,7 +390,7 @@
                         </svg>
                         <span class="aiz-side-nav-text ml-3">{{ translate('Manage Profile') }}</span>
                     </a>
-                </li> --}}
+                </li>
 
                 <!-- Delete My Account -->
                 <li class="aiz-side-nav-item">

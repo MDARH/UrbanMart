@@ -27,6 +27,7 @@ use App\Services\FrequentlyBoughtProductService;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -244,6 +245,37 @@ class ProductController extends Controller
         ProductTranslation::create($request->only([
             'lang', 'name', 'unit', 'description', 'product_id'
         ]));
+
+        // START: Save Price Tiers
+        if ($request->has('price_tiers') && is_array($request->price_tiers['min_qty'])) {
+            $processedTiers = [];
+            foreach ($request->price_tiers['min_qty'] as $key => $min_qty) {
+                if (isset($request->price_tiers['price'][$key]) && (int)$min_qty > 0) {
+                    $current_qty = (int)$min_qty;
+                    if (!isset($processedTiers[$current_qty])) {
+                         $processedTiers[$current_qty] = (float)$request->price_tiers['price'][$key];
+                    }
+                }
+            }
+
+            $tiersToInsert = [];
+            $timestamp = now();
+            foreach ($processedTiers as $min_qty => $price) {
+                $tiersToInsert[] = [
+                    'product_id' => $product->id,
+                    'min_qty'    => $min_qty,
+                    'price'      => $price,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ];
+            }
+
+            if (!empty($tiersToInsert)) {
+                // এই লাইনটি পরিবর্তন করা হয়েছে
+                DB::table('product_price_tiers')->insert($tiersToInsert);
+            }
+        }
+        // END: Save Price Tiers
         
         flash(translate('Product has been inserted successfully'))->success();
 
@@ -366,6 +398,40 @@ class ProductController extends Controller
                 'name', 'unit', 'description'
             ])
         );
+
+
+        
+                    // START: Update Price Tiers
+        $product->priceTiers()->delete();
+        if ($request->has('price_tiers') && is_array($request->price_tiers['min_qty'])) {
+            $processedTiers = [];
+            foreach ($request->price_tiers['min_qty'] as $key => $min_qty) {
+                if (isset($request->price_tiers['price'][$key]) && (int)$min_qty > 0) {
+                    $current_qty = (int)$min_qty;
+                    if (!isset($processedTiers[$current_qty])) {
+                         $processedTiers[$current_qty] = (float)$request->price_tiers['price'][$key];
+                    }
+                }
+            }
+
+            $tiersToInsert = [];
+            $timestamp = now();
+            foreach ($processedTiers as $min_qty => $price) {
+                $tiersToInsert[] = [
+                    'product_id' => $product->id,
+                    'min_qty'    => $min_qty,
+                    'price'      => $price,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ];
+            }
+
+            if (!empty($tiersToInsert)) {
+                // এই লাইনটি পরিবর্তন করা হয়েছে
+                DB::table('product_price_tiers')->insert($tiersToInsert);
+            }
+        }
+        // END: Update Price Tiers
 
         flash(translate('Product has been updated successfully'))->success();
 
