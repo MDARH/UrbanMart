@@ -377,6 +377,10 @@ if (!function_exists('cart_product_tax')) {
             $str = $cart_product['variation'];
         }
         $product_stock = $product->stocks->where('variant', $str)->first();
+        if (!$product_stock) {
+            // No matching stock/variant found; treat tax as zero
+            return $formatted ? format_price(convert_price(0)) : 0;
+        }
         $price = $product_stock->price;
 
         //discount calculation
@@ -425,6 +429,10 @@ if (!function_exists('cart_product_discount')) {
             $str = $cart_product['variation'];
         }
         $product_stock = $product->stocks->where('variant', $str)->first();
+        if (!$product_stock) {
+            // No matching stock/variant found; discount is zero
+            return $formatted ? format_price(convert_price(0)) : 0;
+        }
         $price = $product_stock->price;
 
         //discount calculation
@@ -468,6 +476,10 @@ if (!function_exists('carts_product_discount')) {
                 $str = $cart_product['variation'];
             }
             $product_stock = $product->stocks->where('variant', $str)->first();
+            if (!$product_stock) {
+                // Skip items without valid stock/variant
+                continue;
+            }
             $price = $product_stock->price;
 
             //discount calculation

@@ -84,7 +84,10 @@
                                         $product = get_single_product($product_id);
                                         $cartItem = $carts->toQuery()->where('product_id', $product_id)->where('variation', $admin_product_variation[$key])->first();
                                         $product_stock = $product->stocks->where('variant', $cartItem->variation)->first();
-                                        $total = $total + cart_product_price($cartItem, $product, false) * $cartItem->quantity;
+                                        $lineTotal = (isset($cartItem['price']) && $cartItem['price'] > 0)
+                                            ? $cartItem['price']
+                                            : cart_product_price($cartItem, $product, false) * $cartItem->quantity;
+                                        $total += $lineTotal;
                                     @endphp
                                     <li class="list-group-item px-0 border-md-0">
                                         <div class="row gutters-5 align-items-center">
@@ -115,7 +118,7 @@
                                             <!-- Price & Tax -->
                                             <div class="col-md col-4 ml-4 ml-sm-0 my-3 my-md-0 d-flex flex-column ml-sm-5 ml-md-0">
                                                 <span class="fs-12 text-secondary">{{ translate('Price')}}</span>
-                                                <span class="fw-700 fs-14 mb-2">{{ cart_product_price($cartItem, $product, true, false) }}</span>
+                                                <span class="fw-700 fs-14 mb-2">{{ single_price((isset($cartItem['price']) && $cartItem['price'] > 0) ? ($cartItem['price'] / max(1, $cartItem['quantity'])) : cart_product_price($cartItem, $product, false, false)) }}</span>
                                                 <span>
                                                     <span class="opacity-90 fs-12">{{ translate('Tax')}}: {{ cart_product_tax($cartItem, $product) }}</span>
                                                 </span>
@@ -136,7 +139,7 @@
                                                                 class="col border-0 text-center px-0 fs-14 input-number"
                                                                 placeholder="1" value="{{ $cartItem['quantity'] }}"
                                                                 min="{{ $product->min_qty }}"
-                                                                max="{{ $product_stock->qty }}"
+                                                                max="{{ $product_stock ? $product_stock->qty : ($cartItem['quantity'] ?? 0) }}"
                                                                 onchange="updateQuantity({{ $cartItem->id }}, this)" style="min-width: 45px;">
                                                             <button
                                                                 class="btn col-auto btn-icon btn-sm btn-light rounded-0"
@@ -151,7 +154,7 @@
                                                 </div>
                                                 <!-- Total -->
                                                 <div class="mr-2 mt-2 mt-xl-0">
-                                                    <span class="fw-700 fs-14 text-primary">{{ single_price(cart_product_price($cartItem, $product, false) * $cartItem->quantity) }}</span>
+                                                    <span class="fw-700 fs-14 text-primary">{{ single_price((isset($cartItem['price']) && $cartItem['price'] > 0) ? $cartItem['price'] : cart_product_price($cartItem, $product, false, true) * $cartItem->quantity) }}</span>
                                                 </div>
                                             </div>
                                             <!-- Remove From Cart -->
@@ -194,7 +197,10 @@
                                             $product = get_single_product($product_id);
                                             $cartItem = $carts->toQuery()->where('product_id', $product_id)->where('variation', $seller_product_variation[$key][$key2])->first();
                                             $product_stock = $product->stocks->where('variant', $cartItem->variation)->first();
-                                            $total = $total + cart_product_price($cartItem, $product, false) * $cartItem->quantity;
+                                            $lineTotal = (isset($cartItem['price']) && $cartItem['price'] > 0)
+                                                ? $cartItem['price']
+                                                : cart_product_price($cartItem, $product, false) * $cartItem->quantity;
+                                            $total += $lineTotal;
                                         @endphp
                                         <li class="list-group-item px-0 border-md-0">
                                             <div class="row gutters-5 align-items-center">
@@ -225,7 +231,7 @@
                                                 <!-- Price & Tax -->
                                                 <div class="col-md col-4 ml-4 ml-sm-0 my-3 my-md-0 d-flex flex-column ml-sm-5 ml-md-0">
                                                     <span class="fs-12 text-secondary">{{ translate('Price')}}</span>
-                                                    <span class="fw-700 fs-14 mb-2">{{ cart_product_price($cartItem, $product, true, false) }}</span>
+                                                    <span class="fw-700 fs-14 mb-2">{{ single_price((isset($cartItem['price']) && $cartItem['price'] > 0) ? ($cartItem['price'] / max(1, $cartItem['quantity'])) : cart_product_price($cartItem, $product, false, false)) }}</span>
                                                     <span>
                                                         <span class="opacity-90 fs-12">{{ translate('Tax')}}: {{ cart_product_tax($cartItem, $product) }}</span>
                                                     </span>
@@ -246,7 +252,7 @@
                                                                     class="col border-0 text-center px-0 fs-14 input-number"
                                                                     placeholder="1" value="{{ $cartItem['quantity'] }}"
                                                                     min="{{ $product->min_qty }}"
-                                                                    max="{{ $product_stock->qty }}"
+                                                                    max="{{ $product_stock ? $product_stock->qty : ($cartItem['quantity'] ?? 0) }}"
                                                                     onchange="updateQuantity({{ $cartItem->id }}, this)" style="min-width: 45px;">
                                                                 <button
                                                                     class="btn col-auto btn-icon btn-sm btn-light rounded-0"
@@ -261,7 +267,7 @@
                                                     </div>
                                                     <!-- Total -->
                                                     <div class="mr-2 mt-2 mt-xl-0">
-                                                        <span class="fw-700 fs-14 text-primary">{{ single_price(cart_product_price($cartItem, $product, false) * $cartItem->quantity) }}</span>
+                                                        <span class="fw-700 fs-14 text-primary">{{ single_price((isset($cartItem['price']) && $cartItem['price'] > 0) ? $cartItem['price'] : cart_product_price($cartItem, $product, false, true) * $cartItem->quantity) }}</span>
                                                     </div>
                                                 </div>
                                                 <!-- Remove From Cart -->
