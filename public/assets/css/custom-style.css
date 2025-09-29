@@ -1,0 +1,16 @@
+/*your custom css goes here*/ 
+/* Restore original flag display */
+.iti__flag {
+    display: inline-block !important;
+}
+
+/* Remove any emoji font overrides */
+.iti__country-list .iti__country .iti__flag-container,
+.iti__selected-flag .iti__flag {
+    font-family: inherit !important;
+}
+
+/* Ensure proper flag sizing */
+.iti__flag-container {
+    padding-right: 12px !important;
+}
