@@ -174,4 +174,9 @@ class Product extends Model
         return $this->unit_price - $this->getPreorderPrice();
     }
 
+    public function priceTiers()
+    {
+        return $this->hasMany(ProductPriceTier::class)->orderBy('min_qty', 'asc');
+    }
+
 }

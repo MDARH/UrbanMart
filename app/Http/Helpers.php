@@ -1343,6 +1343,31 @@ function hex2rgba($color, $opacity = false)
     return (new ColorCodeConverter())->convertHexToRgba($color, $opacity);
 }
 
+if (!function_exists('isDarkColor')) {
+    function isDarkColor($color)
+    {
+        // Remove # if present
+        $color = ltrim($color, '#');
+        
+        // Convert to RGB
+        if (strlen($color) == 3) {
+            $r = hexdec(substr($color, 0, 1) . substr($color, 0, 1));
+            $g = hexdec(substr($color, 1, 1) . substr($color, 1, 1));
+            $b = hexdec(substr($color, 2, 1) . substr($color, 2, 1));
+        } else {
+            $r = hexdec(substr($color, 0, 2));
+            $g = hexdec(substr($color, 2, 2));
+            $b = hexdec(substr($color, 4, 2));
+        }
+        
+        // Calculate luminance using the formula: (0.299*R + 0.587*G + 0.114*B)
+        $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
+        
+        // Return true if dark (luminance < 0.5)
+        return $luminance < 0.5;
+    }
+}
+
 if (!function_exists('isAdmin')) {
     function isAdmin()
     {

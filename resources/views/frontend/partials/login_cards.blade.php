@@ -22,14 +22,14 @@
                 </svg>
             </div>
             <h3 class="welcome-title">{{ translate('Quick Actions') }}</h3>
-            <p class="welcome-subtitle">{{ translate('Manage orders, wishlist, and profile') }}</p>
+            <p class="welcome-subtitle">{{ translate('Manage orders and profile') }}</p>
             <div class="quick-links">
                 <a href="{{ route('purchase_history.index') }}" class="quick-link-item">
                     <i class="las la-box"></i> {{ translate('Orders') }}
                 </a>
-                <a href="{{ route('wishlists.index') }}" class="quick-link-item">
+                {{-- <a href="{{ route('wishlists.index') }}" class="quick-link-item">
                     <i class="las la-heart"></i> {{ translate('Wishlist') }}
-                </a>
+                </a> --}}
                 <a href="{{ route('profile') }}" class="quick-link-item">
                     <i class="las la-user-circle"></i> {{ translate('Profile') }}
                 </a>

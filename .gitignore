@@ -1,8 +1,6 @@
-.env
 /bootstrap/compiled.php
 
 /node_modules
-/public/storage
 /storage/*.key
 /storage/debugbar
 /vendor
@@ -20,4 +18,4 @@ yarn-error.log
 .idea/
 /nbproject/private/
 /nbproject
-.env
+

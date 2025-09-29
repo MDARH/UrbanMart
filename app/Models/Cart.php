@@ -12,6 +12,29 @@ class Cart extends Model
     protected $guarded = [];
     protected $fillable = ['address_id','price','tax','shipping_cost','discount','product_referral_code','coupon_code','coupon_applied','quantity','user_id','temp_user_id','owner_id','product_id','variation'];
 
+    protected $attributes = [
+        'tax' => 0.00,
+        'price' => 0.00,
+        'shipping_cost' => 0.00,
+        'discount' => 0.00
+    ];
+
+    protected $casts = [
+        'tax' => 'decimal:2',
+        'price' => 'decimal:2',
+        'shipping_cost' => 'decimal:2',
+        'discount' => 'decimal:2',
+    ];
+
+    /**
+     * Set the tax attribute.
+     * Ensures tax is never null by setting default value.
+     */
+    public function setTaxAttribute($value)
+    {
+        $this->attributes['tax'] = $value ?? 0.00;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
