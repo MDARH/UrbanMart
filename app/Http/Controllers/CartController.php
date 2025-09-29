@@ -146,6 +146,22 @@ class CartController extends Controller
         $price = CartUtility::get_price($product, $product_stock, $request->quantity);
         $tax = CartUtility::tax_calculation($product, $price);
 
+        // If the frontend sends a grand_total_display, use it as the cart price
+        // and set tax to 0 to avoid double-calculation, since the value is already
+        // a final total meant for display in the modal.
+        if ($request->has('grand_total_display')) {
+            $grandTotal = $request->input('grand_total_display');
+            if (is_string($grandTotal)) {
+                // Sanitize any formatted currency string (e.g., "৳ 1,234.50")
+                $grandTotal = preg_replace('/[^\d.\-]/', '', $grandTotal);
+            }
+            $grandTotal = floatval($grandTotal);
+            if ($grandTotal >= 0) {
+                $price = $grandTotal;
+                $tax = 0;
+            }
+        }
+
         CartUtility::save_cart_data($cart, $product, $price, $tax, $quantity);
 
         if($authUser != null) {

@@ -154,6 +154,9 @@
             <input type="hidden" name="id" value="{{ $detailedProduct->id }}">
             <input type="hidden" name="quantity" value="0">
 
+            <!-- Hidden input to send correct grand total to cart modal -->
+            <input type="hidden" name="grand_total_display" value="0">
+
             <!-- Professional Price Breakdown Box -->
             <div class="p-3 mt-3 border rounded-lg d-none" id="chosen_price_div" style="max-width: calc(100% - 145px);">
                 <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
@@ -374,15 +377,11 @@
             const row = $(this);
             const originalPrice = parseFloat(row.data('original-price'));
             const unitPrice = activeTierPrice !== null ? activeTierPrice : originalPrice;
-
             row.find('.unit-price').text('৳ ' + unitPrice.toFixed(2));
 
             if (row.find('.quantity-control').hasClass('active')) {
                 const quantity = parseInt(row.find('.quantity-input').val()) || 0;
-
-                // ***** CHANGE HERE: Show only the base total price in the total price column *****
                 row.find('.total-price').text('৳ ' + (unitPrice * quantity).toFixed(2));
-
                 totalBaseSubtotal += quantity * unitPrice;
             } else {
                 row.find('.total-price').text('৳ 0.00');
@@ -409,12 +408,6 @@
 
         $('input[name="quantity"]').val(totalQuantity);
         saveCartState();
-    }
-
-    function calculateEffectiveUnitPrice(basePrice) {
-        if (basePrice <= 0) return 0;
-        const unitDiscounted = basePrice - (basePrice * GLOBAL_DISCOUNT_PERCENT / 100);
-        return unitDiscounted + (unitDiscounted * GLOBAL_TAX_PERCENT / 100);
     }
 
     function addToCartRow(button, initialQty = 1) {
@@ -478,6 +471,11 @@
             AIZ.plugins.notify('warning', '{{ translate('Please select at least one item') }}');
             return;
         }
+
+        const grandTotalText = $('#chosen_grand_total').text();
+        const grandTotalValue = grandTotalText.replace(/[^0-9.-]+/g, "");
+        $('input[name="grand_total_display"]').val(grandTotalValue);
+
         setHiddenSelectedItems(selectedItems);
         addToCart();
     }
@@ -488,6 +486,11 @@
             AIZ.plugins.notify('warning', '{{ translate('Please select at least one item') }}');
             return;
         }
+
+        const grandTotalText = $('#chosen_grand_total').text();
+        const grandTotalValue = grandTotalText.replace(/[^0-9.-]+/g, "");
+        $('input[name="grand_total_display"]').val(grandTotalValue);
+
         setHiddenSelectedItems(selectedItems);
         buyNow();
     }
