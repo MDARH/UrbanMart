@@ -18,10 +18,13 @@ class CartUtility
         if (isset($product->choice_options) && count(json_decode($product->choice_options)) > 0) {
             //Gets all the choice values of customer choice option and generate a string like Black-S-Cotton
             foreach (json_decode($product->choice_options) as $key => $choice) {
-                if ($str != null) {
-                    $str .= '-' . str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
-                } else {
-                    $str .= str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
+                $attribute_key = 'attribute_id_' . $choice->attribute_id;
+                if (isset($request[$attribute_key])) {
+                    if ($str != null) {
+                        $str .= '-' . str_replace(' ', '', $request[$attribute_key]);
+                    } else {
+                        $str .= str_replace(' ', '', $request[$attribute_key]);
+                    }
                 }
             }
         }
@@ -30,12 +33,18 @@ class CartUtility
 
     public static function get_price($product, $product_stock, $quantity)
     {
-        $price = $product_stock->price;
+        // Check if product_stock is null and fallback to product price
+        if ($product_stock === null) {
+            $price = $product->unit_price ?? 0;
+        } else {
+            $price = $product_stock->price;
+        }
+        
         if ($product->auction_product == 1) {
             $price = $product->bids->max('amount');
         }
 
-        if ($product->wholesale_product) {
+        if ($product->wholesale_product && $product_stock !== null) {
             $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $quantity)
                 ->where('max_qty', '>=', $quantity)
                 ->first();

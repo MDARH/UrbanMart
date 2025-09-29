@@ -218,7 +218,7 @@ class CartController extends Controller
                     'message' => translate('This auction product is already added to your cart.')
                 ], 200);
             }
-            if ($product_stock->qty < $cart->quantity + $request['quantity']) {
+            if ($product_stock !== null && $product_stock->qty < $cart->quantity + $request['quantity']) {
                 if ($product_stock->qty == 0) {
                     return response()->json([
                         'result' => false,
