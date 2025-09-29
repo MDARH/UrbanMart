@@ -65,7 +65,14 @@
             @elseif (Auth::check() && !isCustomer())
                 AIZ.plugins.notify('warning', '{{ translate("Sorry, Only customers can ask questions.") }}');
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+$('#customerAuthModal').modal('show');
             @endif
         }
+
+// Mohammad Hassan
+// Mohammad Hassan
+    function showLoginModal() {
+        showUserTypeModal();
+    }
 </script>

@@ -1932,6 +1932,9 @@
 
     @include('frontend.partials.account_delete_modal')
 
+    {{-- Mohammad Hassan --}}
+    @include('frontend.partials.user_type_modal')
+
     <div class="modal fade" id="addToCart">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-zoom product-modal" id="modal-size" role="document">
             <div class="modal-content position-relative">
@@ -2227,8 +2230,9 @@
             });
         }
 
+        // Mohammad Hassan
         function showLoginModal() {
-            $('#login_modal').modal();
+            showUserTypeModal();
         }
 
         function addToCompare(id){
@@ -2439,7 +2443,8 @@
             @elseif (Auth::check() && isAdmin())
                 AIZ.plugins.notify('warning', '{{ translate('Sorry, Only customers & Sellers can Bid.') }}');
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+                $('#customerAuthModal').modal('show');
             @endif
         }
 

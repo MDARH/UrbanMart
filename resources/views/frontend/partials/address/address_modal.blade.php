@@ -12,10 +12,42 @@
                 @csrf
                 <div class="modal-body c-scrollbar-light">
                     <div class="p-3">
+                        <!-- Name -->
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label>{{ translate('Name')}} <span class="text-danger">*</span></label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Full Name')}}" name="name" required>
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <label>{{ translate('Phone')}} <span class="text-danger">*</span></label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="tel" class="form-control rounded-0" placeholder="01XXXXXXXXX" name="phone" autocomplete="off" required pattern="01[0-9]{9}" maxlength="11" title="Phone number must be 11 digits starting with 01">
+                            </div>
+                        </div>
+
+                        <!-- City (Dropdown for Bangladesh) -->
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label>{{ translate('City')}} <span class="text-danger">*</span></label>
+                            </div>
+                            <div class="col-md-10">
+                                <select class="form-control mb-3 aiz-selectpicker rounded-0" data-live-search="true" name="city_id" id="city_id" required>
+                                    <option value="">{{ translate('Select City') }}</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <!-- Address -->
                         <div class="row">
                             <div class="col-md-2">
-                                <label>{{ translate('Address')}}</label>
+                                <label>{{ translate('Address')}} <span class="text-danger">*</span></label>
                             </div>
                             <div class="col-md-10">
                                 <textarea class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Address')}}" rows="2" name="address" required></textarea>
@@ -55,16 +87,6 @@
                             </div>
                         </div>
                         @endif
-
-                        <!-- City (Optional) -->
-                        <div class="row ">
-                            <div class="col-md-2">
-                                <label>{{ translate('City')}} <span class="text-muted">({{ translate('Optional') }})</span></label>
-                            </div>
-                            <div class="col-md-10">
-                                <input type="text" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your City')}}" name="city" value="">
-                            </div>
-                        </div>
 
                          <!--Area-->
                         <div class="row area-field d-none">
@@ -112,23 +134,13 @@
                         @endif
 
                         <!-- Postal code -->
-                        <div class="row">
+                        {{-- Mohammad Hassan - Hid postal code row --}}
+                        <div class="row" style="display: none;">
                             <div class="col-md-2">
                                 <label>{{ translate('Postal code')}}</label>
                             </div>
                             <div class="col-md-10">
-                                <input type="text" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Postal Code')}}" name="postal_code" value="" required>
-                            </div>
-                        </div>
-
-                        <!-- Phone -->
-                        <div class="row mb-3">
-                            <div class="col-md-2">
-                                <label>{{ translate('Phone')}}</label>
-                            </div>
-                            <div class="col-md-10">
-                                <input type="tel" id="phone-code" class="form-control rounded-0" placeholder="" name="phone" autocomplete="off" required>
-                                <input type="hidden" name="country_code" value="">
+                                <input type="text" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Postal Code')}}" name="postal_code" value="" style="display: none;">
                             </div>
                         </div>
 
@@ -142,6 +154,41 @@
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    // Mohammad Hassan - Load Bangladesh cities (country_id = 18) when modal opens
+    function loadBangladeshCities() {
+        $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            url: "{{route('get-city-by-country')}}",
+            type: 'POST',
+            data: {
+                country_id: 18 // Bangladesh country ID
+            },
+            success: function (response) {
+                var obj = JSON.parse(response);
+                if(obj != '' && $('<select></select>').html(obj).find('option').length > 1) {
+                    $('#city_id').html(obj);
+                    $('#city_id').attr('disabled', false);
+                    AIZ.plugins.bootstrapSelect('refresh');
+                } else {
+                    $('#city_id').html('<option value="">{{ translate('No cities available') }}</option>');
+                    $('#city_id').attr('disabled', true);
+                    AIZ.plugins.bootstrapSelect('refresh');
+                }
+            }
+        });
+    }
+
+    // Load cities when new address modal opens
+    $('#new-address-modal').on('shown.bs.modal', function () {
+        loadBangladeshCities();
+    });
+});
+</script>
 
 <!-- Edit Address Modal -->
 <div class="modal fade" id="edit-address-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

@@ -242,7 +242,9 @@
                     }
                 });
             @else
-                openUserLogin(); // Use the auth modal system
+                // Mohammad Hassan - Use customer login for checkout
+                // Mohammad Hassan
+showUserTypeModal(); // Show user type selection modal
             @endif
         });
 

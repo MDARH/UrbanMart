@@ -1,4 +1,5 @@
 <div class="p-3">
+    <!-- Mohammad Hassan -->
     <!-- Name -->
     <div class="row">
         <div class="col-md-2 mt-md-2">
@@ -9,6 +10,7 @@
         </div>
     </div>
 
+    <!-- Mohammad Hassan -->
     <!-- Phone Number with Country Code -->
     <div class="row">
         <div class="col-md-2 mt-md-2">
@@ -20,20 +22,12 @@
         </div>
     </div>
 
-    <!-- Email (Optional) -->
-    <div class="row">
-        <div class="col-md-2 mt-md-2">
-            <label>{{ translate('Email')}} <span class="text-muted">({{ translate('Optional') }})</span></label>
-        </div>
-        <div class="col-md-10">
-            <input type="email" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Email Address')}}" name="email" value="">
-        </div>
-    </div>
-
-    <!-- Country - Mohammad Hassan: Set Bangladesh as default -->
+    <!-- Mohammad Hassan -->
+    <!-- Country - Set Bangladesh as default -->
     <input type="hidden" name="country_id" value="18">
 
-    <!-- City - Mohammad Hassan: Renamed from District, loads all Bangladesh cities -->
+    <!-- Mohammad Hassan -->
+    <!-- City - Dropdown for Bangladesh cities -->
     <div class="row">
         <div class="col-md-2 mt-md-2">
             <label>{{ translate('City')}} <span class="text-danger">*</span></label>
@@ -45,6 +39,7 @@
         </div>
     </div>
 
+    <!-- Mohammad Hassan -->
     <!-- Address -->
     <div class="row">
         <div class="col-md-2 mt-md-2">
@@ -52,6 +47,17 @@
         </div>
         <div class="col-md-10">
             <textarea class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Full Address')}}" rows="3" name="address" required></textarea>
+        </div>
+    </div>
+    
+    <!-- Mohammad Hassan -->
+    <!-- Email (Optional) - Moved after address -->
+    <div class="row">
+        <div class="col-md-2 mt-md-2">
+            <label>{{ translate('Email')}} <span class="text-muted">({{ translate('Optional') }})</span></label>
+        </div>
+        <div class="col-md-10">
+            <input type="email" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Email Address')}}" name="email" value="">
         </div>
     </div>
 
@@ -116,7 +122,9 @@
     <div class="col-md-10">
         <div class="bg-soft-info p-2">
             {{ translate('If you have already used the same email address or phone number before, please ') }}
-            <a href="javascript:void(0);" onclick="openUserLogin()" class="fw-700 animate-underline-primary">{{ translate('Login') }}</a>
+            {{-- Mohammad Hassan --}}
+                    <!-- Mohammad Hassan -->
+<a href="javascript:void(0);" onclick="showUserTypeModal()" class="fw-700 animate-underline-primary">{{ translate('Login') }}</a>
             {{ translate(' first to continue') }}
         </div>
     </div>

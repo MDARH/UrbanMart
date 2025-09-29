@@ -9,7 +9,7 @@ class Address extends Model
 {
     use PreventDemoModeChanges;
 
-    protected $fillable = ['set_default'];
+    // Mohammad Hassan\n    protected $fillable = ['set_default', 'name'];
 
     public function user()
     {
@@ -20,12 +20,12 @@ class Address extends Model
     {
         return $this->belongsTo(Country::class);
     }
-    
+
     public function state()
     {
         return $this->belongsTo(State::class);
     }
-    
+
     public function city()
     {
         return $this->belongsTo(City::class);

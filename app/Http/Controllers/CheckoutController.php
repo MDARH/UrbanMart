@@ -49,7 +49,8 @@ class CheckoutController extends Controller
         if (auth()->check()) {
             $user_id = Auth::user()->id;
             $carts = Cart::where('user_id', $user_id)->active()->get();
-            $addresses = Address::where('user_id', $user_id)->get();
+            // Mohammad Hassan - Added eager loading for city relationship to fix empty city field issue
+            $addresses = Address::where('user_id', $user_id)->with('city')->get();
             if(count($addresses)){
                 $address = $addresses->toQuery()->first();
                 $address_id = $address->id;
@@ -132,7 +133,8 @@ class CheckoutController extends Controller
                 }
             }
 
-            return view('frontend.checkout', compact('carts', 'address_id', 'total', 'carrier_list', 'shipping_info', 'has_preorder_products'));
+            // Mohammad Hassan - Pass eager-loaded addresses to view to fix city relationship loading
+        return view('frontend.checkout', compact('carts', 'addresses', 'address_id', 'total', 'carrier_list', 'shipping_info', 'has_preorder_products'));
         }
         flash(translate('Please Select cart items to Proceed'))->error();
         return back();
@@ -178,7 +180,7 @@ class CheckoutController extends Controller
         // Check for out-of-stock products and handle pre-orders
         $out_of_stock_products = [];
         $in_stock_carts = [];
-        
+
         foreach ($carts as $cartItem) {
             $product = Product::find($cartItem['product_id']);
             if ($product && $product->isOutOfStock() && $product->isPreorderAvailable()) {
@@ -193,7 +195,7 @@ class CheckoutController extends Controller
             // Store shipping info and payment method in session for preorder processing
             $request->session()->put('preorder_payment_method', $request->payment_option);
             $request->session()->put('preorder_shipping_info', $request->except('_token', 'payment_option'));
-            
+
             // Create preorders for out-of-stock products
             $preorderController = new \App\Http\Controllers\Preorder\PreorderController();
             return $preorderController->create_preorder_from_cart($request);
@@ -332,7 +334,7 @@ class CheckoutController extends Controller
         // For guest checkout, don't automatically log in the user
         // This allows true guest checkout without authentication
         // auth()->login($user); // Commented out for guest checkout
-        
+
         // Store user ID in session for order processing without authentication
         Session::put('guest_user_id', $user->id);
 
@@ -354,14 +356,14 @@ class CheckoutController extends Controller
             $order->save();
 
             // Order paid notification to Customer, Seller, & Admin
-            EmailUtility::order_email($order, 'paid'); 
-            
+            EmailUtility::order_email($order, 'paid');
+
             // Calculate Commission from seller, Customer Affiliate earning and Customers Club Point
             calculateCommissionAffilationClubPoint($order);
         }
         Session::put('combined_order_id', $combined_order_id);
     }
-    
+
     //redirects to this method after a successfull checkout
     public function checkout_done($combined_order_id, $payment)
     {
@@ -375,9 +377,9 @@ class CheckoutController extends Controller
                 'user_id' => auth()->id()
             ]
         ]);
-        
+
         $combined_order = CombinedOrder::findOrFail($combined_order_id);
-        
+
         \Log::info('Combined Order Found', [
             'combined_order_id' => $combined_order->id,
             'grand_total' => $combined_order->grand_total,
@@ -386,32 +388,32 @@ class CheckoutController extends Controller
 
         foreach ($combined_order->orders as $key => $order) {
             $order = Order::findOrFail($order->id);
-            
+
             \Log::info('Processing Order', [
                 'order_id' => $order->id,
                 'order_code' => $order->code,
                 'current_payment_status' => $order->payment_status,
                 'grand_total' => $order->grand_total
             ]);
-            
+
             $order->payment_status = 'paid';
             $order->payment_details = $payment;
             $order->save();
-            
+
             \Log::info('Order Payment Status Updated', [
                 'order_id' => $order->id,
                 'new_payment_status' => $order->payment_status
             ]);
 
             // Order paid notification to Customer, Seller, & Admin
-            EmailUtility::order_email($order, 'paid'); 
-            
+            EmailUtility::order_email($order, 'paid');
+
             // Calculate Commission from seller, Customer Affiliate earning and Customers Club Point
             calculateCommissionAffilationClubPoint($order);
         }
-        
+
         \Log::info('All Orders Processed Successfully', ['combined_order_id' => $combined_order_id]);
-        
+
         Session::put('combined_order_id', $combined_order_id);
         return redirect()->route('order_confirmed');
     }
@@ -466,12 +468,12 @@ class CheckoutController extends Controller
                 $required_fields_missing = $request->name == null || $request->email == null || $request->address == null ||
                     $request->country_id == null || $request->city_id == null ||
                     $request->postal_code == null || $request->phone == null;
-                
+
                 // For countries other than Bangladesh, state_id is still required
                 if($request->country_id != 18 && $request->state_id == null) {
                     $required_fields_missing = true;
                 }
-                
+
                 if($required_fields_missing) {
                     flash(translate("Please add shipping address"))->warning();
                     return redirect()->route('checkout.shipping_info');
@@ -800,7 +802,7 @@ class CheckoutController extends Controller
                     Address::findOrFail($request->address_id)->area_id :
                     $request->area_id;
 
-                    
+
         $shipping_info['country_id'] = $country_id;
         $shipping_info['city_id'] = $city_id;
         $shipping_info['area_id'] = $area_id;
@@ -869,7 +871,7 @@ class CheckoutController extends Controller
                     Address::findOrFail($carts[0]->address_id)->area_id : $request->area_id;
         $shipping_info['country_id'] = $country_id;
         $shipping_info['city_id'] = $city_id;
-        $shipping_info['area_id'] = $area_id;   
+        $shipping_info['area_id'] = $area_id;
         $shipping_type = $request->shipping_type;
         foreach ($user_carts as $key => $cartItem) {
             if ($shipping_type != 'carrier' || $shipping_type == 'pickup_point') {

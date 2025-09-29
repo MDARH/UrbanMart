@@ -58,6 +58,9 @@
             });
         }
 
+        // Mohammad Hassan
+        // Removed auto-opening of Customer Login modal on cart page for guests. Modal opens only when clicking "Proceed to Checkout".
+
         // coupon apply
         $(document).on("click", "#coupon-apply", function() {
             @if (Auth::check())
@@ -83,7 +86,8 @@
                     }
                 });
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+                // Removed auto-opening of Customer Login modal on cart page for guests while applying coupon.
             @endif
         });
 

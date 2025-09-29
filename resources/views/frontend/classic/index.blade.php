@@ -164,31 +164,13 @@
                     <!-- Middle Slider Column End-->
 
                     <!-- Login Cards Container (Right Side) -->
-                    <div class="login-cards-container">
-                        <div class="login-card user-login" onclick="openUserLogin()">
-                            <div class="icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20"
-                                    style="width: 80% !important;" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <h3>User Login</h3>
-                            <p>Access your account, track orders, and manage your profile</p>
-                        </div>
-                        <div class="login-card wholesaler-login" onclick="openWholesalerLogin()">
-                            <div class="icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none"
-                                    viewBox="0 0 24 24" style="width: 80% !important;" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <h3>Wholesaler Login</h3>
-                            <p>Get wholesale prices, bulk discounts, and business solutions</p>
-                        </div>
-                    </div>
+                    {{-- Mohammad Hassan --}}
+                    @include('frontend.partials.login_cards', [
+                        'userLoginFunction' => 'openCustomerLogin',
+                        'wholesalerLoginFunction' => 'openWholesalerLogin',
+                        'customerLoginTitle' => 'User Login',
+                        'wholesalerLoginTitle' => 'Wholesaler Login'
+                    ])
 
                 </section>
 
@@ -739,7 +721,7 @@
 
         <!-- NEW: Authentication Modal (for both Login and Register) -->
         {{-- @includeIf('frontend.classic.partials.authentication') --}}
-        @include('auth.modals')
+        {{-- Mohammad Hassan - Removed deprecated auth.modals include --}}
         <!-- End NEW: Authentication Modal -->
     </div> {{-- NEW: End of dynamic-content-wrapper --}}
 

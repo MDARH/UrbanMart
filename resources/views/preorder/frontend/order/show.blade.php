@@ -376,7 +376,7 @@
                                                             </div>
                                                             @endif
                                                         </div>
-                
+
                                                     <div class="form-section preorder-border-dashed-grey p-4 rounded-2">
                                                         @if($order->final_order_status == 0 && $order->preorder_product?->is_cod)
                                                         <div class="form-group row">
@@ -455,7 +455,7 @@
                                                                 <div class="form-group ">
                                                                     <label class="col-form-label"
                                                                         for="signinSrEmail">{{translate('Note')}}</label>
-                
+
                                                                     <textarea name="final_payment_confirm_note" rows="4"
                                                                         class="form-control" ></textarea>
                                                                 </div>
@@ -947,7 +947,8 @@ function stepCompletionShippingInfo() {
             @elseif (Auth::check() && !isCustomer())
                 AIZ.plugins.notify('warning', '{{ translate("Sorry, Only customers can give review.") }}');
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+$('#customerAuthModal').modal('show');
             @endif
         }
 
@@ -971,8 +972,14 @@ function stepCompletionShippingInfo() {
             @elseif (Auth::check() && !isCustomer())
                 AIZ.plugins.notify('warning', '{{ translate("Sorry, Only customers can give review.") }}');
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+                $('#customerAuthModal').modal('show');
             @endif
+        }
+
+        // Mohammad Hassan
+        function showLoginModal() {
+            $('#customerAuthModal').modal('show');
         }
 
         // hide prepayment fields

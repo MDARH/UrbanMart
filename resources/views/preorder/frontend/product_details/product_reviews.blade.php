@@ -74,7 +74,8 @@
             @elseif (Auth::check() && !isCustomer())
                 AIZ.plugins.notify('warning', '{{ translate("Sorry, Only customers can give review.") }}');
             @else
-                $('#login_modal').modal('show');
+                // Mohammad Hassan
+                $('#customerAuthModal').modal('show');
             @endif
         }
 </script>
