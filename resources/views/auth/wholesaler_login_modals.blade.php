@@ -331,8 +331,9 @@ function submitWholesalerRegistration() {
     })
     .then(response => response.json())
     .then(data => {
+        // Mohammad Hassan
         if (data.result) {
-            alert('{{ translate("Registration successful! Your account is pending approval.") }}');
+            AIZ.plugins.notify('success', '{{ translate("Registration successful! Your account is pending approval.") }}');
             $('#wholesalerAuthModal').modal('hide');
             form.reset();
             // Redirect to login or refresh page
@@ -340,19 +341,20 @@ function submitWholesalerRegistration() {
         } else {
             if (typeof data.message === 'object') {
                 // Handle validation errors
-                let errorMessage = '{{ translate("Please fix the following errors:") }}\n';
+                let errorMessage = '{{ translate("Please fix the following errors:") }}<br>';
                 Object.keys(data.message).forEach(key => {
-                    errorMessage += '- ' + data.message[key].join(', ') + '\n';
+                    errorMessage += '• ' + data.message[key].join(', ') + '<br>';
                 });
-                alert(errorMessage);
+                AIZ.plugins.notify('danger', errorMessage);
             } else {
-                alert(data.message || '{{ translate("Registration failed. Please try again.") }}');
+                AIZ.plugins.notify('danger', data.message || '{{ translate("Registration failed. Please try again.") }}');
             }
         }
     })
     .catch(error => {
+        // Mohammad Hassan
         console.error('Error:', error);
-        alert('{{ translate("An error occurred. Please try again.") }}');
+        AIZ.plugins.notify('danger', '{{ translate("An error occurred. Please try again.") }}');
     })
     .finally(() => {
         // Reset button state
