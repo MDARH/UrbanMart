@@ -27,20 +27,66 @@
             ->values(); // Sorting high to low is key for the JS logic
         $price_tiers_json = json_encode($tiers);
     }
+
+    // Mohammad Hassan - Calculate base and discounted prices for display
+    $base_price = $detailedProduct->unit_price;
+    $discounted_price = $base_price;
+    if ($detailedProduct->discount_type == 'percent' && $detailedProduct->discount > 0) {
+        $discounted_price = $base_price - ($base_price * $detailedProduct->discount / 100);
+    } elseif ($detailedProduct->discount_type == 'amount' && $detailedProduct->discount > 0) {
+        $discounted_price = $base_price - $detailedProduct->discount;
+    }
+    $has_discount = $base_price > $discounted_price;
 @endphp
 
 <div class="text-left">
     <!-- Product Name -->
-    <h2 class="mb-2 fs-18 fw-800 text-dark">
+    <h2 class="mb-3 fs-20 fw-800 text-dark">
         {{ $detailedProduct->getTranslation('name') }}
     </h2>
+
+    <!-- Mohammad Hassan - Enhanced Price Display Section -->
+    <div class="price-section mb-4 p-3 bg-light rounded-lg border" style="max-width: calc(100% - 145px);">
+        <div class="d-flex align-items-center flex-wrap">
+            @if($has_discount)
+                <div class="mr-3 mb-2">
+                    <span class="fs-24 fw-700 text-primary">৳{{ number_format($discounted_price, 2) }}</span>
+                    <small class="text-muted ml-1">{{ translate('Discounted Price') }}</small>
+                </div>
+                <div class="mr-3 mb-2">
+                    <del class="fs-18 fw-500 text-muted">৳{{ number_format($base_price, 2) }}</del>
+                    <small class="text-muted ml-1">{{ translate('Original Price') }}</small>
+                </div>
+                <div class="mb-2">
+                    <span class="badge badge-danger fs-12 fw-600">
+                        {{ $detailedProduct->discount_type == 'percent' ? $detailedProduct->discount.'% OFF' : '৳'.$detailedProduct->discount.' OFF' }}
+                    </span>
+                </div>
+            @else
+                <div class="mr-3 mb-2">
+                    <span class="fs-24 fw-700 text-primary">৳{{ number_format($base_price, 2) }}</span>
+                    <small class="text-muted ml-1">{{ translate('Price') }}</small>
+                </div>
+            @endif
+        </div>
+        
+        @if($detailedProduct->tax > 0)
+            <div class="mt-2">
+                <small class="text-info">
+                    <i class="fas fa-info-circle"></i>
+                    {{ translate('Tax') }}: {{ $detailedProduct->tax_type == 'percent' ? $detailedProduct->tax.'%' : '৳'.$detailedProduct->tax }}
+                </small>
+            </div>
+        @endif
+    </div>
+
     <hr>
 
     <!-- Dynamic Color Section -->
     @if ($detailedProduct->colors != null && count(json_decode($detailedProduct->colors)) > 0)
         <div class="mb-4">
-            <h5 class="mb-3">{{ translate('Color') }} :
-                <span
+            <h5 class="mb-3 fs-16 fw-600">{{ translate('Color') }} :
+                <span class="text-primary fw-700"
                     id="selected-color-name">{{ get_single_color_name(json_decode($detailedProduct->colors)[0]) }}</span>
             </h5>
             <div class="d-flex flex-wrap" id="color-options">
@@ -69,23 +115,26 @@
             Auth::user()->user_type == 'wholesaler' &&
             $detailedProduct->priceTiers &&
             count($detailedProduct->priceTiers) > 0)
-        <div class="d-flex flex-wrap mb-3" id="price-tier-options"
-            style="gap: 12px; justify-content: flex-start; margin-right: 145px;">
-            @foreach (collect($detailedProduct->priceTiers)->sortBy('min_qty') as $key => $tier)
-                <div class="price-tier-item text-center rounded-lg p-3 mb-2" data-price="{{ $tier->price }}"
-                    data-min-qty="{{ $tier->min_qty }}" onclick="selectPriceTier(this)"
-                    style="flex: 1 1 calc(25% - 12px); min-width: 110px;">
-                    <div class="fs-18 fw-600">৳{{ $tier->price }}</div>
-                    <div class="fs-13">{{ $tier->min_qty }} or more</div>
-                </div>
-            @endforeach
+        <div class="mb-4">
+            <h5 class="mb-3 fs-16 fw-600">{{ translate('Wholesale Price Tiers') }}</h5>
+            <div class="d-flex flex-wrap mb-3" id="price-tier-options"
+                style="gap: 12px; justify-content: flex-start; margin-right: 145px;">
+                @foreach (collect($detailedProduct->priceTiers)->sortBy('min_qty') as $key => $tier)
+                    <div class="price-tier-item text-center rounded-lg p-3 mb-2" data-price="{{ $tier->price }}"
+                        data-min-qty="{{ $tier->min_qty }}" onclick="selectPriceTier(this)"
+                        style="flex: 1 1 calc(25% - 12px); min-width: 110px;">
+                        <div class="fs-18 fw-600">৳{{ $tier->price }}</div>
+                        <div class="fs-13">{{ $tier->min_qty }} or more</div>
+                    </div>
+                @endforeach
+            </div>
         </div>
     @endif
     {{-- END: DYNAMIC PRICE TIERS --}}
 
     <!-- Size/Variant Table -->
     <div class="mb-4">
-        <h5 class="mb-3">{{ translate('Model/Size') }}</h5>
+        <h5 class="mb-3 fs-16 fw-600">{{ translate('Model/Size') }}</h5>
         <div class="size-table-container"
             style="max-height: 300px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px;margin-right: 145px;">
             <table class="table table-bordered mb-0" id="sizeTable">
@@ -155,7 +204,8 @@
             <input type="hidden" name="quantity" value="0">
 
             <!-- Professional Price Breakdown Box -->
-            <div class="p-3 mt-3 border rounded-lg d-none" id="chosen_price_div" style="max-width: calc(100% - 145px);">
+            <div class="p-4 mt-3 border rounded-lg d-none bg-white shadow-sm" id="chosen_price_div" style="max-width: calc(100% - 145px);">
+                <h6 class="mb-3 fs-16 fw-600 text-dark">{{ translate('Order Summary') }}</h6>
                 <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
                     <div class="text-secondary fs-14 fw-400">{{ translate('Total Quantity') }}</div>
                     <strong id="chosen_quantity" class="fs-16 fw-600 text-dark">0</strong>
@@ -174,25 +224,35 @@
                     <div class="text-secondary fs-14 fw-400">{{ translate('Tax') }}</div>
                     <strong id="chosen_tax_value" class="fs-16 fw-600 text-success">+ ৳ 0.00</strong>
                 </div>
-                <div class="d-flex justify-content-between mb-2 pt-1">
-                    <div class="text-secondary fs-16 fw-600">{{ translate('Grand Total') }}</div>
-                    <strong id="chosen_grand_total" class="fs-22 fw-700 text-primary">৳ 0.00</strong>
+                <div class="d-flex justify-content-between mb-2 pt-2">
+                    <div class="text-secondary fs-18 fw-600">{{ translate('Grand Total') }}</div>
+                    <strong id="chosen_grand_total" class="fs-24 fw-700 text-primary">৳ 0.00</strong>
                 </div>
             </div>
         </form>
     @endif
 
-    {{-- Purchase Buttons --}}
+    {{-- Mohammad Hassan - Enhanced Purchase Buttons --}}
     @if (!$detailedProduct->auction_product)
-        <div class="mt-3">
-            <button type="button" class="btn btn-info mr-2 add-to-cart fw-600 min-w-150px rounded-0 text-white"
-                @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCartFromTable()" @else onclick="showLoginModal()" @endif>
-                <i class="las la-shopping-bag"></i> {{ translate('Add to cart') }}
-            </button>
-            <button type="button" class="btn btn-dark mr-2 buy-now fw-600 add-to-cart min-w-150px rounded-0"
-                @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="buyNowFromTable()" @else onclick="showLoginModal()" @endif>
-                <i class="la la-shopping-cart"></i> {{ translate('Buy Now') }}
-            </button>
+        <div class="mt-4 mb-3">
+            <div class="d-flex flex-wrap gap-3">
+                <button type="button" class="btn btn-info add-to-cart fw-600 px-4 py-2 rounded-lg text-white"
+                    style="min-width: 160px; background: #17a2b8; border: none;"
+                    @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCartFromTable()" @else onclick="showLoginModal()" @endif>
+                    <i class="las la-shopping-bag mr-1"></i> {{ translate('Add to Cart') }}
+                </button>
+                <button type="button" class="btn btn-primary buy-now fw-600 px-4 py-2 rounded-lg"
+                    style="min-width: 160px; background: #3D52A0; border: none;"
+                    @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="buyNowFromTable()" @else onclick="showLoginModal()" @endif>
+                    <i class="la la-shopping-cart mr-1"></i> {{ translate('Buy Now') }}
+                </button>
+            </div>
+            <div class="mt-2">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt text-success"></i>
+                    {{ translate('Secure checkout with multiple payment options') }}
+                </small>
+            </div>
         </div>
         <hr>
     @endif
@@ -210,11 +270,17 @@
 
 <style>
     .price-tier-item {
-        background-color: #f3f3f3;
+        background-color: #f8f9fa;
         color: #333;
-        border: 1px solid #e0e0e0;
+        border: 2px solid #e9ecef;
         cursor: pointer;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .price-tier-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
     .price-tier-item.active {
@@ -222,19 +288,24 @@
         color: white;
         border-color: #3D52A0;
         transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(61, 82, 160, 0.3);
     }
 
     .color-option {
         transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .color-option:hover {
         border-color: #3D52A0 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
     .selected-color {
         border-color: #3D52A0 !important;
         border-width: 2px !important;
+        box-shadow: 0 4px 8px rgba(61, 82, 160, 0.2);
     }
 
     .size-table-container::-webkit-scrollbar {
@@ -243,17 +314,23 @@
 
     .size-table-container::-webkit-scrollbar-track {
         background: #f1f1f1;
+        border-radius: 4px;
     }
 
     .size-table-container::-webkit-scrollbar-thumb {
         background: #3D52A0;
-        border-radius: 10px;
+        border-radius: 4px;
+    }
+
+    .size-table-container::-webkit-scrollbar-thumb:hover {
+        background: #2a3d7a;
     }
 
     .sticky-top {
         position: sticky;
         top: 0;
         z-index: 10;
+        background: #f8f9fa !important;
     }
 
     .quantity-control {
@@ -266,10 +343,34 @@
 
     .add-btn {
         display: block !important;
+        transition: all 0.3s ease;
+    }
+
+    .add-btn:hover {
+        background: #2a3d7a !important;
+        transform: translateY(-1px);
     }
 
     .add-btn.hidden {
         display: none !important;
+    }
+
+    .price-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 4px solid #3D52A0;
+    }
+
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .gap-3 {
+        gap: 1rem;
     }
 </style>
 
@@ -488,8 +589,32 @@
             AIZ.plugins.notify('warning', '{{ translate('Please select at least one item') }}');
             return;
         }
+        
+        // Set hidden fields for selected items
         setHiddenSelectedItems(selectedItems);
-        buyNow();
+        
+        // Mohammad Hassan - Updated buy now to redirect to checkout instead of cart
+        const form = document.getElementById('option-choice-form');
+        const formData = new FormData(form);
+        
+        $.ajax({
+            type: "POST",
+            url: '{{ route('cart.addToCart') }}',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                if (data.status == 1) {
+                    // Redirect directly to checkout page for buy now
+                    window.location.href = "{{ route('checkout') }}";
+                } else {
+                    AIZ.plugins.notify('danger', data.message || "{{ translate('Something went wrong') }}");
+                }
+            },
+            error: function() {
+                AIZ.plugins.notify('danger', "{{ translate('Something went wrong') }}");
+            }
+        });
     }
 
     $(document).ready(function() {
