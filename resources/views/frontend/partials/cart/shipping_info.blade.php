@@ -13,21 +13,7 @@
         $user = Auth::user();
         $addressesList = ($addresses ?? $user->addresses);
         $user_type = $user->user_type ?? 'unknown';
-        \Log::info('ShippingInfo Debug Start', [
-            'user_id' => $user->id ?? null,
-            'user_type' => $user_type,
-            'addresses_count' => is_iterable($addressesList) ? $addressesList->count() : 0,
-            'address_ids' => is_iterable($addressesList) ? $addressesList->pluck('id')->implode(',') : ''
-        ]);
     @endphp
-
-    @if (request()->has('debug'))
-        <div class="alert alert-info">
-            <div><strong>Debug:</strong> user_id={{ $user->id ?? 'N/A' }}, user_type={{ $user_type }}</div>
-            <div>addresses_count={{ is_iterable($addressesList) ? $addressesList->count() : 0 }}</div>
-            <div>address_ids={{ is_iterable($addressesList) ? $addressesList->pluck('id')->implode(', ') : '' }}</div>
-        </div>
-    @endif
 
     @foreach ($addressesList as $key => $address)
         @php
@@ -56,18 +42,6 @@
                 ($active_area_exists && !$has_area_id) ||
                 ($address->state_id == null && get_setting('has_state') == 1)
             );
-
-            // Mohammad Hassan - Per-address debug logging
-            \Log::info('ShippingInfo Address', [
-                'address_id' => $address->id,
-                'user_id' => $address->user_id,
-                'city_id' => $address->city_id,
-                'area_id' => $address->area_id,
-                'state_id' => $address->state_id,
-                'country_id' => $address->country_id,
-                'is_disabled' => $is_disabled,
-                'city_relation_loaded' => $address->relationLoaded('city')
-            ]);
         @endphp
         <div class="border mb-4 {{ $is_disabled ? ' border-danger' : '' }}">
             <div class="row">
