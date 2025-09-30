@@ -316,9 +316,12 @@ if (!function_exists('cart_product_price')) {
             $product_stock = $product->stocks->where('variant', $str)->first();
             if ($product_stock) {
                 $price = $product_stock->price;
+            } else {
+                // Mohammad Hassan - Fallback to product unit_price if no stock variant found
+                $price = $product->unit_price ?? 0;
             }
 
-            if ($product->wholesale_product) {
+            if ($product->wholesale_product && $product_stock) {
                 $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $cart_product['quantity'])->where('max_qty', '>=', $cart_product['quantity'])->first();
                 if ($wholesalePrice) {
                     $price = $wholesalePrice->price;
@@ -377,11 +380,13 @@ if (!function_exists('cart_product_tax')) {
             $str = $cart_product['variation'];
         }
         $product_stock = $product->stocks->where('variant', $str)->first();
-        if (!$product_stock) {
-            // No matching stock/variant found; treat tax as zero
-            return $formatted ? format_price(convert_price(0)) : 0;
+        
+        // Mohammad Hassan - Handle null product_stock for priceTiers compatibility
+        if ($product_stock === null) {
+            $price = $product->unit_price ?? 0;
+        } else {
+            $price = $product_stock->price;
         }
-        $price = $product_stock->price;
 
         //discount calculation
         $discount_applicable = false;
@@ -429,10 +434,6 @@ if (!function_exists('cart_product_discount')) {
             $str = $cart_product['variation'];
         }
         $product_stock = $product->stocks->where('variant', $str)->first();
-        if (!$product_stock) {
-            // No matching stock/variant found; discount is zero
-            return $formatted ? format_price(convert_price(0)) : 0;
-        }
         $price = $product_stock->price;
 
         //discount calculation
@@ -476,10 +477,6 @@ if (!function_exists('carts_product_discount')) {
                 $str = $cart_product['variation'];
             }
             $product_stock = $product->stocks->where('variant', $str)->first();
-            if (!$product_stock) {
-                // Skip items without valid stock/variant
-                continue;
-            }
             $price = $product_stock->price;
 
             //discount calculation
@@ -2184,14 +2181,6 @@ if (!function_exists('get_best_sellers')) {
         return Cache::remember('best_selers', 86400, function () use ($limit) {
             return Shop::where('verification_status', 1)->orderBy('num_of_sale', 'desc')->take($limit)->get();
         });
-    }
-}
-
-//Get all sellers
-if (!function_exists('get_all_sellers')) {
-    function get_all_sellers()
-    {
-        return User::where('user_type', '=', 'seller')->get();
     }
 }
 

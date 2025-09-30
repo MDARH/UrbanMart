@@ -2,6 +2,35 @@
 
 ## Recent Changes Log
 
+### 2025-10-01 - Product Details & Meta Components Enhancement
+- `resources/views/components/product-meta.blade.php`
+- `resources/views/frontend/product_details.blade.php`
+- `resources/views/frontend/product_details/details.blade.php`
+- `app/Http/Controllers/Api/V2/AuthController.php`
+
+**Improvements Implemented:**
+1. **Product Meta Component**:
+   - Created reusable Blade component for product meta details (Schema.org, Twitter Card, Open Graph)
+   - Extracted meta section from product_details.blade.php into reusable component
+   - Supports dynamic product attributes: meta_title, meta_description, meta_img, unit_price, slug, brand, stock availability
+
+2. **Product Details Page Enhancement**:
+   - Replaced inline meta tags with x-product-meta component for better maintainability
+   - Added prominent price display section showing base price, discounted price, and tax information
+   - Improved UI/UX with better styling for color options, price tiers, and buttons
+   - Enhanced visual hierarchy with proper spacing and typography
+
+3. **Buy Now Functionality**:
+   - Updated buyNowFromTable() function to redirect directly to checkout page instead of cart
+   - Improved user experience for immediate purchase flow
+   - Added proper error handling and user feedback
+
+4. **Wholesaler Registration**:
+   - Added clarifying comment in AuthController.php confirming user_type is set to 'wholesaler' by default
+   - Verified existing functionality works correctly
+
+// Mohammad Hassan
+
 ### 2025-10-01 - Authentication UI Enhancements
 - `resources/views/auth/wholesaler_login_modals.blade.php`
 - `resources/views/auth/customer_login_modals.blade.php`
@@ -129,6 +158,36 @@ All changes include proper commenting with "Mohammad Hassan" as required.\n\n###
 - `resources/views/frontend/partials/cart/shipping_info.blade.php`
 
 **Fixes Applied:**
+
+### 2025-09-29 - Wholesaler Registration Integration Fix
+- `resources/views/auth/wholesaler_login_modals.blade.php`
+
+**Changes Applied:**
+1. **Updated Form Submission Method**:
+   - Removed `action="{{ route('register') }}"` from form to prevent regular form submission
+   - Changed submit button from `type="submit"` to `type="button"` with onclick handler
+   - Added comprehensive AJAX handling for form submission
+
+2. **Added AJAX Registration Function**:
+   - Created `submitWholesalerRegistration()` function to handle form submission
+   - Implemented client-side validation for required fields
+   - Added password confirmation validation
+   - Added terms and conditions checkbox validation
+   - Integrated loading states during submission
+
+3. **API Integration**:
+   - Form now submits to `/api/v2/auth/wholesaler-register` endpoint
+   - Properly hits the `AuthController::wholesalerRegister` method
+   - Ensures `user_type` is correctly set to 'wholesaler'
+   - Added proper error handling and success messages
+
+4. **User Experience Improvements**:
+   - Added visual feedback for invalid fields
+   - Implemented loading state with disabled button during submission
+   - Added success/error alerts with proper translations
+   - Form resets and modal closes on successful registration
+
+**Result**: Wholesaler registration modal now correctly uses the dedicated API endpoint instead of the generic registration route, ensuring proper wholesaler account creation with the correct user type.
 1. **address_edit_modal.blade.php**:
    - Fixed syntax error by correcting escaped HTML and script tags
    - Removed duplicate invalid JavaScript code

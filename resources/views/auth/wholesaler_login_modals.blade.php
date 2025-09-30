@@ -124,7 +124,8 @@
 
                     <!-- Register Tab -->
                     <div class="tab-pane fade" id="wholesaler-register" role="tabpanel">
-                        <form class="form-default" role="form" id="wholesalerRegisterForm" action="{{ route('register') }}" method="POST">
+                        <!-- Mohammad Hassan: Updated form to use API endpoint for wholesaler registration -->
+                        <form class="form-default" role="form" id="wholesalerRegisterForm" method="POST">
                             @csrf
                             <input type="hidden" name="user_type" value="wholesaler">
 
@@ -206,7 +207,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <button type="submit" class="btn btn-primary btn-block fw-600">{{ translate('Create Account') }}</button>
+                                <!-- Mohammad Hassan: Updated button to handle AJAX submission -->
+                                <button type="button" class="btn btn-primary btn-block fw-600" onclick="submitWholesalerRegistration()">{{ translate('Create Account') }}</button>
                             </div>
 
                             <!-- Mohammad Hassan: Google Registration Button -->
@@ -248,5 +250,116 @@ function openWholesalerLogin() {
 function openWholesalerRegister() {
     $('#wholesalerAuthModal').modal('show');
     $('#wholesaler-register-tab').tab('show');
+}
+
+// Mohammad Hassan: AJAX function for wholesaler registration
+function submitWholesalerRegistration() {
+    const form = document.getElementById('wholesalerRegisterForm');
+    const formData = new FormData();
+    
+    // Map form fields to API expected field names
+    formData.append('businessName', form.querySelector('[name="name"]').value);
+    formData.append('email', form.querySelector('[name="email"]').value);
+    formData.append('phone', form.querySelector('[name="phone"]').value);
+    formData.append('address', form.querySelector('[name="address"]').value);
+    formData.append('password', form.querySelector('[name="password"]').value);
+    formData.append('confirmPassword', form.querySelector('[name="password_confirmation"]').value);
+    formData.append('facebookLink', form.querySelector('[name="facebook"]').value || '');
+    formData.append('websiteLink', form.querySelector('[name="website"]').value || '');
+    formData.append('tradeLicense', form.querySelector('[name="trade_license"]').value || '');
+    
+    // Validate required fields
+    const requiredFields = [
+        {name: 'businessName', element: form.querySelector('[name="name"]')},
+        {name: 'email', element: form.querySelector('[name="email"]')},
+        {name: 'phone', element: form.querySelector('[name="phone"]')},
+        {name: 'address', element: form.querySelector('[name="address"]')},
+        {name: 'password', element: form.querySelector('[name="password"]')},
+        {name: 'confirmPassword', element: form.querySelector('[name="password_confirmation"]')}
+    ];
+    
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.element.value.trim()) {
+            isValid = false;
+            field.element.classList.add('is-invalid');
+        } else {
+            field.element.classList.remove('is-invalid');
+        }
+    });
+    
+    // Check if terms checkbox is checked
+    const termsCheckbox = form.querySelector('[name="terms"]');
+    if (!termsCheckbox.checked) {
+        isValid = false;
+        termsCheckbox.closest('.aiz-checkbox').classList.add('text-danger');
+    } else {
+        termsCheckbox.closest('.aiz-checkbox').classList.remove('text-danger');
+    }
+    
+    // Check password confirmation
+    const password = form.querySelector('[name="password"]').value;
+    const passwordConfirmation = form.querySelector('[name="password_confirmation"]').value;
+    if (password !== passwordConfirmation) {
+        isValid = false;
+        form.querySelector('[name="password_confirmation"]').classList.add('is-invalid');
+        alert('{{ translate("Passwords do not match") }}');
+        return;
+    }
+    
+    if (!isValid) {
+        alert('{{ translate("Please fill in all required fields") }}');
+        return;
+    }
+    
+    // Show loading state
+    const submitBtn = document.querySelector('#wholesalerRegisterForm button[onclick="submitWholesalerRegistration()"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '{{ translate("Creating Account...") }}';
+    submitBtn.disabled = true;
+    
+    // Submit via AJAX to API endpoint
+    fetch('/api/v2/auth/wholesaler-register', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Mohammad Hassan
+        if (data.result) {
+            AIZ.plugins.notify('success', '{{ translate("Registration successful! Your account is pending approval.") }}');
+            $('#wholesalerAuthModal').modal('hide');
+            form.reset();
+            // Redirect to login or refresh page
+            window.location.reload();
+        } else {
+            if (typeof data.message === 'object') {
+                // Handle validation errors
+                let errorMessage = '{{ translate("Please fix the following errors:") }}<br>';
+                Object.keys(data.message).forEach(key => {
+                    errorMessage += '• ' + data.message[key].join(', ') + '<br>';
+                });
+                AIZ.plugins.notify('danger', errorMessage);
+            } else {
+                AIZ.plugins.notify('danger', data.message || '{{ translate("Registration failed. Please try again.") }}');
+            }
+        }
+    })
+    .catch(error => {
+        // Mohammad Hassan
+        console.error('Error:', error);
+        AIZ.plugins.notify('danger', '{{ translate("An error occurred. Please try again.") }}');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
 }
 </script>

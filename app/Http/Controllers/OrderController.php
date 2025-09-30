@@ -232,13 +232,18 @@ class OrderController extends Controller
                 $product_variation = $cartItem['variation'];
 
                 $product_stock = $product->stocks->where('variant', $product_variation)->first();
-                if ($product->digital != 1 && $cartItem['quantity'] > $product_stock->qty) {
-                    flash(translate('The requested quantity is not available for ') . $product->getTranslation('name'))->warning();
-                    $order->delete();
-                    return redirect()->route('cart')->send();
-                } elseif ($product->digital != 1) {
-                    $product_stock->qty -= $cartItem['quantity'];
-                    $product_stock->save();
+                // Mohammad Hassan
+                // Check if product_stock exists and handle null case for priceTiers compatibility
+                if ($product->digital != 1) {
+                    if ($product_stock && $cartItem['quantity'] > $product_stock->qty) {
+                        flash(translate('The requested quantity is not available for ') . $product->getTranslation('name'))->warning();
+                        $order->delete();
+                        return redirect()->route('cart')->send();
+                    } elseif ($product_stock) {
+                        $product_stock->qty -= $cartItem['quantity'];
+                        $product_stock->save();
+                    }
+                    // If $product_stock is null (priceTiers case), skip stock validation
                 }
 
                 $order_detail = new OrderDetail;

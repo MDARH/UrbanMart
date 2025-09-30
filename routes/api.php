@@ -12,7 +12,6 @@ Route::post('v2/auth/user-verify-code', [VerificationController::class, 'verific
 Route::post('v2/auth/user-resend-code', [VerificationController::class, 'resendVerificationCode']);
 Route::post('v2/auth/check-user-type', [AuthController::class, 'checkUserType']);
 Route::post('v2/auth/google-login', [AuthController::class, 'googleLogin']);
-Route::post('v2/auth/wholesaler-register', [AuthController::class, 'wholesalerRegister']);
 Route::post('v2/auth/wholesaler-login', [AuthController::class, 'wholesalerLogin']);
 
 
@@ -434,6 +433,9 @@ Route::apiResource('customers', 'App\Http\Controllers\Api\V2\CustomerController'
 
 
     Route::withoutMiddleware([EnsureSystemKey::class])->group(function () {
+        // Mohammad Hassan: Wholesaler registration route without system key middleware
+        Route::post('auth/wholesaler-register', [AuthController::class, 'wholesalerRegister']);
+        
         Route::controller(WholesaleProductController::class)->group(function () {
             // Mohammad Hassan - Commented out duplicate route name that conflicts with wholesale.php route
             // Route::get('/wholesale/all-products', 'all_wholesale_products')->name('wholesale_products.all');
