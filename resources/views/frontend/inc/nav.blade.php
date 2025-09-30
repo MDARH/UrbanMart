@@ -7,7 +7,7 @@
             <!-- Left Section: Mobile Menu Toggle & Logo -->
             <div class="d-flex align-items-center">
                 <!-- Mobile Menu Button (Hamburger) -->
-                <button type="button" class="btn d-lg-none mr-3 mr-sm-4 p-0 active" data-toggle="class-toggle"
+                {{-- <button type="button" class="btn d-lg-none mr-3 mr-sm-4 p-0 active" data-toggle="class-toggle"
                     data-target=".aiz-top-menu-sidebar">
                     <svg id="Component_43_1" data-name="Component 43 – 1" xmlns="http://www.w3.org/2000/svg" width="18"
                         height="18" viewBox="0 0 16 16">
@@ -17,7 +17,7 @@
                         <rect id="Rectangle_19064" data-name="Rectangle 19064" width="16" height="2"
                             transform="translate(0 14)" fill="#333" />
                     </svg>
-                </button>
+                </button> --}}
 
                 <!-- Logo -->
                 <a class="d-block py-0" href="{{ route('home') }}">

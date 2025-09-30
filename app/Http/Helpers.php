@@ -2187,6 +2187,14 @@ if (!function_exists('get_best_sellers')) {
     }
 }
 
+//Get all sellers
+if (!function_exists('get_all_sellers')) {
+    function get_all_sellers()
+    {
+        return User::where('user_type', '=', 'seller')->get();
+    }
+}
+
 //Get users followed sellers
 if (!function_exists('get_followed_sellers')) {
     function get_followed_sellers()

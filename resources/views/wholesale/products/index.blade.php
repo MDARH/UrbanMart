@@ -39,8 +39,8 @@
                 <select class="form-control form-control-sm aiz-selectpicker mb-2 mb-md-0" id="user_id" name="user_id" onchange="sort_products()">
                     <option value="">{{ translate('All Sellers') }}</option>
                     @foreach (get_all_sellers() as $key => $seller)
-                        @if ($seller->user != null && $seller->user->shop != null)
-                            <option value="{{ $seller->user->id }}" @if ($seller->user->id == $seller_id) selected @endif>{{ $seller->user->shop->name }} ({{ $seller->user->name }})</option>
+                        @if ($seller != null && $seller->shop != null)
+                            <option value="{{ $seller->id }}" @if ($seller->id == $seller_id) selected @endif>{{ $seller->shop->name }} ({{ $seller->name }})</option>
                         @endif
                     @endforeach
                 </select>
