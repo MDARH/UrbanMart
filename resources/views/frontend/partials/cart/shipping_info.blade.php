@@ -8,7 +8,14 @@
     </div>
 @endif
 @if (Auth::check())
-    @foreach (($addresses ?? Auth::user()->addresses) as $key => $address)
+    @php
+        // Mohammad Hassan - Debug: compute user and addresses once
+        $user = Auth::user();
+        $addressesList = ($addresses ?? $user->addresses);
+        $user_type = $user->user_type ?? 'unknown';
+    @endphp
+
+    @foreach ($addressesList as $key => $address)
         @php
 
             // Get the city from the address relationship

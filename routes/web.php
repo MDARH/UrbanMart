@@ -64,8 +64,10 @@ use App\Http\Controllers\Preorder\PreorderController;
  */
 
 // Route::get('verify/{token}', [VerificationController::class, 'verify'])->name('verify');
-// Route::post('send-verification-code', [VerificationController::class, 'sendVerificationCode']);
-// Route::post('verify-code', [VerificationController::class, 'verification_confirmation']);
+// Mohammad Hassan
+Route::post('send-verification-code', [VerificationController::class, 'sendVerificationCode'])->name('send-verification-code');
+// Mohammad Hassan
+Route::post('verify-code', [VerificationController::class, 'verification_confirmation'])->name('verify-code');
 Route::post('/pre-order/submit', [PreorderController::class, 'submit_request'])->name('pre_order.submit')->middleware(['auth']);
 
 Route::group(['middleware' => 'web'], function () {

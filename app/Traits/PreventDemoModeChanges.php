@@ -35,6 +35,7 @@ trait PreventDemoModeChanges
             flash_message(translate('Data chaning action is not allowed in demo mode.','warning'));
             throw new Redirectingexception();
         }
+        // Mohammad Hassan
         return parent::save($options);
     }
 

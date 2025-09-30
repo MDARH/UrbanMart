@@ -9,7 +9,22 @@ class Address extends Model
 {
     use PreventDemoModeChanges;
 
-    // Mohammad Hassan\n    protected $fillable = ['set_default', 'name'];
+    // Mohammad Hassan - Expand fillable to support mass assignment safely
+    // Note: 'city' column has been removed from database via migration
+    protected $fillable = [
+        'user_id',
+        'name',
+        'phone',
+        'address',
+        'country_id',
+        'state_id',
+        'city_id',
+        'area_id',
+        'longitude',
+        'latitude',
+        'postal_code',
+        'set_default',
+    ];
 
     public function user()
     {
