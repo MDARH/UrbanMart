@@ -50,7 +50,6 @@ class AddressController extends Controller
         $address->country_id    = $request->country_id ?? 18; // Default to Bangladesh
         $address->state_id      = $request->state_id;
         $address->city_id       = $request->city_id; // Keep for backward compatibility
-        $address->city          = $request->city; // New text field for city
         $address->area_id       = $request->area_id;
         $address->longitude     = $request->longitude;
         $address->latitude      = $request->latitude;
