@@ -29,14 +29,14 @@
                                 </div>
                             </div>
 
-                            <!-- Delivery Info -->
+                            <!-- Order Details -->
                             <div class="card rounded-0 border shadow-none" style="margin-bottom: 2rem; overflow: visible !important;">
                                 <div class="card-header border-bottom-0 py-3 py-xl-4" id="headingDeliveryInfo" type="button" data-toggle="collapse" data-target="#collapseDeliveryInfo" aria-expanded="true" aria-controls="collapseDeliveryInfo">
                                     <div class="d-flex align-items-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
                                             <path id="Path_42357" data-name="Path 42357" d="M58,48A10,10,0,1,0,68,58,10,10,0,0,0,58,48ZM56.457,61.543a.663.663,0,0,1-.423.212.693.693,0,0,1-.428-.216l-2.692-2.692.856-.856,2.269,2.269,6-6.043.841.87Z" transform="translate(-48 -48)" fill="#9d9da6"/>
                                         </svg>
-                                        <span class="ml-2 fs-19 fw-700">{{ translate('Delivery Info') }}</span>
+                                        <span class="ml-2 fs-19 fw-700">{{ translate('Order Details') }}</span>
                                     </div>
                                     <i class="las la-angle-down fs-18"></i>
                                 </div>

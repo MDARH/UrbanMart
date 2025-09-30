@@ -69,7 +69,7 @@
                 </div>
             @endif
         </div>
-        
+
         @if($detailedProduct->tax > 0)
             <div class="mt-2">
                 <small class="text-info">
@@ -179,7 +179,7 @@
                                             style="background: #3D52A0; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
                                             onclick="decreaseQuantity(this)">-</button>
                                         <input type="number" class="quantity-input mx-2 text-center" value="0"
-                                            min="0" style="width: 40px; border: none; height: 30px;" readonly>
+                                            min="0" style="width: 40px; height: 30px;">
                                         <button type="button" class="btn btn-sm plus-btn"
                                             style="background: #3D52A0; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
                                             onclick="increaseQuantity(this)">+</button>
@@ -203,32 +203,7 @@
             <input type="hidden" name="id" value="{{ $detailedProduct->id }}">
             <input type="hidden" name="quantity" value="0">
 
-            <!-- Professional Price Breakdown Box -->
-            <div class="p-4 mt-3 border rounded-lg d-none bg-white shadow-sm" id="chosen_price_div" style="max-width: calc(100% - 145px);">
-                <h6 class="mb-3 fs-16 fw-600 text-dark">{{ translate('Order Summary') }}</h6>
-                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
-                    <div class="text-secondary fs-14 fw-400">{{ translate('Total Quantity') }}</div>
-                    <strong id="chosen_quantity" class="fs-16 fw-600 text-dark">0</strong>
-                </div>
-                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
-                    <div class="text-secondary fs-14 fw-400">{{ translate('Base Price') }}</div>
-                    <strong id="chosen_base_price" class="fs-16 fw-600 text-dark">৳ 0.00</strong>
-                </div>
-                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom" id="discount_row"
-                    style="display: none;">
-                    <div class="text-secondary fs-14 fw-400">{{ translate('Discount') }}</div>
-                    <strong id="chosen_discount_value" class="fs-16 fw-600 text-danger">- ৳ 0.00</strong>
-                </div>
-                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom" id="tax_row"
-                    style="display: none;">
-                    <div class="text-secondary fs-14 fw-400">{{ translate('Tax') }}</div>
-                    <strong id="chosen_tax_value" class="fs-16 fw-600 text-success">+ ৳ 0.00</strong>
-                </div>
-                <div class="d-flex justify-content-between mb-2 pt-2">
-                    <div class="text-secondary fs-18 fw-600">{{ translate('Grand Total') }}</div>
-                    <strong id="chosen_grand_total" class="fs-24 fw-700 text-primary">৳ 0.00</strong>
-                </div>
-            </div>
+            <!-- Mohammad Hassan - Order Summary section removed -->
         </form>
     @endif
 
@@ -589,14 +564,14 @@
             AIZ.plugins.notify('warning', '{{ translate('Please select at least one item') }}');
             return;
         }
-        
+
         // Set hidden fields for selected items
         setHiddenSelectedItems(selectedItems);
-        
+
         // Mohammad Hassan - Updated buy now to redirect to checkout instead of cart
         const form = document.getElementById('option-choice-form');
         const formData = new FormData(form);
-        
+
         $.ajax({
             type: "POST",
             url: '{{ route('cart.addToCart') }}',

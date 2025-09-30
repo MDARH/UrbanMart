@@ -19,7 +19,7 @@ $pickup_point_list = get_all_pickup_points();
             sprintf("%02d", count($admin_products)) }})</h5>
     </div>
     <div class="card-body p-0">
-        @include('frontend.partials.cart.delivery_info_details', ['products' => $admin_products, 'product_variation' =>
+        @include('frontend.partials.cart.order_details', ['products' => $admin_products, 'product_variation' =>
         $admin_product_variation, 'owner_id' => get_admin()->id ])
     </div>
 </div>
@@ -35,7 +35,7 @@ $pickup_point_list = get_all_pickup_points();
             sprintf("%02d", count($seller_product)) }})</h5>
     </div>
     <div class="card-body p-0">
-        @include('frontend.partials.cart.delivery_info_details', ['products' => $seller_product, 'product_variation' =>
+        @include('frontend.partials.cart.order_details', ['products' => $seller_product, 'product_variation' =>
         $seller_product_variation, 'owner_id' => $key ])
     </div>
 </div>

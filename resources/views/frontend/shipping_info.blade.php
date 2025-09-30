@@ -24,7 +24,7 @@
                         <div class="col">
                             <div class="text-center border border-bottom-6px p-2">
                                 <i class="la-3x mb-2 opacity-50 las la-truck"></i>
-                                <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50">{{ translate('3. Delivery info') }}
+                                <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50">{{ translate('3. Order Details') }}
                                 </h3>
                             </div>
                         </div>

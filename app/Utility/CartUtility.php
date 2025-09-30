@@ -8,6 +8,7 @@ use Cookie;
 class CartUtility
 {
 
+    // Mohammad Hassan - Enhanced cart variant creation with color support
     public static function create_cart_variant($product, $request)
     {
         $str = null;
@@ -28,10 +29,25 @@ class CartUtility
                 }
             }
         }
+        
+        // Handle selected_items from table-based selection
+        if (isset($request['selected_items'])) {
+            $selectedItems = json_decode($request['selected_items'], true);
+            if (is_array($selectedItems) && count($selectedItems) > 0) {
+                // For multiple items, we'll handle them separately in the controller
+                // For now, just use the first item's variant
+                $firstItem = $selectedItems[0];
+                if (isset($firstItem['size'])) {
+                    $str = $firstItem['size'];
+                }
+            }
+        }
+        
         return $str;
     }
 
-    public static function get_price($product, $product_stock, $quantity)
+    // Mohammad Hassan - Enhanced price calculation with price tiers support
+    public static function get_price($product, $product_stock, $quantity, $user = null)
     {
         // Check if product_stock is null and fallback to product price
         if ($product_stock === null) {
@@ -42,6 +58,27 @@ class CartUtility
         
         if ($product->auction_product == 1) {
             $price = $product->bids->max('amount');
+        }
+
+        // Mohammad Hassan - Check for price tiers (wholesaler only)
+        if ($user === null) {
+            $user = auth()->user();
+        }
+        
+        if ($user && $user->user_type == 'wholesaler' && $product->priceTiers && count($product->priceTiers) > 0) {
+            // Find the best price tier for the quantity
+            $bestTier = null;
+            foreach ($product->priceTiers as $tier) {
+                if ($quantity >= $tier->min_qty) {
+                    if ($bestTier === null || $tier->min_qty > $bestTier->min_qty) {
+                        $bestTier = $tier;
+                    }
+                }
+            }
+            
+            if ($bestTier) {
+                $price = $bestTier->price;
+            }
         }
 
         if ($product->wholesale_product && $product_stock !== null) {
@@ -93,20 +130,53 @@ class CartUtility
         return $tax;
     }
 
-    public static function save_cart_data($cart, $product, $price, $tax, $quantity)
+    // Mohammad Hassan - Enhanced cart data saving with color variant and price tier support
+    public static function save_cart_data($cart, $product, $request, $quantity, $price, $tax, $shipping_cost, $product_stock = null)
     {
-        $cart->quantity = $quantity;
         $cart->product_id = $product->id;
-        $cart->owner_id = $product->user_id;
         $cart->price = $price;
         $cart->tax = $tax;
+        $cart->shipping_cost = $shipping_cost;
+        $cart->quantity = $quantity;
+        
+        // Mohammad Hassan - Store color variant if available
+        if (isset($request['color'])) {
+            $cart->color_variant = $request['color'];
+        }
+        
+        // Mohammad Hassan - Store variant name for display purposes
+        $variant = CartUtility::create_cart_variant($product, $request);
+        if ($variant) {
+            $cart->variant_name = $variant;
+        }
+        
+        // Mohammad Hassan - Store price tier information for wholesaler users
+        $user = auth()->user();
+        if ($user && $user->user_type == 'wholesaler' && $product->priceTiers && count($product->priceTiers) > 0) {
+            // Find the applied price tier
+            $appliedTier = null;
+            foreach ($product->priceTiers as $tier) {
+                if ($quantity >= $tier->min_qty) {
+                    if ($appliedTier === null || $tier->min_qty > $appliedTier->min_qty) {
+                        $appliedTier = $tier;
+                    }
+                }
+            }
+            
+            if ($appliedTier) {
+                $cart->price_tier_min_qty = $appliedTier->min_qty;
+                $cart->tier_price = $appliedTier->price;
+            }
+        }
+        
+        $cart->variation = CartUtility::create_cart_variant($product, $request);
+        $cart->owner_id = $product->user_id;
         $cart->product_referral_code = null;
 
         if (Cookie::has('referred_product_id') && Cookie::get('referred_product_id') == $product->id) {
             $cart->product_referral_code = Cookie::get('product_referral_code');
         }
 
-        // Cart::create($data);
         $cart->save();
     }
 

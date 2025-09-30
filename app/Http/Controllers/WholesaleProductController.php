@@ -10,7 +10,8 @@ use App\Models\ProductTranslation;
 use App\Services\WholesaleService;
 use App\Services\ProductTaxService;
 use App\Services\ProductFlashDealService;
-use App\Services\FrequentlyBroughtProductService;
+// Mohammad Hassan
+use App\Services\FrequentlyBoughtProductService;
 use App\Http\Requests\WholesaleProductRequest;
 use Auth;
 use Artisan;
@@ -213,7 +214,8 @@ class WholesaleProductController extends Controller
         ]), $product);
 
         // Frequently Bought Products
-        (new FrequentlyBroughtProductService)->store($request->only([
+        // Mohammad Hassan
+            (new FrequentlyBoughtProductService)->store($request->only([
             'product_id', 'frequently_brought_selection_type', 'fq_brought_product_ids', 'fq_brought_product_category_id'
         ]));
 
@@ -251,7 +253,8 @@ class WholesaleProductController extends Controller
         //Product categories
         $product->categories()->attach($request->category_ids);
         
-        (new FrequentlyBroughtProductService)->store($request->only([
+        // Mohammad Hassan
+            (new FrequentlyBoughtProductService)->store($request->only([
             'product_id', 'frequently_brought_selection_type', 'fq_brought_product_ids', 'fq_brought_product_category_id'
         ]));
         

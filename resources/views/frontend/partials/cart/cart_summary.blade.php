@@ -89,7 +89,7 @@
                     <!-- Subtotal -->
                     <tr class="cart-subtotal">
                         <th class="pl-0 fs-14 fw-400 pt-0 pb-2 text-dark border-top-0">{{ translate('Subtotal') }} ({{ sprintf("%02d", count($carts)) }} {{ translate('Products') }})</th>
-                        <td class="text-right pr-0 fs-14 pt-0 pb-2 text-dark border-top-0">{{ single_price($subtotal) }}</td>
+                        <td class="text-right pr-0 fs-14 pt-0 pb-2 text-dark border-top-0" id="cart-subtotal-amount">{{ single_price($subtotal) }}</td>
                     </tr>
                     <!-- Tax -->
                     <tr class="cart-tax">
@@ -160,7 +160,7 @@
                         <!-- Regular Total -->
                         <tr class="cart-total">
                             <th class="pl-0 fs-14 text-dark fw-700 border-top-0 pt-3 text-uppercase">{{ translate('Total') }}</th>
-                            <td class="text-right pr-0 fs-16 fw-700 text-primary border-top-0 pt-3">{{ single_price($total) }}</td>
+                            <td class="text-right pr-0 fs-16 fw-700 text-primary border-top-0 pt-3" id="cart-total-amount">{{ single_price($total) }}</td>
                         </tr>
                     @endif
 

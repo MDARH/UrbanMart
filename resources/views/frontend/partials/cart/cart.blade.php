@@ -42,6 +42,14 @@
             @foreach ($carts as $key => $cartItem)
                 @php
                     $product = get_single_product($cartItem['product_id']);
+                    
+                    // Mohammad Hassan - Enhanced product name display with variant and price tier info
+                    $product_name_with_choice = $product->getTranslation('name');
+                    if ($cartItem['variant_name'] != null) {
+                        $product_name_with_choice = $product->getTranslation('name').' - '.$cartItem['variant_name'];
+                    } elseif ($cartItem['variation'] != null) {
+                        $product_name_with_choice = $product->getTranslation('name').' - '.$cartItem['variation'];
+                    }
                 @endphp
                 @if ($product != null)
                     <li class="list-group-item border-0 hov-scale-img">
@@ -54,8 +62,8 @@
                                     alt="{{ $product->getTranslation('name') }}"
                                     onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
                                 <span class="minw-0 pl-2 flex-grow-1">
-                                    <span class="fw-700 fs-13 text-dark mb-2 text-truncate-2" title="{{ $product->getTranslation('name') }}">
-                                        {{ $product->getTranslation('name') }}
+                                    <span class="fw-700 fs-13 text-dark mb-2 text-truncate-2" title="{{ $product_name_with_choice }}">
+                                        {{ $product_name_with_choice }}
                                     </span>
                                     <span class="fs-14 fw-400 text-secondary">{{ $cartItem['quantity'] }}x</span>
                                     <span class="fs-14 fw-400 text-secondary">{{ cart_product_price($cartItem, $product) }}</span>

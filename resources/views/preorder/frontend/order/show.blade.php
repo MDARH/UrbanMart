@@ -326,7 +326,7 @@
                                                             d="M58,48A10,10,0,1,0,68,58,10,10,0,0,0,58,48ZM56.457,61.543a.663.663,0,0,1-.423.212.693.693,0,0,1-.428-.216l-2.692-2.692.856-.856,2.269,2.269,6-6.043.841.87Z"
                                                             transform="translate(-48 -48)" fill="#9d9da6" />
                                                     </svg>
-                                                    <span class="ml-2 fs-19 fw-700">{{ translate('Delivery Info') }}</span>
+                                                    <span class="ml-2 fs-19 fw-700">{{ translate('Order Details') }}</span>
                                                 </div>
                                                 <i class="las la-angle-down fs-18"></i>
                                             </div>

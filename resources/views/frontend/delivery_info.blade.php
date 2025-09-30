@@ -24,7 +24,7 @@
                         <div class="col active">
                             <div class="text-center border border-bottom-6px p-2 text-primary">
                                 <i class="la-3x mb-2 las la-truck cart-animate" style="margin-left: -100px; transition: 2s;"></i>
-                                <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('3. Delivery info') }}
+                                <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('3. Order Details') }}
                                 </h3>
                             </div>
                         </div>

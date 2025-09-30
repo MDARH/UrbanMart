@@ -24,9 +24,19 @@
                                     $product_stock = $product->stocks->where('variant', $cartItem['variation'])->first();
                                     // $total = $total + ($cartItem['price']  + $cartItem['tax']) * $cartItem['quantity'];
                                     $total = $total + cart_product_price($cartItem, $product, false) * $cartItem['quantity'];
+                                    
+                                    // Mohammad Hassan - Enhanced product name display with variant and price tier info
                                     $product_name_with_choice = $product->getTranslation('name');
-                                    if ($cartItem['variation'] != null) {
+                                    if ($cartItem['variant_name'] != null) {
+                                        $product_name_with_choice = $product->getTranslation('name').' - '.$cartItem['variant_name'];
+                                    } elseif ($cartItem['variation'] != null) {
                                         $product_name_with_choice = $product->getTranslation('name').' - '.$cartItem['variation'];
+                                    }
+                                    
+                                    // Add price tier info for wholesaler users
+                                    $price_tier_info = '';
+                                    if (Auth::check() && Auth::user()->user_type == 'wholesaler' && $cartItem['price_tier_min_qty'] > 0) {
+                                        $price_tier_info = ' (Tier: '.$cartItem['price_tier_min_qty'].'+ pcs @ ৳'.$cartItem['tier_price'].')';
                                     }
                                 @endphp
                                 <li class="list-group-item px-0">
@@ -66,7 +76,7 @@
                                                     alt="{{ $product->getTranslation('name')  }}"
                                                     onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
                                             </span>
-                                            <span class="fs-14">{{ $product_name_with_choice }}</span>
+                                            <span class="fs-14">{{ $product_name_with_choice }}{{ $price_tier_info }}</span>
                                         </div>
                                         <!-- Price -->
                                         <div class="col-md col-4 order-2 order-md-0 my-3 my-md-0">

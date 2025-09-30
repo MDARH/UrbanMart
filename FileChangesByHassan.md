@@ -2,6 +2,53 @@
 
 ## Recent Changes Log
 
+### 2025-10-01 - Enhanced Cart System with Color Variants and Price Tiers
+- `app/Http/Controllers/CartController.php`
+- `app/Models/ProductPriceTier.php`
+- `app/Models/OrderDetail.php`
+- `resources/views/frontend/partials/cart/cart_details.blade.php`
+- `resources/views/frontend/partials/cart/cart.blade.php`
+- `resources/views/frontend/partials/cart/delivery_info_details.blade.php`
+
+**Improvements Implemented:**
+1. **CartController Enhancement**:
+   - Updated `addToCart` method to pass user context (`$authUser`) to `CartUtility::get_price`
+   - Enhanced cart data saving with full request data (`$request->all()`) for variant and price tier support
+   - Improved price calculation logic for wholesaler users with price tiers
+
+2. **ProductPriceTier Model**:
+   - Added `PreventDemoModeChanges` trait for demo mode protection
+   - Defined fillable fields: `product_id`, `min_qty`, `price`
+   - Established `belongsTo` relationship with Product model
+   - Enhanced price tier functionality for bulk pricing
+
+3. **OrderDetail Model**:
+   - Added missing fillable fields: `seller_id`, `variation`, `shipping_type`, `product_referral_code`
+   - Enhanced model to properly store variant and price tier information in orders
+   - Improved order detail tracking with complete product information
+
+4. **Cart Display Views**:
+   - **cart_details.blade.php**: Enhanced product name display with variant names and price tier information
+   - **cart.blade.php**: Updated cart dropdown to show enhanced product names with variants
+   - **delivery_info_details.blade.php**: Added variant and price tier display during checkout process
+   - Implemented dynamic product name generation with variant and pricing context
+   - Added price tier information display for wholesaler users
+
+5. **Enhanced User Experience**:
+   - Color variants now properly stored and displayed throughout cart flow
+   - Price tiers show minimum quantity and tier pricing for wholesaler users
+   - Improved product identification with variant names in cart and checkout
+   - Seamless integration from product details to order completion
+
+**Technical Features:**
+- Dynamic price calculation based on user type and quantity
+- Variant name storage and display across all cart views
+- Price tier information for bulk purchasing
+- Enhanced product tracking through order completion
+- Improved cart item identification with complete variant information
+
+// Mohammad Hassan
+
 ### 2025-10-01 - Product Details & Meta Components Enhancement
 - `resources/views/components/product-meta.blade.php`
 - `resources/views/frontend/product_details.blade.php`

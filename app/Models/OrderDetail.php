@@ -9,12 +9,17 @@ class OrderDetail extends Model
 {
     use PreventDemoModeChanges;
 
+    // Mohammad Hassan
     protected $fillable = [
         'order_id',
+        'seller_id',
         'product_id',
+        'variation',
         'price',
         'tax',
         'shipping_cost',
+        'shipping_type',
+        'product_referral_code',
         'quantity',
         'payment_status',
         'delivery_status'

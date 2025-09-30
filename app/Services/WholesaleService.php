@@ -238,7 +238,8 @@ class WholesaleService
         
         // Frequently Bought Products
         $product->frequently_brought_products()->delete();
-        (new FrequentlyBroughtProductService)->store($request->only([
+        // Mohammad Hassan
+            (new FrequentlyBoughtProductService)->store($request->only([
             'product_id', 'frequently_brought_selection_type', 'fq_brought_product_ids', 'fq_brought_product_category_id'
         ]));
 

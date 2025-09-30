@@ -143,10 +143,12 @@ class CartController extends Controller
             $quantity = $cart->quantity + $request['quantity'];
         }
 
-        $price = CartUtility::get_price($product, $product_stock, $request->quantity);
+        // Mohammad Hassan - Enhanced price calculation with user context
+        $price = CartUtility::get_price($product, $product_stock, $request->quantity, $authUser);
         $tax = CartUtility::tax_calculation($product, $price);
 
-        CartUtility::save_cart_data($cart, $product, $price, $tax, $quantity);
+        // Mohammad Hassan - Enhanced cart data saving with new parameters
+        CartUtility::save_cart_data($cart, $product, $request->all(), $quantity, $price, $tax, 0, $product_stock);
 
         if($authUser != null) {
             $user_id = $authUser->id;
