@@ -10,7 +10,19 @@
     if (isset($detailedProduct->tax) && $detailedProduct->tax_type == 'percent') {
         $product_tax_rate = (float) $detailedProduct->tax;
     }
-
+    
+    // --- Custom Availability Check Placeholder ---
+    // NOTE: Replace $detailedProduct->is_preorder_product with your actual flag if different.
+    $is_preorder_enabled = $detailedProduct->is_preorder_product ?? 0;
+    
+    // Total available stock across all variants
+    $total_available_stock = 0;
+    if (isset($detailedProduct->stocks) && count($detailedProduct->stocks) > 0) {
+        $total_available_stock = collect($detailedProduct->stocks)->sum(function ($s) {
+            return (int) ($s->qty ?? 0);
+        });
+    }
+    
     // Prepare price tiers for JavaScript: Sort by min_qty descending for easier logic
     $price_tiers_json = '[]';
     if (
@@ -24,7 +36,7 @@
                 return ['min_qty' => (int) $tier->min_qty, 'price' => (float) $tier->price];
             })
             ->sortByDesc('min_qty')
-            ->values(); // Sorting high to low is key for the JS logic
+            ->values();
         $price_tiers_json = json_encode($tiers);
     }
 @endphp
@@ -111,34 +123,48 @@
                         @php
                             $variantId = $stock->variant ?? $stock->id;
                             $variantName = $stock->variant ?? translate('Default');
+                            $qty = (int)$stock->qty;
                         @endphp
                         <tr data-size="{{ $variantId }}" data-original-price="{{ $stock->price }}"
-                            data-stock-qty="{{ $stock->qty }}" style="height: 60px;">
+                            data-stock-qty="{{ $qty }}" style="height: 60px;">
 
                             <td style="padding: 8px 12px;">{{ $variantName }}</td>
                             <td class="unit-price" style="padding: 8px 12px;">৳ {{ number_format($stock->price, 2) }}
                             </td>
                             <td class="total-price" style="padding: 8px 12px;">৳ 0.00</td>
                             <td style="padding: 8px 12px;">
-                                <div class="d-flex align-items-center justify-content-end">
-                                    <button type="button" class="btn add-btn" data-row-id="{{ $variantId }}"
-                                        style="background: #3D52A0; color: white; border-radius: 8px; padding: 6px 20px;"
-                                        onclick="addToCartRow(this)">{{ translate('Add') }}</button>
-                                    <div class="quantity-control d-flex align-items-center"
-                                        data-row-id="{{ $variantId }}" style="display: none;">
-                                        <button type="button" class="btn btn-sm minus-btn"
-                                            style="background: #3D52A0; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
-                                            onclick="decreaseQuantity(this)">-</button>
-                                        <input type="number" class="quantity-input mx-2 text-center" value="0"
-                                            min="0" style="width: 40px; border: none; height: 30px;" readonly>
-                                        <button type="button" class="btn btn-sm plus-btn"
-                                            style="background: #3D52A0; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
-                                            onclick="increaseQuantity(this)">+</button>
-                                    </div>
+                                <div class="d-flex align-items-center justify-content-end variant-control-container">
+                                    @if ($qty > 0)
+                                        {{-- Initial Add Button (Stock > 0) --}}
+                                        <button type="button" class="btn add-btn" data-row-id="{{ $variantId }}"
+                                            style="background: #3D52A0; color: white; border-radius: 8px; padding: 6px 20px;"
+                                            onclick="addToCartRow(this)">{{ translate('Add') }}</button>
+                                        {{-- Quantity Control (Initially Hidden) --}}
+                                        <div class="quantity-control d-flex align-items-center"
+                                            data-row-id="{{ $variantId }}" style="display: none;">
+                                            <button type="button" class="btn btn-sm minus-btn"
+                                                style="background: #3D52A0; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
+                                                onclick="decreaseQuantity(this)">-</button>
+                                            <input type="number" class="quantity-input mx-2 text-center" value="0"
+                                                min="0" style="width: 40px; border: none; height: 30px;" readonly>
+                                            <button type="button" class="btn btn-sm plus-btn"
+                                                style="background: #3D52A0; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
+                                                onclick="increaseQuantity(this)">+</button>
+                                        </div>
+                                    @else
+                                        {{-- Out of Stock / Pre-Order (Stock == 0) --}}
+                                        @if ($is_preorder_enabled == 1)
+                                            <button type="button" class="btn btn-warning btn-sm" disabled
+                                                style="border-radius: 8px; padding: 6px 10px; color: white;">{{ translate('Pre-Order Only') }}</button>
+                                        @else
+                                            <button type="button" class="btn btn-secondary btn-sm" disabled
+                                                style="background-color: #e0e0e0; color: #888; border-radius: 8px; padding: 6px 10px; font-weight: 600;">{{ translate('Out of Stock') }}</button>
+                                        @endif
+                                    @endif
                                 </div>
                                 <div class="text-right">
                                     <small class="text-muted stock-text">{{ translate('Stock') }}:
-                                        {{ $stock->qty }}</small>
+                                        {{ $qty }}</small>
                                 </div>
                             </td>
                         </tr>
@@ -153,6 +179,7 @@
             @csrf
             <input type="hidden" name="id" value="{{ $detailedProduct->id }}">
             <input type="hidden" name="quantity" value="0">
+            <input type="hidden" name="is_preorder" value="0">
 
             <!-- Hidden input to send correct grand total to cart modal -->
             <input type="hidden" name="grand_total_display" value="0">
@@ -187,15 +214,34 @@
 
     {{-- Purchase Buttons --}}
     @if (!$detailedProduct->auction_product)
-        <div class="mt-3">
-            <button type="button" class="btn btn-info mr-2 add-to-cart fw-600 min-w-150px rounded-0 text-white"
-                @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCartFromTable()" @else onclick="showLoginModal()" @endif>
-                <i class="las la-shopping-bag"></i> {{ translate('Add to cart') }}
-            </button>
-            <button type="button" class="btn btn-dark mr-2 buy-now fw-600 add-to-cart min-w-150px rounded-0"
-                @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="buyNowFromTable()" @else onclick="showLoginModal()" @endif>
-                <i class="la la-shopping-cart"></i> {{ translate('Buy Now') }}
-            </button>
+        <div class="mt-3 button-group-container">
+            @if ($total_available_stock > 0)
+                {{-- Stock available → show Add to Cart & Buy Now --}}
+                <button type="button" id="main_add_to_cart_btn"
+                    class="btn btn-info mr-2 add-to-cart fw-600 min-w-150px rounded-0 text-white"
+                    @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCartFromTable()" @else onclick="showLoginModal()" @endif>
+                    <i class="las la-shopping-bag"></i> {{ translate('Add to cart') }}
+                </button>
+                <button type="button" id="main_buy_now_btn"
+                    class="btn btn-dark mr-2 buy-now fw-600 add-to-cart min-w-150px rounded-0"
+                    @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="buyNowFromTable()" @else onclick="showLoginModal()" @endif>
+                    <i class="la la-shopping-cart"></i> {{ translate('Buy Now') }}
+                </button>
+            @else
+                {{-- No stock → show Pre-Order or Out of Stock based on flag --}}
+                <button type="button" id="oos_btn" class="btn btn-secondary out-of-stock fw-600" disabled
+                        style="min-width: 150px;">
+                        <i class="la la-cart-arrow-down"></i> {{ translate('Out of Stock') }}
+                    </button>
+                    
+                    <button type="button" id="preorder_btn" class="btn btn-warning out-of-stock fw-600 min-w-150px rounded-0 text-white"
+                        @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) data-toggle="modal" data-target="#preOrderModal" @else onclick="showLoginModal()" @endif>
+                        <i class="la la-clock"></i> {{ translate('Pre-Order') }}
+                    </button>
+               
+                   
+               
+            @endif
         </div>
         <hr>
     @endif
@@ -267,14 +313,58 @@
         display: flex !important;
     }
 
-    .add-btn {
-        display: block !important;
-    }
-
     .add-btn.hidden {
         display: none !important;
     }
+    
+    /* Ensure the OOS/Pre-Order buttons are hidden by default */
+    .out-of-stock.d-none {
+        display: none !important;
+    }
+    
+    /* Custom styling for the disabled OOS button in the table */
+    .variant-control-container .btn-secondary[disabled] {
+        background-color: #e0e0e0 !important;
+        color: #888 !important;
+        cursor: not-allowed;
+        border: 1px solid #ddd;
+    }
 </style>
+
+<!-- NEW: Pre-Order Modal -->
+<div class="modal fade" id="preOrderModal" tabindex="-1" role="dialog" aria-labelledby="preOrderModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="preOrderModalLabel">{{ translate('Pre-Order Confirmation') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>{{ translate('This product is currently out of stock but available for pre-order.') }}</p>
+                <h6 class="fw-600">{{ translate('Pre-Order Terms:') }}</h6>
+                <p class="mb-1">
+                    {{ translate('An advance payment of 50% is required to confirm your order.') }}
+                </p>
+                <p>
+                    {{ translate('The remaining 50% will be due upon cash on delivery.') }}
+                </p>
+                <p class="text-primary">
+                    {{ translate('Our team will contact you shortly to process the advance payment after you confirm.') }}
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                    data-dismiss="modal">{{ translate('Cancel') }}</button>
+                <button type="button" class="btn btn-primary"
+                    onclick="confirmPreOrder()">{{ translate('Confirm Pre-Order') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END NEW -->
 
 <script type="text/javascript">
     const PRODUCT_ID = {{ $detailedProduct->id }};
@@ -282,6 +372,7 @@
     const GLOBAL_DISCOUNT_PERCENT = {{ $product_discount_rate }};
     const GLOBAL_TAX_PERCENT = {{ $product_tax_rate }};
     const PRICE_TIERS = {!! $price_tiers_json !!};
+    const IS_PREORDER_ENABLED = {{ $is_preorder_enabled }};
 
     function saveCartState() {
         const selectedItems = extractSelectedItems();
@@ -304,9 +395,13 @@
                 state.items.forEach(item => {
                     const row = $(`tr[data-size="${item.size}"]`);
                     if (row.length && item.quantity > 0) {
-                        row.find('.add-btn').addClass('hidden');
-                        row.find('.quantity-control').addClass('active');
-                        row.find('.quantity-input').val(item.quantity);
+                        const stockQty = parseInt(row.data('stock-qty'));
+                        
+                        if (stockQty > 0) {
+                            row.find('.add-btn').addClass('hidden');
+                            row.find('.quantity-control').addClass('active');
+                            row.find('.quantity-input').val(Math.min(item.quantity, stockQty));
+                        }
                     }
                 });
             }
@@ -316,6 +411,38 @@
             localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
     }
+    
+  function checkProductAvailabilityAndToggleButtons() {
+    let totalAvailableStock = 0;
+
+    $('#sizeTable tbody tr').each(function() {
+        totalAvailableStock += parseInt($(this).data('stock-qty'));
+    });
+
+    const standardBtns = $('#main_add_to_cart_btn, #main_buy_now_btn');
+    const oosBtn = $('#oos_btn');
+    const preOrderBtn = $('#preorder_btn');
+
+    if (totalAvailableStock > 0) {
+        // Stock আছে -> শুধু Add to Cart + Buy Now দেখাবে
+        standardBtns.show();
+        oosBtn.hide();
+        preOrderBtn.hide();
+    } else {
+        // Stock নাই -> এখন check করবো preorder আছে নাকি
+        standardBtns.hide();
+        if (IS_PREORDER_ENABLED) {
+            preOrderBtn.show();
+            oosBtn.hide();
+        } else {
+            oosBtn.show();
+            preOrderBtn.hide();
+        }
+    }
+}
+
+
+
 
     function selectPriceTier(element) {
         const minQty = parseInt($(element).data('min-qty'));
@@ -329,13 +456,17 @@
         if (totalQuantity < minQty) {
             const neededQty = minQty - totalQuantity;
             let targetRow = $('#sizeTable tbody tr').filter(function() {
-                return $(this).find('.quantity-control').hasClass('active');
+                // Prioritize rows that are in stock
+                return parseInt($(this).data('stock-qty')) > 0;
             }).first();
 
             if (targetRow.length === 0) {
                 targetRow = $('#sizeTable tbody tr').first();
-                const addBtn = targetRow.find('.add-btn');
-                if (addBtn.length) addToCartRow(addBtn[0], 0);
+            }
+
+            const addBtn = targetRow.find('.add-btn');
+            if (addBtn.length && !addBtn.hasClass('hidden')) {
+                addToCartRow(addBtn[0], 0);
             }
 
             const input = targetRow.find('.quantity-input');
@@ -408,26 +539,39 @@
 
         $('input[name="quantity"]').val(totalQuantity);
         saveCartState();
+        checkProductAvailabilityAndToggleButtons(); // Check button state after total update
     }
 
     function addToCartRow(button, initialQty = 1) {
         const row = $(button).closest('tr');
+        const maxQty = parseInt(row.data('stock-qty'));
+        
+        if (maxQty === 0) {
+            AIZ.plugins.notify('warning', 'This item is out of stock.');
+            return;
+        }
+
         $(button).addClass('hidden');
         row.find('.quantity-control').addClass('active');
-        row.find('.quantity-input').val(initialQty);
+        row.find('.quantity-input').val(Math.min(initialQty, maxQty)); // Prevent setting > stock
         updateGrandTotal();
     }
 
     function increaseQuantity(button) {
-        const input = $(button).siblings('.quantity-input');
-        const maxQty = parseInt($(button).closest('tr').data('stock-qty'));
-        if (parseInt(input.val()) < maxQty) {
-            input.val(parseInt(input.val()) + 1);
-            updateGrandTotal();
-        } else {
-            AIZ.plugins.notify('warning', 'Maximum stock limit reached.');
-        }
+    const input = $(button).siblings('.quantity-input');
+    const row = $(button).closest('tr');
+    const maxQty = parseInt(row.data('stock-qty'));
+
+    let currentVal = parseInt(input.val());
+
+    if (currentVal < maxQty) {
+        input.val(currentVal + 1);
+        updateGrandTotal();
+    } else {
+        AIZ.plugins.notify('warning', 'Maximum stock limit reached (' + maxQty + ').');
     }
+}
+
 
     function decreaseQuantity(button) {
         const input = $(button).siblings('.quantity-input');
@@ -472,12 +616,15 @@
             return;
         }
 
+        $('#option-choice-form').find('input[name="is_preorder"]').val('0');
+
         const grandTotalText = $('#chosen_grand_total').text();
         const grandTotalValue = grandTotalText.replace(/[^0-9.-]+/g, "");
         $('input[name="grand_total_display"]').val(grandTotalValue);
 
         setHiddenSelectedItems(selectedItems);
-        addToCart();
+        // Assuming 'addToCart' function handles AJAX submission
+        addToCart(); 
     }
 
     function buyNowFromTable() {
@@ -486,22 +633,70 @@
             AIZ.plugins.notify('warning', '{{ translate('Please select at least one item') }}');
             return;
         }
+        
+        $('#option-choice-form').find('input[name="is_preorder"]').val('0');
 
         const grandTotalText = $('#chosen_grand_total').text();
         const grandTotalValue = grandTotalText.replace(/[^0-9.-]+/g, "");
         $('input[name="grand_total_display"]').val(grandTotalValue);
 
         setHiddenSelectedItems(selectedItems);
+        // Assuming 'buyNow' function handles AJAX submission and redirect
+        buyNow();
+    }
+
+    function confirmPreOrder() {
+        const selectedItems = extractSelectedItems();
+        if (selectedItems.length === 0) {
+            // For pre-order, if all items are OOS, we allow selection of 1 unit of the first OOS item
+            let firstOOSRow = $('#sizeTable tbody tr').filter(function() {
+                return parseInt($(this).data('stock-qty')) === 0;
+            }).first();
+            
+            if (firstOOSRow.length) {
+                 // Forcing selection of 1 unit of the OOS item for pre-order submission
+                 selectedItems.push({
+                    size: firstOOSRow.data('size'),
+                    quantity: 1 
+                });
+            } else {
+                 // Should not happen if pre-order button is visible, but safety check:
+                AIZ.plugins.notify('warning', '{{ translate('Cannot pre-order. No items available.') }}');
+                $('#preOrderModal').modal('hide');
+                return;
+            }
+        }
+
+        $('#option-choice-form').find('input[name="is_preorder"]').val('1');
+
+        setHiddenSelectedItems(selectedItems);
+        $('input[name="quantity"]').val(selectedItems.reduce((sum, item) => sum + item.quantity, 0));
+        
+        // Note: Total price calculation in the modal will be based on the price tier logic defined in updateGrandTotal.
+        const grandTotalText = $('#chosen_grand_total').text();
+        const grandTotalValue = grandTotalText.replace(/[^0-9.-]+/g, "");
+        $('input[name="grand_total_display"]').val(grandTotalValue);
+
+
+        $('#preOrderModal').modal('hide');
+
+        // Pre-order flow typically leads directly to checkout/confirmation
         buyNow();
     }
 
     $(document).ready(function() {
+        // Assuming standard jQuery functions and AIZ/Laravel helper functions (like addToCart, buyNow, showLoginModal, updateNavCart, AIZ.plugins.notify) are defined elsewhere.
+        
         loadCartState();
+        // Initial setup run twice to ensure all prices and button states are correct
         updateGrandTotal();
+        // The core issue might be a loading delay or conflict with other scripts; ensure this runs last.
+        setTimeout(checkProductAvailabilityAndToggleButtons, 100); 
     });
 </script>
 
 <script>
+    // Existing color selection functionality (assuming helper functions exist)
     function selectColor(element, colorName, colorValue) {
         document.querySelectorAll('#color-options .color-option').forEach(option => {
             option.classList.remove('selected-color');
@@ -510,7 +705,7 @@
         });
         element.classList.add('selected-color');
         document.getElementById('selected-color-name').textContent = colorName;
-        $('input[name="color"][value="' + colorName + '"]').prop('checked', true);
+        $('input[name="color"][value="' + colorName + '"]').prop('checked', true); 
         if (typeof getVariantPrice === 'function') {
             getVariantPrice();
         }
