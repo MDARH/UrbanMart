@@ -187,6 +187,19 @@ $(document).ready(function() {
     $('#new-address-modal').on('shown.bs.modal', function () {
         loadBangladeshCities();
     });
+
+    // Mohammad Hassan - Debug: log form submission data when ?debug=1
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('debug') === '1') {
+        $('form[action="{{ route('addresses.store') }}"]').on('submit', function(e) {
+            try {
+                const payload = $(this).serializeArray();
+                console.log('Address store submit payload:', payload);
+            } catch (err) {
+                console.error('Failed to log address submit payload:', err);
+            }
+        });
+    }
 });
 </script>
 
