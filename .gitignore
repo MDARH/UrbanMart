@@ -5,6 +5,7 @@
 /storage/*.key
 /storage/debugbar
 /vendor
+vendor.zip
 /temp
 /.idea
 /.vscode
