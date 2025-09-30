@@ -91,38 +91,19 @@
                                     <h5 class="fs-16 fw-700 text-dark mb-0">{{ get_setting('site_name') }} {{ translate('Inhouse Products') }}</h5>
                                 </div>
                                 <div class="card-body p-0">
-                                    <!-- Product List -->
-                                    <ul class="list-group list-group-flush border p-3 mb-3">
-                                        @php
-                                            $physical = false;
-                                        @endphp
-                                        @foreach ($admin_products as $key => $cartItem)
-                                            @php
-                                                $product = get_single_product($cartItem);
-                                                if ($product->digital == 0) {
-                                                    $physical = true;
-                                                }
-                                            @endphp
-                                            <li class="list-group-item">
-                                                <div class="d-flex align-items-center">
-                                                    <span class="mr-2 mr-md-3">
-                                                        <img src="{{ get_image($product->thumbnail) }}"
-                                                            class="img-fit size-60px"
-                                                            alt="{{  $product->getTranslation('name')  }}"
-                                                            onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
-                                                    </span>
-                                                    <span class="fs-14 fw-400 text-dark">
-                                                        {{ $product->getTranslation('name') }}
-                                                        <br>
-                                                        @if ($admin_product_variation[$key] != '')
-                                                            <span class="fs-12 text-secondary">{{ translate('Variation') }}: {{ $admin_product_variation[$key] }}</span>
-                                                        @endif
-                                                    </span>
-                                                </div>
-                                            </li>
-                                        @endforeach
-                                    </ul>
+                                    {{-- Mohammad Hassan - Include order details table with pricing and cart controls --}}
+                                    @include('frontend.partials.cart.order_details', ['products' => $admin_products, 'product_variation' => $admin_product_variation, 'owner_id' => get_admin()->id ])
                                     <!-- Choose Delivery Type -->
+                                    @php
+                                        $physical = false;
+                                        foreach ($admin_products as $cartItem) {
+                                            $product = get_single_product($cartItem);
+                                            if ($product->digital == 0) {
+                                                $physical = true;
+                                                break;
+                                            }
+                                        }
+                                    @endphp
                                     @if ($physical)
                                         <div class="row pt-3">
                                             <div class="col-md-6">
@@ -252,38 +233,19 @@
                                             <h5 class="fs-16 fw-700 text-dark mb-0">{{ get_shop_by_user_id($key)->name }} {{ translate('Products') }}</h5>
                                         </div>
                                         <div class="card-body p-0">
-                                            <!-- Product List -->
-                                            <ul class="list-group list-group-flush border p-3 mb-3">
-                                                @php
-                                                    $physical = false;
-                                                @endphp
-                                                @foreach ($seller_product as $key2 => $cartItem)
-                                                    @php
-                                                        $product = get_single_product($cartItem);
-                                                        if ($product->digital == 0) {
-                                                            $physical = true;
-                                                        }
-                                                    @endphp
-                                                    <li class="list-group-item">
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="mr-2 mr-md-3">
-                                                                <img src="{{ get_image($product->thumbnail) }}"
-                                                                    class="img-fit size-60px"
-                                                                    alt="{{  $product->getTranslation('name')  }}"
-                                                                    onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
-                                                            </span>
-                                                            <span class="fs-14 fw-400 text-dark">
-                                                                {{ $product->getTranslation('name') }}
-                                                                <br>
-                                                                @if ($seller_product_variation[$key2] != '')
-                                                                    <span class="fs-12 text-secondary">{{ translate('Variation') }}: {{ $seller_product_variation[$key2] }}</span>
-                                                                @endif
-                                                            </span>
-                                                        </div>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
+                                            {{-- Mohammad Hassan - Include order details table with pricing and cart controls --}}
+                                            @include('frontend.partials.cart.order_details', ['products' => $seller_product, 'product_variation' => $seller_product_variation, 'owner_id' => $key ])
                                             <!-- Choose Delivery Type -->
+                                            @php
+                                                $physical = false;
+                                                foreach ($seller_product as $cartItem) {
+                                                    $product = get_single_product($cartItem);
+                                                    if ($product->digital == 0) {
+                                                        $physical = true;
+                                                        break;
+                                                    }
+                                                }
+                                            @endphp
                                             @if ($physical)
                                                 <div class="row pt-3">
                                                     <div class="col-md-6">

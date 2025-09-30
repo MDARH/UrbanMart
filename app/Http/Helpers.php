@@ -321,6 +321,24 @@ if (!function_exists('cart_product_price')) {
                 $price = $product->unit_price ?? 0;
             }
 
+            // Mohammad Hassan - Check for price tiers (wholesaler only)
+            $user = auth()->user();
+            if ($user && $user->user_type == 'wholesaler' && $product->priceTiers && count($product->priceTiers) > 0) {
+                // Find the best price tier for the quantity
+                $bestTier = null;
+                foreach ($product->priceTiers as $tier) {
+                    if ($cart_product['quantity'] >= $tier->min_qty) {
+                        if ($bestTier === null || $tier->min_qty > $bestTier->min_qty) {
+                            $bestTier = $tier;
+                        }
+                    }
+                }
+                
+                if ($bestTier) {
+                    $price = $bestTier->price;
+                }
+            }
+
             if ($product->wholesale_product && $product_stock) {
                 $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $cart_product['quantity'])->where('max_qty', '>=', $cart_product['quantity'])->first();
                 if ($wholesalePrice) {

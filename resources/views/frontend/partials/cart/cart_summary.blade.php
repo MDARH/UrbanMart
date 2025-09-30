@@ -54,7 +54,7 @@
             <div class="text-right">
                 <!-- Minimum Order Amount -->
                 @if (get_setting('minimum_order_amount_check') == 1 && $subtotal_for_min_order_amount < get_setting('minimum_order_amount'))
-                    <span class="badge badge-inline badge-warning fs-12 rounded-0 px-2">
+                    <span class="text-warning fs-12 px-2 border border-warning rounded">
                         {{ translate('Minimum Order Amount') . ' ' . single_price(get_setting('minimum_order_amount')) }}
                     </span>
                 @endif

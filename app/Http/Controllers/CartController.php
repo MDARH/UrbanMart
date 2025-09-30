@@ -186,7 +186,8 @@ class CartController extends Controller
         );
     }
 
-    //updated the quantity for a cart item
+    // Mohammad Hassan
+    // Updated the quantity for a cart item with proper price recalculation
     public function updateQuantity(Request $request)
     {
         $cartItem = Cart::findOrFail($request->id);
@@ -194,46 +195,45 @@ class CartController extends Controller
         if ($cartItem['id'] == $request->id) {
             $product = Product::find($cartItem['product_id']);
             $product_stock = $product->stocks->where('variant', $cartItem['variation'])->first();
-            $quantity = $product_stock->qty;
-            $price = $product_stock->price;
+            $stock_quantity = $product_stock ? $product_stock->qty : 0;
+            
+            // Mohammad Hassan - Use CartUtility for consistent price calculation
+            $authUser = auth()->user();
+            $unit_price = CartUtility::get_price($product, $product_stock, $request->quantity, $authUser);
+            $tax = CartUtility::tax_calculation($product, $unit_price);
 
-            //discount calculation
-            $discount_applicable = false;
-
-            if ($product->discount_start_date == null) {
-                $discount_applicable = true;
-            } elseif (
-                strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-                strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-            ) {
-                $discount_applicable = true;
+            // Check stock availability (skip for preorder products)
+            $is_preorder = $product->isOutOfStock() && $product->isPreorderAvailable();
+            
+            if (!$is_preorder && $stock_quantity < $request->quantity) {
+                return array(
+                    'status' => 0,
+                    'message' => translate('Insufficient stock available'),
+                    'cart_count' => 0,
+                    'cart_view' => '',
+                    'nav_cart_view' => '',
+                );
             }
 
-            if ($discount_applicable) {
-                if ($product->discount_type == 'percent') {
-                    $price -= ($price * $product->discount) / 100;
-                } elseif ($product->discount_type == 'amount') {
-                    $price -= $product->discount;
-                }
+            // Check minimum quantity requirement
+            if ($request->quantity < $product->min_qty) {
+                return array(
+                    'status' => 0,
+                    'message' => translate('Minimum quantity required: ') . $product->min_qty,
+                    'cart_count' => 0,
+                    'cart_view' => '',
+                    'nav_cart_view' => '',
+                );
             }
 
-            if ($quantity >= $request->quantity) {
-                if ($request->quantity >= $product->min_qty) {
-                    $cartItem['quantity'] = $request->quantity;
-                }
-            }
-
-            if ($product->wholesale_product) {
-                $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $request->quantity)->where('max_qty', '>=', $request->quantity)->first();
-                if ($wholesalePrice) {
-                    $price = $wholesalePrice->price;
-                }
-            }
-
-            $cartItem['price'] = $price;
+            // Update cart item
+            $cartItem['quantity'] = $request->quantity;
+            $cartItem['price'] = $unit_price;
+            $cartItem['tax'] = $tax;
             $cartItem->save();
         }
 
+        // Get updated cart items
         if (auth()->user() != null) {
             $user_id = Auth::user()->id;
             $carts = Cart::where('user_id', $user_id)->get();
@@ -243,6 +243,7 @@ class CartController extends Controller
         }
 
         return array(
+            'status' => 1,
             'cart_count' => count($carts),
             'cart_view' => view('frontend.partials.cart.cart_details', compact('carts'))->render(),
             'nav_cart_view' => view('frontend.partials.cart.cart')->render(),

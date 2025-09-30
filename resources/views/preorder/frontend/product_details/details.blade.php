@@ -32,16 +32,16 @@
     <div class="row align-items-center">
         <div class="col-md-12 m-0 p-0">
             <div class="ml-2">
-                <span class="badge badge-inline badge-cool-blue fs-12 fw-700 p-3 text-white m-1 rounded-2"
+                <span class="text-primary fs-12 fw-700 p-3 bg-light border border-primary rounded m-1 d-inline-block"
                     >{{$product->is_available ? translate( 'Available Now ')  : (strtotime($product->available_date) <= strtotime(date('Y-m-d')) ? translate( 'Available Now ') : translate('Available on ') .' '. $product->available_date .' '. (translate(' estimated')))}}</span>
                 
                     @if($product->discount != null && $product->discount > 0 &&  $product->discount_start_date != null  && (strtotime(date('d-m-Y')) > $product->discount_start_date || strtotime(date('d-m-Y')) < $product->discount_end_date))
-                    <span class="badge badge-inline badge-orange fs-12 fw-700 p-3 text-white m-1 rounded-2"
+                    <span class="text-warning fs-12 fw-700 p-3 bg-light border border-warning rounded m-1 d-inline-block"
                     > {{ translate('Discount ')}} {{ $product->discount_type == 'flat' ? single_price($product->discount) : $product->discount.'%'}}</span>
                     @endif
 
                 @if($product->is_prepayment)
-                <span class="badge badge-inline badge-sea-green fs-12 fw-700 p-3 text-white m-1 rounded-2"
+                <span class="text-success fs-12 fw-700 p-3 bg-light border border-success rounded m-1 d-inline-block"
                     >{{ translate('Prepayment Needed') }}</span>
                 @endif
             </div>

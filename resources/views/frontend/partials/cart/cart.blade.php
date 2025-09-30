@@ -50,6 +50,10 @@
                     } elseif ($cartItem['variation'] != null) {
                         $product_name_with_choice = $product->getTranslation('name').' - '.$cartItem['variation'];
                     }
+                    
+                    // Mohammad Hassan - Check if product is out of stock and can be preordered
+                    $isOutOfStock = $product->isOutOfStock();
+                    $isPreorderAvailable = $product->isPreorderAvailable();
                 @endphp
                 @if ($product != null)
                     <li class="list-group-item border-0 hov-scale-img">
@@ -65,6 +69,22 @@
                                     <span class="fw-700 fs-13 text-dark mb-2 text-truncate-2" title="{{ $product_name_with_choice }}">
                                         {{ $product_name_with_choice }}
                                     </span>
+                                    @if($isOutOfStock && $isPreorderAvailable)
+                                        <div class="mb-1">
+                                            <span class="text-warning fs-10 px-1 border border-warning rounded" style="font-size: 9px !important;">
+                                                <i class="las la-clock"></i>
+                                                {{ translate('Pre-order') }}
+                                            </span>
+                                            <div class="text-info fs-10 mt-1">
+                                                <i class="las la-calendar"></i>
+                                                {{ translate('Est. Availability') }}: {{ \Carbon\Carbon::now()->addDays(14)->format('M d') }}
+                                            </div>
+                                            <div class="text-muted fs-10">
+                                                <i class="las la-info-circle"></i>
+                                                {{ translate('50% advance payment') }}
+                                            </div>
+                                        </div>
+                                    @endif
                                     <span class="fs-14 fw-400 text-secondary">{{ $cartItem['quantity'] }}x</span>
                                     <span class="fs-14 fw-400 text-secondary">{{ cart_product_price($cartItem, $product) }}</span>
                                 </span>

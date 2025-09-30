@@ -13,101 +13,14 @@ foreach ($products as $key => $cartItem){
 <!-- Order Details Table -->
 <div class="mb-4">
     <h6 class="fs-16 fw-700 mb-3">{{ translate('Order Details') }}</h6>
-        <div class="table-responsive">
-            <table class="table table-borderless">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="border-0 fs-14 fw-600">{{ translate('Product') }}</th>
-                        <th class="border-0 fs-14 fw-600 text-center">{{ translate('Unit Price') }}</th>
-                        <th class="border-0 fs-14 fw-600 text-center">{{ translate('Qty') }}</th>
-                        <th class="border-0 fs-14 fw-600 text-right">{{ translate('Total') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($products as $key => $cartItem)
-                    @php
-                        $product = get_single_product($cartItem);
-                        $cart_item = collect($carts)->firstWhere('product_id', $cartItem);
-                        
-                        // Mohammad Hassan - Calculate unit price and total
-                        $unit_price = $cart_item['price'] ?? $product->unit_price;
-                        $quantity = $cart_item['quantity'] ?? 1;
-                        $total_price = $unit_price * $quantity;
-                        $subtotal += $total_price;
-                        
-                        // Mohammad Hassan - Build product name with variant
-                        $product_name_with_choice = $product->getTranslation('name');
-                        if (isset($cart_item['variant_name']) && !empty($cart_item['variant_name'])) {
-                            $product_name_with_choice .= ' - ' . $cart_item['variant_name'];
-                        }
-                        if ($product_variation[$key] != '') {
-                            $product_name_with_choice .= ' (' . $product_variation[$key] . ')';
-                        }
-                    @endphp
-                    <tr>
-                        <td class="border-0 py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="mr-3">
-                                    <img src="{{ get_image($product->thumbnail) }}"
-                                        class="img-fit size-50px rounded"
-                                        alt="{{ $product->getTranslation('name') }}"
-                                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
-                                </div>
-                                <div>
-                                    <span class="fs-14 fw-500 text-dark d-block">{{ $product_name_with_choice }}</span>
-                                    {{-- Mohammad Hassan - Wholesale tiered discount info --}}
-                                    @if (auth()->check() && auth()->user()->user_type == 'wholesaler' && 
-                                         isset($cart_item['price_tier_min_qty']) && $cart_item['price_tier_min_qty'] > 0)
-                                        <small class="text-success">
-                                            <i class="las la-tag"></i>
-                                            {{ translate('Tier Price') }}: {{ single_price($cart_item['tier_price']) }}
-                                            ({{ translate('Min Qty') }}: {{ $cart_item['price_tier_min_qty'] }})
-                                        </small>
-                                    @endif
-                                </div>
-                            </div>
-                        </td>
-                        <td class="border-0 py-3 text-center">
-                            <span class="fs-14 fw-600">{{ single_price($unit_price) }}</span>
-                        </td>
-                        <td class="border-0 py-3 text-center">
-                            {{-- Mohammad Hassan - Quantity controls --}}
-                            <div class="d-flex align-items-center justify-content-center">
-                                <button type="button" class="btn btn-sm btn-outline-secondary quantity-btn-minus" 
-                                        data-product-id="{{ $cartItem }}" 
-                                        data-unit-price="{{ $unit_price }}"
-                                        style="width: 30px; height: 30px; padding: 0; border-radius: 50%;">
-                                    <i class="las la-minus"></i>
-                                </button>
-                                <input type="number" class="form-control text-center quantity-input mx-2" 
-                                       value="{{ $quantity }}" 
-                                       min="1" 
-                                       max="999"
-                                       data-product-id="{{ $cartItem }}"
-                                       data-unit-price="{{ $unit_price }}"
-                                       style="width: 60px; height: 30px; padding: 0; font-size: 14px;">
-                                <button type="button" class="btn btn-sm btn-outline-secondary quantity-btn-plus" 
-                                        data-product-id="{{ $cartItem }}" 
-                                        data-unit-price="{{ $unit_price }}"
-                                        style="width: 30px; height: 30px; padding: 0; border-radius: 50%;">
-                                    <i class="las la-plus"></i>
-                                </button>
-                            </div>
-                        </td>
-                        <td class="border-0 py-3 text-right">
-                            <span class="fs-14 fw-700 text-primary item-total" data-product-id="{{ $cartItem }}">{{ single_price($total_price) }}</span>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-                <tfoot>
-                    <tr class="bg-light">
-                        <td colspan="3" class="border-0 py-3 fs-14 fw-700">{{ translate('Subtotal') }}</td>
-                        <td class="border-0 py-3 text-right fs-16 fw-700 text-primary" id="order-details-subtotal">{{ single_price($subtotal) }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+    {{-- Mohammad Hassan - Use reusable cart table component --}}
+    @include('frontend.partials.cart.cart_table', [
+        'carts' => $carts,
+        'products' => $products,
+        'is_checkout' => true,
+        'show_actions' => false,
+        'show_selection' => false
+    ])
 </div>
 
 {{-- Mohammad Hassan - JavaScript for quantity controls and price updates --}}

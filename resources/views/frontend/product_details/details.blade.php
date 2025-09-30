@@ -210,24 +210,56 @@
     {{-- Mohammad Hassan - Enhanced Purchase Buttons --}}
     @if (!$detailedProduct->auction_product)
         <div class="mt-4 mb-3">
-            <div class="d-flex flex-wrap gap-3">
-                <button type="button" class="btn btn-info add-to-cart fw-600 px-4 py-2 rounded-lg text-white"
-                    style="min-width: 160px; background: #17a2b8; border: none;"
-                    @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCartFromTable()" @else onclick="showLoginModal()" @endif>
-                    <i class="las la-shopping-bag mr-1"></i> {{ translate('Add to Cart') }}
-                </button>
-                <button type="button" class="btn btn-primary buy-now fw-600 px-4 py-2 rounded-lg"
-                    style="min-width: 160px; background: #3D52A0; border: none;"
-                    @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="buyNowFromTable()" @else onclick="showLoginModal()" @endif>
-                    <i class="la la-shopping-cart mr-1"></i> {{ translate('Buy Now') }}
-                </button>
-            </div>
-            <div class="mt-2">
-                <small class="text-muted">
-                    <i class="fas fa-shield-alt text-success"></i>
-                    {{ translate('Secure checkout with multiple payment options') }}
-                </small>
-            </div>
+            @php
+                $isOutOfStock = $detailedProduct->isOutOfStock();
+                $isPreorderAvailable = $detailedProduct->isPreorderAvailable();
+            @endphp
+            
+            @if($isOutOfStock && $isPreorderAvailable)
+                {{-- Pre-order buttons for out of stock products --}}
+                <div class="alert alert-warning mb-3">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    {{ translate('This product is currently out of stock. You can place a pre-order.') }}
+                </div>
+                <div class="d-flex flex-wrap gap-3">
+                    <button type="button" class="btn btn-warning add-to-cart fw-600 px-4 py-2 rounded-lg text-white"
+                        style="min-width: 160px; background: #ffc107; border: none;"
+                        @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCartFromTable(true)" @else onclick="showLoginModal()" @endif>
+                        <i class="las la-clock mr-1"></i> {{ translate('Add to Pre-order') }}
+                    </button>
+                    <button type="button" class="btn btn-primary buy-now fw-600 px-4 py-2 rounded-lg"
+                        style="min-width: 160px; background: #fd7e14; border: none;"
+                        @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="buyNowFromTable(true)" @else onclick="showLoginModal()" @endif>
+                        <i class="la la-calendar-check mr-1"></i> {{ translate('Pre-order Now') }}
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle text-info"></i>
+                        {{ translate('Pre-order requires 50% advance payment. Remaining amount due on delivery.') }}
+                    </small>
+                </div>
+            @else
+                {{-- Regular buttons for in-stock products --}}
+                <div class="d-flex flex-wrap gap-3">
+                    <button type="button" class="btn btn-info add-to-cart fw-600 px-4 py-2 rounded-lg text-white"
+                        style="min-width: 160px; background: #17a2b8; border: none;"
+                        @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCartFromTable()" @else onclick="showLoginModal()" @endif>
+                        <i class="las la-shopping-bag mr-1"></i> {{ translate('Add to Cart') }}
+                    </button>
+                    <button type="button" class="btn btn-primary buy-now fw-600 px-4 py-2 rounded-lg"
+                        style="min-width: 160px; background: #3D52A0; border: none;"
+                        @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="buyNowFromTable()" @else onclick="showLoginModal()" @endif>
+                        <i class="la la-shopping-cart mr-1"></i> {{ translate('Buy Now') }}
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt text-success"></i>
+                        {{ translate('Secure checkout with multiple payment options') }}
+                    </small>
+                </div>
+            @endif
         </div>
         <hr>
     @endif

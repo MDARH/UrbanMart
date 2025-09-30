@@ -35,8 +35,22 @@
                                     
                                     // Add price tier info for wholesaler users
                                     $price_tier_info = '';
-                                    if (Auth::check() && Auth::user()->user_type == 'wholesaler' && $cartItem['price_tier_min_qty'] > 0) {
-                                        $price_tier_info = ' (Tier: '.$cartItem['price_tier_min_qty'].'+ pcs @ ৳'.$cartItem['tier_price'].')';
+                                    if (Auth::check() && Auth::user()->user_type == 'wholesaler') {
+                                        // Mohammad Hassan - Get price tier info from product_price_tiers table
+                                        $appliedTier = null;
+                                        if ($product->priceTiers && count($product->priceTiers) > 0) {
+                                            foreach ($product->priceTiers as $tier) {
+                                                if ($cartItem['quantity'] >= $tier->min_qty) {
+                                                    if ($appliedTier === null || $tier->min_qty > $appliedTier->min_qty) {
+                                                        $appliedTier = $tier;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        if ($appliedTier) {
+                                            $price_tier_info = ' (Tier: '.$appliedTier->min_qty.'+ pcs @ ৳'.$appliedTier->price.')';
+                                        }
                                     }
                                 @endphp
                                 <li class="list-group-item px-0">
@@ -76,7 +90,22 @@
                                                     alt="{{ $product->getTranslation('name')  }}"
                                                     onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
                                             </span>
-                                            <span class="fs-14">{{ $product_name_with_choice }}{{ $price_tier_info }}</span>
+                                            <div class="d-flex flex-column">
+                                                <span class="fs-14">{{ $product_name_with_choice }}{{ $price_tier_info }}</span>
+                                                @php
+                                                    // Mohammad Hassan - Check if product is out of stock and can be preordered
+                                                    $isOutOfStock = $product->isOutOfStock();
+                                                    $isPreorderAvailable = $product->isPreorderAvailable();
+                                                @endphp
+                                                @if($isOutOfStock && $isPreorderAvailable)
+                                                    <span class="badge badge-warning fs-11 mt-1" style="width: fit-content;">
+                                                        <i class="fas fa-clock mr-1"></i>{{ translate('Pre-order Item') }}
+                                                    </span>
+                                                    <small class="text-muted fs-11 mt-1">
+                                                        {{ translate('50% advance payment required') }}
+                                                    </small>
+                                                @endif
+                                            </div>
                                         </div>
                                         <!-- Price -->
                                         <div class="col-md col-4 order-2 order-md-0 my-3 my-md-0">

@@ -150,24 +150,8 @@ class CartUtility
             $cart->variant_name = $variant;
         }
         
-        // Mohammad Hassan - Store price tier information for wholesaler users
-        $user = auth()->user();
-        if ($user && $user->user_type == 'wholesaler' && $product->priceTiers && count($product->priceTiers) > 0) {
-            // Find the applied price tier
-            $appliedTier = null;
-            foreach ($product->priceTiers as $tier) {
-                if ($quantity >= $tier->min_qty) {
-                    if ($appliedTier === null || $tier->min_qty > $appliedTier->min_qty) {
-                        $appliedTier = $tier;
-                    }
-                }
-            }
-            
-            if ($appliedTier) {
-                $cart->price_tier_min_qty = $appliedTier->min_qty;
-                $cart->tier_price = $appliedTier->price;
-            }
-        }
+        // Mohammad Hassan - Price tier information is now handled via product_price_tiers table relationship
+        // No need to store in cart as we can retrieve it dynamically when needed
         
         $cart->variation = CartUtility::create_cart_variant($product, $request);
         $cart->owner_id = $product->user_id;

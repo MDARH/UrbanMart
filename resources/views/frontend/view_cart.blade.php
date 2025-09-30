@@ -15,15 +15,48 @@
             removeFromCart(key);
         }
 
+        // Mohammad Hassan
+        // Enhanced updateQuantity function with error handling and cart summary refresh
         function updateQuantity(key, element) {
             $.post('{{ route('cart.updateQuantity') }}', {
                 _token: AIZ.data.csrf,
                 id: key,
                 quantity: element.value
             }, function(data) {
-                updateNavCart(data.nav_cart_view, data.cart_count);
-                $('#cart-details').html(data.cart_view);
-                AIZ.extra.plusMinus();
+                if (data.status == 1) {
+                    updateNavCart(data.nav_cart_view, data.cart_count);
+                    $('#cart-details').html(data.cart_view);
+                    
+                    // Refresh cart summary to update totals
+                    refreshCartSummary();
+                    
+                    AIZ.extra.plusMinus();
+                } else {
+                    // Show error message if quantity update failed
+                    if (data.message) {
+                        AIZ.plugins.notify('warning', data.message);
+                    }
+                    // Reset quantity to previous value
+                    element.value = element.getAttribute('data-original-value') || 1;
+                }
+            }).fail(function() {
+                AIZ.plugins.notify('danger', '{{ translate('Something went wrong') }}');
+                // Reset quantity to previous value
+                element.value = element.getAttribute('data-original-value') || 1;
+            });
+        }
+
+        // Mohammad Hassan
+        // Function to refresh cart summary with updated totals
+        function refreshCartSummary() {
+            $.post('{{ route('cart.updateCartStatus') }}', {
+                _token: AIZ.data.csrf,
+                product_id: []
+            }, function(data) {
+                // Update cart summary if it exists
+                if ($('#cart_summary').length) {
+                    $('#cart_summary').html(data);
+                }
             });
         }
 

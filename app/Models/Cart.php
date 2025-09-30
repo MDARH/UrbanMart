@@ -11,7 +11,8 @@ class Cart extends Model
 
     protected $guarded = [];
     // Mohammad Hassan
-    protected $fillable = ['address_id','price','tax','shipping_cost','discount','product_referral_code','coupon_code','coupon_applied','quantity','user_id','temp_user_id','owner_id','product_id','variation','color_variant','price_tier_min_qty','tier_price','variant_name'];
+    // Mohammad Hassan - Removed price_tier_min_qty and tier_price as we use product_price_tiers table
+    protected $fillable = ['address_id','price','tax','shipping_cost','discount','product_referral_code','coupon_code','coupon_applied','quantity','user_id','temp_user_id','owner_id','product_id','variation','color_variant','variant_name'];
 
     protected $attributes = [
         'tax' => 0.00,
