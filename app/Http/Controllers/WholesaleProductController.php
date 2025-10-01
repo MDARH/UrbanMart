@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use CoreComponentRepository;
+// Mohammad Hassan - Removed CoreComponentRepository import
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductTranslation;
@@ -30,7 +30,7 @@ class WholesaleProductController extends Controller
 
     public function all_wholesale_products(Request $request)
     {
-        CoreComponentRepository::instantiateShopRepository();
+        // Mohammad Hassan - Removed CoreComponentRepository::instantiateShopRepository();
 
         $type = 'All';
         $col_name = null;
@@ -65,7 +65,7 @@ class WholesaleProductController extends Controller
 
     public function in_house_wholesale_products(Request $request)
     {
-        CoreComponentRepository::instantiateShopRepository();
+        // Mohammad Hassan - Removed CoreComponentRepository::instantiateShopRepository();
 
         $type = 'In House';
         $col_name = null;
@@ -94,7 +94,7 @@ class WholesaleProductController extends Controller
 
     public function seller_wholesale_products(Request $request)
     {
-        CoreComponentRepository::instantiateShopRepository();
+        // Mohammad Hassan - Removed CoreComponentRepository::instantiateShopRepository();
 
         $type = 'Seller';
         $col_name = null;
@@ -154,7 +154,7 @@ class WholesaleProductController extends Controller
 
     public function product_create_admin()
     {
-        CoreComponentRepository::initializeCache();
+        // Mohammad Hassan - Removed CoreComponentRepository::initializeCache();
 
         $categories = Category::where('parent_id', 0)
             ->where('digital', 0)
@@ -282,7 +282,7 @@ class WholesaleProductController extends Controller
 
     public function product_edit_admin(Request $request, $id)
     {
-        CoreComponentRepository::initializeCache();
+        // Mohammad Hassan - Removed CoreComponentRepository::initializeCache();
 
         $product = Product::findOrFail($id);
         if($product->digital == 1) {

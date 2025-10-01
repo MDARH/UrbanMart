@@ -13,7 +13,7 @@ use App\Services\SocialRevoke;
 use App\Utility\EmailUtility;
 use Session;
 use Illuminate\Http\Request;
-use CoreComponentRepository;
+// Mohammad Hassan - Removed CoreComponentRepository import
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 use Storage;
@@ -283,7 +283,7 @@ class LoginController extends Controller
         }
 
         if (auth()->user()->user_type == 'admin' || auth()->user()->user_type == 'staff') {
-            CoreComponentRepository::instantiateShopRepository();
+            // Mohammad Hassan - Removed CoreComponentRepository::instantiateShopRepository();
             return redirect()->route('admin.dashboard');
         } elseif (auth()->user()->user_type == 'seller') {
             

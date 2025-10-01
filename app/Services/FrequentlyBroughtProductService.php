@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\FrequentlyBoughtProduct;
 use DB;
 
-class FrequentlyBoughtProductService
+class FrequentlyBroughtProductService
 {
     public function store(array $data)
     {

@@ -1,11 +1,7 @@
 @extends('backend.layouts.app')
 
 @section('content')
-    @php
-        CoreComponentRepository::instantiateShopRepository();
-        CoreComponentRepository::initializeCache();
-    @endphp
-
+   
     <div class="aiz-titlebar text-left mt-2 mb-3">
         <div class="row align-items-center">
             <div class="col-auto">
@@ -30,7 +26,7 @@
                     <div class="col-12 d-flex align-items-center">
                         <h5 class="mb-0 me-2 h6">{{ translate('All Preorder Products') }}</h5>
                         <span class="ml-4 fs-16">
-                            {{ translate('Frontend Page URL ') }} :  
+                            {{ translate('Frontend Page URL ') }} :
                             <a href="{{ route('home')  . '/all-preorder-products' }}" target="_blank" rel="noopener noreferrer">
                                 {{ route('home')  . '/all-preorder-products' }}
                             </a>
@@ -232,9 +228,9 @@
                                     <div class="mb-2">
                                         <span class="opacity-60 text-muted text-truncate-2 fs-12">{{ translate('Publish') }}</span>
                                         <label class="aiz-switch aiz-switch-success mb-0 mt-2">
-                                            <input onchange="update_published(this)" 
+                                            <input onchange="update_published(this)"
                                                 value="{{ $product->id }}"
-                                                type="checkbox" 
+                                                type="checkbox"
                                                 @if ($product->is_published == 1) checked @endif
                                                 @if(!auth()->user()->can('update_preorder_product_status')) disabled @endif>
                                             <span class="slider round"></span>
@@ -243,9 +239,9 @@
                                     <div class="mb-2">
                                         <span class="opacity-60 text-muted text-truncate-2 fs-12">{{ translate('Featured') }}</span>
                                         <label class="aiz-switch aiz-switch-success mb-0 mt-2">
-                                            <input onchange="update_featured(this)" 
+                                            <input onchange="update_featured(this)"
                                                 value="{{ $product->id }}"
-                                                type="checkbox" 
+                                                type="checkbox"
                                                 @if($product->is_featured == 1) checked @endif
                                                 @if(!auth()->user()->can('update_preorder_product_status')) disabled @endif>
                                             <span class="slider round"></span>
@@ -255,9 +251,9 @@
                                 @if($type == 'seller' && get_setting('product_approve_by_admin'))
                                     <td>
                                         <label class="aiz-switch aiz-switch-success mb-0 mt-2">
-                                            <input onchange="update_approval(this)" 
+                                            <input onchange="update_approval(this)"
                                                 value="{{ $product->id }}"
-                                                type="checkbox" 
+                                                type="checkbox"
                                                 @if ($product->is_approved == 1) checked @endif>
                                             <span class="slider round"></span>
                                         </label>
@@ -283,7 +279,7 @@
                                             title="{{ translate('Delete') }}">
                                             <i class="las la-trash"></i>
                                         </a>
-                                    @endif    
+                                    @endif
                                     @endcan
                                 </td>
                             </tr>

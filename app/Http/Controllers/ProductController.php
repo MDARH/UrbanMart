@@ -16,7 +16,7 @@ use App\Models\Wishlist;
 use App\Models\User;
 use App\Notifications\ShopProductNotification;
 use Carbon\Carbon;
-use CoreComponentRepository;
+// Mohammad Hassan - Removed CoreComponentRepository import
 use Artisan;
 use Cache;
 use App\Services\ProductService;
@@ -67,7 +67,7 @@ class ProductController extends Controller
      */
     public function admin_products(Request $request)
     {
-        CoreComponentRepository::instantiateShopRepository();
+        // Mohammad Hassan - Removed CoreComponentRepository::instantiateShopRepository();
 
         $type = 'In House';
         $col_name = null;
@@ -179,7 +179,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        CoreComponentRepository::initializeCache();
+        // Mohammad Hassan - Removed CoreComponentRepository::initializeCache();
 
         $categories = Category::where('parent_id', 0)
             ->where('digital', 0)
@@ -239,7 +239,7 @@ class ProductController extends Controller
         $this->frequentlyBoughtProductService->store($request->only([
             'product_id', 'frequently_bought_selection_type', 'fq_bought_product_ids', 'fq_bought_product_category_id'
         ]));
-       
+
         // Product Translations
         $request->merge(['lang' => env('DEFAULT_LANGUAGE')]);
         ProductTranslation::create($request->only([
@@ -276,7 +276,7 @@ class ProductController extends Controller
             }
         }
         // END: Save Price Tiers
-        
+
         flash(translate('Product has been inserted successfully'))->success();
 
         Artisan::call('view:clear');
@@ -304,7 +304,7 @@ class ProductController extends Controller
      */
     public function admin_product_edit(Request $request, $id)
     {
-        CoreComponentRepository::initializeCache();
+        // Mohammad Hassan - Removed CoreComponentRepository::initializeCache();
 
         $product = Product::findOrFail($id);
         if ($product->digital == 1) {
@@ -400,7 +400,7 @@ class ProductController extends Controller
         );
 
 
-        
+
                     // START: Update Price Tiers
         $product->priceTiers()->delete();
         if ($request->has('price_tiers') && is_array($request->price_tiers['min_qty'])) {
@@ -514,7 +514,7 @@ class ProductController extends Controller
 
         //VAT & Tax
         $this->productTaxService->product_duplicate_store($product->taxes, $product_new);
-        
+
         // Product Categories
         foreach($product->product_categories as $product_category){
             ProductCategory::insert([

@@ -8,7 +8,7 @@ use DB;
 use Hash;
 use App\Models\BusinessSetting;
 use App\Models\User;
-use MehediIitdu\CoreComponentRepository\CoreComponentRepository;
+// Mohammad Hassan - Removed MehediIitdu\CoreComponentRepository\CoreComponentRepository import
 use Artisan;
 use Session;
 use ZipArchive;
@@ -32,7 +32,7 @@ class InstallController extends Controller
     }
 
     public function step3($error = "") {
-        CoreComponentRepository::instantiateShopRepository();
+        // Mohammad Hassan - Removed CoreComponentRepository::instantiateShopRepository();
         if($error == ""){
             return view('installation.step3');
         }else {

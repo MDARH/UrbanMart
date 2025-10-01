@@ -6,14 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\V2\WholesaleProductCollection;
 use App\Http\Resources\V2\Seller\WholesaleProductDetailsCollection;
 use Illuminate\Http\Request;
-use CoreComponentRepository;
+// Mohammad Hassan - Removed use CoreComponentRepository;
 use App\Models\Product;
 
 class WholesaleProductController extends Controller
 {
     public function all_wholesale_products(Request $request)
     {
-        CoreComponentRepository::instantiateShopRepository();
+        // Mohammad Hassan - Removed CoreComponentRepository::instantiateShopRepository();
 
         $products = Product::where('wholesale_product', 1)->orderBy('created_at', 'desc');
 

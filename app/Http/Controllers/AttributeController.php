@@ -7,7 +7,7 @@ use App\Models\Attribute;
 use App\Models\Color;
 use App\Models\AttributeTranslation;
 use App\Models\AttributeValue;
-use CoreComponentRepository;
+// Mohammad Hassan - Removed CoreComponentRepository import
 use Str;
 
 class AttributeController extends Controller
@@ -34,8 +34,8 @@ class AttributeController extends Controller
      */
     public function index()
     {
-        CoreComponentRepository::instantiateShopRepository();
-        CoreComponentRepository::initializeCache();
+        // Mohammad Hassan - Removed CoreComponentRepository::instantiateShopRepository();
+        // Mohammad Hassan - Removed CoreComponentRepository::initializeCache();
         $attributes = Attribute::with('attribute_values')->orderBy('created_at', 'desc')->paginate(15);
         return view('backend.product.attribute.index', compact('attributes'));
     }

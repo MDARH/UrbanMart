@@ -19,15 +19,15 @@ class PreventBackHistory
         $headers = [
             'Cache-Control' => 'nocache, no-store, max-age=0, must-revalidate',
             'Pragma'        => 'no-cache',
-            'Expires'       => 'Sat, 26 Jul 1997 05:00:00 GMT'
+            'Expires'       => 'Sat, 26 Jul 2026 05:00:00 GMT'
         ];
-        
+
         $response = $next($request);
-        
+
         foreach($headers as $key => $value) {
             $response->headers->set($key, $value);
         }
- 
+
         return $response;
     }
 }
