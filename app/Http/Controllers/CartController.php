@@ -87,6 +87,11 @@ class CartController extends Controller
             );
         }
 
+        // Mohammad Hassan - Handle multiple variants from product details page
+        if ($request->has('selected_items') && !empty($request->selected_items)) {
+            return $this->addMultipleVariantsToCart($request, $authUser, $product);
+        }
+
         $quantity = $request['quantity'];
 
         if ($quantity < $product->min_qty) {
@@ -102,37 +107,33 @@ class CartController extends Controller
         $str = CartUtility::create_cart_variant($product, $request->all());
         $product_stock = $product->stocks->where('variant', $str)->first();
 
+        // Mohammad Hassan
+        // Check if the same product with same variant already exists in cart
+        // If exists, increase quantity; if different variant, create new cart item
+        $existing_cart = null;
         if($authUser != null) {
             $user_id = $authUser->id;
-            $cart = Cart::firstOrNew([
-                'variation' => $str,
-                'user_id' => $user_id,
-                'product_id' => $request['id']
-            ]);
+            $existing_cart = Cart::where('user_id', $user_id)
+                ->where('product_id', $request['id'])
+                ->where('variation', $str)
+                ->first();
         } else {
             $temp_user_id = $request->session()->get('temp_user_id');
-            $cart = Cart::firstOrNew([
-                'variation' => $str,
-                'temp_user_id' => $temp_user_id,
-                'product_id' => $request['id']
-            ]);
+            $existing_cart = Cart::where('temp_user_id', $temp_user_id)
+                ->where('product_id', $request['id'])
+                ->where('variation', $str)
+                ->first();
         }
 
-        // Mohammad Hassan
-        // Check if this is a preorder request
-        $is_preorder = $request->has('is_preorder') && $request->is_preorder == 1;
-        
-        if ($cart->exists && $product->digital == 0) {
-            if ($product->auction_product == 1 && ($cart->product_id == $product->id)) {
-                return array(
-                    'status' => 0,
-                    'cart_count' => count($carts),
-                    'modal_view' => view('frontend.partials.cart.auctionProductAlredayAddedCart')->render(),
-                    'nav_cart_view' => view('frontend.partials.cart.cart')->render(),
-                );
-            }
-            // Skip stock validation for preorder products
-            if (!$is_preorder && $product_stock !== null && $product_stock->qty < $cart->quantity + $request['quantity']) {
+        // Mohammad Hassan - If same variant exists, update quantity instead of creating new item
+        if ($existing_cart && $product->auction_product != 1) {
+            $new_quantity = $existing_cart->quantity + $request['quantity'];
+            
+            // Check if this is a preorder product
+            $is_preorder = $request->has('is_preorder') && $request->is_preorder == 1;
+            
+            // Check stock availability for the new total quantity
+            if (!$is_preorder && $product->digital == 0 && $product_stock !== null && $product_stock->qty < $new_quantity) {
                 return array(
                     'status' => 0,
                     'cart_count' => count($carts),
@@ -140,15 +141,87 @@ class CartController extends Controller
                     'nav_cart_view' => view('frontend.partials.cart.cart')->render(),
                 );
             }
-            $quantity = $cart->quantity + $request['quantity'];
+            
+            // Update existing cart item quantity and price
+            $price = CartUtility::get_price($product, $product_stock, $new_quantity, $authUser);
+            $tax = CartUtility::tax_calculation($product, $price);
+            
+            $existing_cart->quantity = $new_quantity;
+            $existing_cart->price = $price;
+            $existing_cart->unit_price = $price;
+            $existing_cart->tax = $tax;
+            $existing_cart->save();
+            
+            $cart = $existing_cart;
+        } else {
+            // Create new cart item for different variants or first-time additions
+            if($authUser != null) {
+                $user_id = $authUser->id;
+                $cart = new Cart([
+                    'variation' => $str,
+                    'user_id' => $user_id,
+                    'product_id' => $request['id']
+                ]);
+            } else {
+                $temp_user_id = $request->session()->get('temp_user_id');
+                $cart = new Cart([
+                    'variation' => $str,
+                    'temp_user_id' => $temp_user_id,
+                    'product_id' => $request['id']
+                ]);
+            }
         }
 
-        // Mohammad Hassan - Enhanced price calculation with user context
-        $price = CartUtility::get_price($product, $product_stock, $request->quantity, $authUser);
-        $tax = CartUtility::tax_calculation($product, $price);
+        // Mohammad Hassan
+        // Check if this is a preorder request
+        $is_preorder = $request->has('is_preorder') && $request->is_preorder == 1;
+        
+        // Check for auction products - only allow one auction product in cart
+        if ($product->auction_product == 1) {
+            $existing_auction = null;
+            if($authUser != null) {
+                $existing_auction = Cart::where('user_id', $user_id)
+                    ->whereHas('product', function($query) {
+                        $query->where('auction_product', 1);
+                    })->first();
+            } else {
+                $existing_auction = Cart::where('temp_user_id', $temp_user_id)
+                    ->whereHas('product', function($query) {
+                        $query->where('auction_product', 1);
+                    })->first();
+            }
+            
+            if ($existing_auction && $existing_auction->product_id == $product->id) {
+                return array(
+                    'status' => 0,
+                    'cart_count' => count($carts),
+                    'modal_view' => view('frontend.partials.cart.auctionProductAlredayAddedCart')->render(),
+                    'nav_cart_view' => view('frontend.partials.cart.cart')->render(),
+                );
+            }
+        }
+        
+        // Mohammad Hassan - Only check stock and save for new cart items (not for existing ones that were already updated)
+        if (!isset($existing_cart) || !$existing_cart) {
+            // Check stock availability for non-preorder products
+            if (!$is_preorder && $product->digital == 0 && $product_stock !== null && $product_stock->qty < $request['quantity']) {
+                return array(
+                    'status' => 0,
+                    'cart_count' => count($carts),
+                    'modal_view' => view('frontend.partials.outOfStockCart')->render(),
+                    'nav_cart_view' => view('frontend.partials.cart.cart')->render(),
+                );
+            }
+            
+            $quantity = $request['quantity'];
 
-        // Mohammad Hassan - Enhanced cart data saving with new parameters
-        CartUtility::save_cart_data($cart, $product, $request->all(), $quantity, $price, $tax, 0, $product_stock);
+            // Mohammad Hassan - Enhanced price calculation with user context
+            $price = CartUtility::get_price($product, $product_stock, $request->quantity, $authUser);
+            $tax = CartUtility::tax_calculation($product, $price);
+
+            // Mohammad Hassan - Enhanced cart data saving with new parameters
+            CartUtility::save_cart_data($cart, $product, $request->all(), $quantity, $price, $tax, 0, $product_stock);
+        }
 
         if($authUser != null) {
             $user_id = $authUser->id;
@@ -162,6 +235,132 @@ class CartController extends Controller
             'status' => 1,
             'cart_count' => count($carts),
             'modal_view' => view('frontend.partials.cart.addedToCart', compact('product', 'cart'))->render(),
+            'nav_cart_view' => view('frontend.partials.cart.cart')->render(),
+        );
+    }
+
+    // Mohammad Hassan - Handle multiple variants from product details page
+    private function addMultipleVariantsToCart($request, $authUser, $product)
+    {
+        $selected_items = json_decode($request->selected_items, true);
+        $added_count = 0;
+        $total_cart_count = 0;
+        $added_cart_items = []; // Mohammad Hassan - Collect all added cart items
+        
+        if($authUser != null) {
+            $user_id = $authUser->id;
+            $data['user_id'] = $user_id;
+        } else {
+            $temp_user_id = $request->session()->get('temp_user_id');
+            $data['temp_user_id'] = $temp_user_id;
+        }
+
+        foreach ($selected_items as $item) {
+            if (!isset($item['size']) || !isset($item['quantity']) || $item['quantity'] <= 0) {
+                continue;
+            }
+
+            $variant = $item['size'];
+            $quantity = $item['quantity'];
+            
+            // Get product stock for this variant
+            $product_stock = $product->stocks->where('variant', $variant)->first();
+            
+            // Check if this is a preorder product
+            $is_preorder = $product->isOutOfStock() && $product->isPreorderAvailable();
+            
+            // Mohammad Hassan - Check for existing cart item with same product and variant
+            $existing_cart = null;
+            if($authUser != null) {
+                $existing_cart = Cart::where('user_id', $authUser->id)
+                    ->where('product_id', $product->id)
+                    ->where('variation', $variant)
+                    ->first();
+            } else {
+                $temp_user_id = $request->session()->get('temp_user_id');
+                $existing_cart = Cart::where('temp_user_id', $temp_user_id)
+                    ->where('product_id', $product->id)
+                    ->where('variation', $variant)
+                    ->first();
+            }
+
+            if ($existing_cart) {
+                // Mohammad Hassan - Update existing cart item quantity
+                $new_quantity = $existing_cart->quantity + $quantity;
+                
+                // Check stock availability for the new total quantity
+                if (!$is_preorder && $product->digital == 0 && $product_stock !== null && $product_stock->qty < $new_quantity) {
+                    continue; // Skip this variant if insufficient stock
+                }
+                
+                // Update existing cart item
+                $existing_cart->quantity = $new_quantity;
+                
+                // Recalculate price and tax for the updated quantity
+                $price = CartUtility::get_price($product, $product_stock, $new_quantity, $authUser);
+                $tax = CartUtility::tax_calculation($product, $price);
+                
+                $existing_cart->price = $price;
+                $existing_cart->unit_price = $price;
+                $existing_cart->tax = $tax;
+                
+                $existing_cart->save();
+                $added_count++;
+                $added_cart_items[] = $existing_cart; // Mohammad Hassan - Collect updated cart item
+            } else {
+                // Mohammad Hassan - Create new cart entry for new variant
+                // Check stock availability for non-preorder products
+                if (!$is_preorder && $product->digital == 0 && $product_stock !== null && $product_stock->qty < $quantity) {
+                    continue; // Skip this variant if insufficient stock
+                }
+
+                $cart = new Cart;
+                $cart->owner_id = $product->user_id;
+                $cart->product_id = $product->id;
+                $cart->variation = $variant;
+                $cart->quantity = $quantity;
+                
+                // Calculate price and tax
+                $price = CartUtility::get_price($product, $product_stock, $quantity, $authUser);
+                $tax = CartUtility::tax_calculation($product, $price);
+                
+                $cart->price = $price;
+                $cart->unit_price = $price;
+                $cart->tax = $tax;
+                
+                if($authUser != null) {
+                    $cart->user_id = $authUser->id;
+                } else {
+                    $cart->temp_user_id = $request->session()->get('temp_user_id');
+                }
+                
+                $cart->save();
+                $added_count++;
+                $added_cart_items[] = $cart; // Mohammad Hassan - Collect new cart item
+            }
+        }
+
+        // Get updated cart count
+        if($authUser != null) {
+            $carts = Cart::where('user_id', $authUser->id)->get();
+        } else {
+            $temp_user_id = $request->session()->get('temp_user_id');
+            $carts = Cart::where('temp_user_id', $temp_user_id)->get();
+        }
+
+        // Mohammad Hassan - Get the last added cart item for modal display
+        $last_cart = null;
+        if($authUser != null) {
+            $last_cart = Cart::where('user_id', $authUser->id)->where('product_id', $product->id)->latest()->first();
+        } else {
+            $temp_user_id = $request->session()->get('temp_user_id');
+            $last_cart = Cart::where('temp_user_id', $temp_user_id)->where('product_id', $product->id)->latest()->first();
+        }
+
+        return array(
+            'status' => 1,
+            'cart_count' => count($carts),
+            'modal_view' => view('frontend.partials.cart.addedToCart', compact('product', 'added_cart_items'))->render(),
             'nav_cart_view' => view('frontend.partials.cart.cart')->render(),
         );
     }
@@ -229,6 +428,7 @@ class CartController extends Controller
             // Update cart item
             $cartItem['quantity'] = $request->quantity;
             $cartItem['price'] = $unit_price;
+            $cartItem['unit_price'] = $unit_price;
             $cartItem['tax'] = $tax;
             $cartItem->save();
         }

@@ -1,5 +1,15 @@
 # File Changes by Mohammad Hassan
 
+## Project Rules and Guidelines
+
+### AI Assistant Rules
+- **No Website Testing**: AI should NOT test, visit, or preview the website using any preview tools
+- **User Testing Only**: The user (Mohammad Hassan) will handle all website testing and provide real-world feedback
+- **Focus on Code**: AI should focus on code implementation and modifications only
+- **User Verification**: All functionality verification should be done by the user, not the AI
+
+// Mohammad Hassan
+
 ## Recent Changes Log
 
 ### 2025-10-01 - Enhanced Cart System with Color Variants and Price Tiers

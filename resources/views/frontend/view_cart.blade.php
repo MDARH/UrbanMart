@@ -18,31 +18,47 @@
         // Mohammad Hassan
         // Enhanced updateQuantity function with error handling and cart summary refresh
         function updateQuantity(key, element) {
+            // Store original value for rollback
+            var originalValue = element.getAttribute('data-original-value') || element.value;
+            
+            // Disable the input temporarily to prevent multiple requests
+            element.disabled = true;
+            
             $.post('{{ route('cart.updateQuantity') }}', {
                 _token: AIZ.data.csrf,
                 id: key,
                 quantity: element.value
             }, function(data) {
                 if (data.status == 1) {
+                    // Update original value to new value on success
+                    element.setAttribute('data-original-value', element.value);
+                    
                     updateNavCart(data.nav_cart_view, data.cart_count);
                     $('#cart-details').html(data.cart_view);
                     
                     // Refresh cart summary to update totals
                     refreshCartSummary();
                     
+                    // Re-initialize plus/minus controls for new content
                     AIZ.extra.plusMinus();
+                    
+                    // Show success message
+                    AIZ.plugins.notify('success', '{{ translate('Cart updated successfully') }}');
                 } else {
                     // Show error message if quantity update failed
                     if (data.message) {
                         AIZ.plugins.notify('warning', data.message);
                     }
                     // Reset quantity to previous value
-                    element.value = element.getAttribute('data-original-value') || 1;
+                    element.value = originalValue;
                 }
             }).fail(function() {
                 AIZ.plugins.notify('danger', '{{ translate('Something went wrong') }}');
                 // Reset quantity to previous value
-                element.value = element.getAttribute('data-original-value') || 1;
+                element.value = originalValue;
+            }).always(function() {
+                // Re-enable the input
+                element.disabled = false;
             });
         }
 

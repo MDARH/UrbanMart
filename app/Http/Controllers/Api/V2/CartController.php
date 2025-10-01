@@ -194,58 +194,90 @@ class CartController extends Controller
 
         $product_stock = $product->stocks->where('variant', $variant)->first();
 
+        // Mohammad Hassan - Create new cart item for each addition to prevent quantity combination
+        // This ensures each variant is treated as a separate product
+        $cart = new Cart();
         if($user_id != null) {
-            $cart = Cart::firstOrNew([
-                'variation' => $variant,
-                'user_id' => $user_id,
-                'product_id' => $request['id']
-            ]);
+            $cart->user_id = $user_id;
         } else {
-            $cart = Cart::firstOrNew([
-                'variation' => $variant,
-                'temp_user_id' => $temp_user_id,
-                'product_id' => $request['id']
-            ]);
+            $cart->temp_user_id = $temp_user_id;
         }
-
+        $cart->product_id = $request['id'];
+        $cart->variation = $variant;
 
         $variant_string = $variant != null && $variant != "" ? translate("for") . " ($variant)" : "";
 
-        if ($cart->exists && $product->digital == 0) {
-            if ($product->auction_product == 1 && ($cart->product_id == $product->id)) {
+        // Check for auction products
+        if ($product->auction_product == 1) {
+            $existing_cart = null;
+            if($user_id != null) {
+                $existing_cart = Cart::where('user_id', $user_id)
+                    ->where('product_id', $request['id'])
+                    ->where('variation', $variant)
+                    ->first();
+            } else {
+                $existing_cart = Cart::where('temp_user_id', $temp_user_id)
+                    ->where('product_id', $request['id'])
+                    ->where('variation', $variant)
+                    ->first();
+            }
+            
+            if ($existing_cart) {
                 return response()->json([
                     'result' => false,
                     'message' => translate('This auction product is already added to your cart.')
                 ], 200);
             }
-            if ($product_stock !== null && $product_stock->qty < $cart->quantity + $request['quantity']) {
-                if ($product_stock->qty == 0) {
-                    return response()->json([
-                        'result' => false,
-                        'temp_user_id' => $temp_user_id,
-                        'message' => translate("Stock out")
-                    ], 200);
-                } else {
-                    return response()->json([
-                        'result' => false,
-                        'temp_user_id' => $temp_user_id,
-                        'message' => translate("Only") . " {$product_stock->qty} " . translate("item(s) are available") . " {$variant_string}"
-                    ], 200);
-                }
+        }
+
+        // Check stock availability
+        if ($product_stock !== null && $product_stock->qty < $request['quantity']) {
+            if ($product_stock->qty == 0) {
+                return response()->json([
+                    'result' => false,
+                    'temp_user_id' => $temp_user_id,
+                    'message' => translate("Stock out")
+                ], 200);
+            } else {
+                return response()->json([
+                    'result' => false,
+                    'temp_user_id' => $temp_user_id,
+                    'message' => translate("Only") . " {$product_stock->qty} " . translate("item(s) are available") . " {$variant_string}"
+                ], 200);
             }
-            if ($product->digital == 1 && ($cart->product_id == $product->id)) {
+        }
+
+        // Check for digital products
+        if ($product->digital == 1) {
+            $existing_digital = null;
+            if($user_id != null) {
+                $existing_digital = Cart::where('user_id', $user_id)
+                    ->where('product_id', $request['id'])
+                    ->first();
+            } else {
+                $existing_digital = Cart::where('temp_user_id', $temp_user_id)
+                    ->where('product_id', $request['id'])
+                    ->first();
+            }
+            
+            if ($existing_digital) {
                 return response()->json([
                     'result' => false,
                     'temp_user_id' => $temp_user_id,
                     'message' => translate('Already added this product')
                 ]);
             }
-            $quantity = $cart->quantity + $request['quantity'];
         }
 
-        $price = CartUtility::get_price($product, $product_stock, $request->quantity);
+        $quantity = $request['quantity'];
+
+        // Mohammad Hassan - Enhanced price calculation with user context
+        $user = auth()->user();
+        $price = CartUtility::get_price($product, $product_stock, $request->quantity, $user);
         $tax = CartUtility::tax_calculation($product, $price);
-        CartUtility::save_cart_data($cart, $product, $price, $tax, $quantity);
+        
+        // Mohammad Hassan - Enhanced cart data saving with request data
+        CartUtility::save_cart_data($cart, $product, $request->all(), $quantity, $price, $tax, 0, $product_stock);
 
         if (NagadUtility::create_balance_reference($request->cost_matrix) == false) {
             return response()->json(['result' => false, 'message' => 'Cost matrix error']);
@@ -265,9 +297,19 @@ class CartController extends Controller
             if ($product->auction_product == 1) {
                 return response()->json(['result' => false, 'message' => translate('Maximum available quantity reached')], 200);
             }
-            if ($cart->product->stocks->where('variant', $cart->variation)->first()->qty >= $request->quantity) {
+            
+            $product_stock = $cart->product->stocks->where('variant', $cart->variation)->first();
+            if ($product_stock && $product_stock->qty >= $request->quantity) {
+                // Mohammad Hassan - Recalculate price and tax for new quantity
+                $user = auth()->user();
+                $price = CartUtility::get_price($product, $product_stock, $request->quantity, $user);
+                $tax = CartUtility::tax_calculation($product, $price);
+                
                 $cart->update([
-                    'quantity' => $request->quantity
+                    'quantity' => $request->quantity,
+                    'price' => $price,
+                    'unit_price' => $price,
+                    'tax' => $tax
                 ]);
 
                 return response()->json(['result' => true, 'message' => translate('Cart updated')], 200);

@@ -8,29 +8,93 @@
               <rect id="Rectangle_18069" data-name="Rectangle 18069" width="3" height="13" rx="1.5" transform="translate(6295.657 -7760.707) rotate(45)" fill="#fff"/>
             </g>
         </svg>
-        <h3 class="fs-28 fw-500">{{ translate('Item added to your cart!')}}</h3>
+        <h3 class="fs-28 fw-500">{{ translate('Items added to your cart!')}}</h3>
     </div>
 
     <!-- Product Info -->
     <div class="media mb-1">
         <img src="{{ static_asset('assets/img/placeholder.jpg') }}" data-src="{{ uploaded_asset($product->thumbnail_img) }}"
-            class="mr-4 lazyload size-90px img-fit rounded-0" alt="Product Image" onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
-        <div class="media-body mt-2 text-left d-flex flex-column justify-content-between">
+            class="mr-4 lazyload size-90px img-fit rounded-0" alt="Product Image" onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">        <div class="media-body mt-2 text-left d-flex flex-column justify-content-between">
             <h6 class="fs-14 fw-700 text-truncate-2">
                 {{  $product->getTranslation('name')  }}
             </h6>
-            <div class="row mt-2">
-                <div class="col-sm-3 fs-14 fw-400 text-secondary">
-                    <div>{{ translate('Price')}}</div>
-                </div>
-                <div class="col-sm-9">
-                    <div class="fs-16 fw-700 text-primary">
-                        <strong>
-                            {{ single_price(cart_product_price($cart, $product, false) * $cart->quantity) }}
-                        </strong>
+            
+            {{-- Mohammad Hassan - Display table of added variants --}}
+            @if(isset($added_cart_items) && count($added_cart_items) > 0)
+                <div class="mt-3">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="fs-12 fw-600 text-dark">{{ translate('Variant')}}</th>
+                                    <th class="fs-12 fw-600 text-dark text-center">{{ translate('Quantity')}}</th>
+                                    <th class="fs-12 fw-600 text-dark text-right">{{ translate('Price')}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php $total_price = 0; @endphp
+                                @foreach($added_cart_items as $cart_item)
+                                    @php $item_total = cart_product_price($cart_item, $product, false) * $cart_item->quantity; @endphp
+                                    @php $total_price += $item_total; @endphp
+                                    <tr>
+                                        <td class="fs-13 fw-500">
+                                            {{ $cart_item->variation ?: translate('Default') }}
+                                        </td>
+                                        <td class="fs-13 fw-500 text-center">
+                                            {{ $cart_item->quantity }}
+                                        </td>
+                                        <td class="fs-13 fw-600 text-primary text-right">
+                                            {{ single_price($item_total) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                <tr class="bg-light">
+                                    <td colspan="2" class="fs-14 fw-700 text-dark">{{ translate('Total')}}</td>
+                                    <td class="fs-16 fw-700 text-primary text-right">
+                                        {{ single_price($total_price) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
+            @elseif(isset($cart))
+                {{-- Mohammad Hassan - Fallback for single item display --}}
+                <div class="row mt-1">
+                    <div class="col-sm-3 fs-12 fw-400 text-secondary">
+                        <div>{{ translate('Variant')}}</div>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="fs-13 fw-600 text-dark">
+                            {{ $cart->variation ?: translate('Default') }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-1">
+                    <div class="col-sm-3 fs-12 fw-400 text-secondary">
+                        <div>{{ translate('Quantity')}}</div>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="fs-13 fw-600 text-dark">
+                            {{ $cart->quantity }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-2">
+                    <div class="col-sm-3 fs-14 fw-400 text-secondary">
+                        <div>{{ translate('Price')}}</div>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="fs-16 fw-700 text-primary">
+                            <strong>
+                                {{ single_price(cart_product_price($cart, $product, false) * $cart->quantity) }}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 

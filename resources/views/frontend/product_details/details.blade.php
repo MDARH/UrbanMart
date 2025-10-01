@@ -58,7 +58,7 @@
                     <small class="text-muted ml-1">{{ translate('Original Price') }}</small>
                 </div>
                 <div class="mb-2">
-                    <span class="badge badge-danger fs-12 fw-600">
+                    <span class="rounded p-1 badge-danger fs-12 fw-600">
                         {{ $detailedProduct->discount_type == 'percent' ? $detailedProduct->discount.'% OFF' : '৳'.$detailedProduct->discount.' OFF' }}
                     </span>
                 </div>
@@ -214,7 +214,7 @@
                 $isOutOfStock = $detailedProduct->isOutOfStock();
                 $isPreorderAvailable = $detailedProduct->isPreorderAvailable();
             @endphp
-            
+
             @if($isOutOfStock && $isPreorderAvailable)
                 {{-- Pre-order buttons for out of stock products --}}
                 <div class="alert alert-warning mb-3">

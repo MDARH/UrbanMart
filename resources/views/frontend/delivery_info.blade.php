@@ -65,7 +65,7 @@
 
                                     if($product->added_by == 'admin'){
                                         array_push($admin_products, $cartItem['product_id']);
-                                        $admin_product_variation[] = $cartItem['variation'];
+                                        $admin_product_variation[] = $cartItem['id'];
                                     }
                                     else{
                                         $product_ids = array();
@@ -74,7 +74,14 @@
                                         }
                                         array_push($product_ids, $cartItem['product_id']);
                                         $seller_products[$product->user_id] = $product_ids;
-                                        $seller_product_variation[] = $cartItem['variation'];
+
+                                        // Mohammad Hassan - Fix: Organize seller variations by seller ID
+                                        $seller_variations = array();
+                                        if(isset($seller_product_variation[$product->user_id])){
+                                            $seller_variations = $seller_product_variation[$product->user_id];
+                                        }
+                                        $seller_variations[] = $cartItem['id'];
+                                        $seller_product_variation[$product->user_id] = $seller_variations;
                                     }
                                 }
 
@@ -234,7 +241,7 @@
                                         </div>
                                         <div class="card-body p-0">
                                             {{-- Mohammad Hassan - Include order details table with pricing and cart controls --}}
-                                            @include('frontend.partials.cart.order_details', ['products' => $seller_product, 'product_variation' => $seller_product_variation, 'owner_id' => $key ])
+                                            @include('frontend.partials.cart.order_details', ['products' => $seller_product, 'product_variation' => $seller_product_variation[$key], 'owner_id' => $key ])
                                             <!-- Choose Delivery Type -->
                                             @php
                                                 $physical = false;

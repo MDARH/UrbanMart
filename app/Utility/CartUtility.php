@@ -46,14 +46,22 @@ class CartUtility
         return $str;
     }
 
-    // Mohammad Hassan - Enhanced price calculation with price tiers support
-    public static function get_price($product, $product_stock, $quantity, $user = null)
+    // Mohammad Hassan - Enhanced price calculation with variant-specific pricing and wholesale discounts
+    public static function get_price($product, $product_stock, $quantity, $user = null, $selected_items = null)
     {
         // Check if product_stock is null and fallback to product price
         if ($product_stock === null) {
             $price = $product->unit_price ?? 0;
         } else {
             $price = $product_stock->price;
+        }
+        
+        // Mohammad Hassan - Check for variant-specific pricing from selected_items
+        if ($selected_items && is_array($selected_items) && count($selected_items) > 0) {
+            $first_item = $selected_items[0];
+            if (isset($first_item['unit_price']) && $first_item['unit_price'] > 0) {
+                $price = $first_item['unit_price'];
+            }
         }
         
         if ($product->auction_product == 1) {
@@ -133,11 +141,19 @@ class CartUtility
     // Mohammad Hassan - Enhanced cart data saving with color variant and price tier support
     public static function save_cart_data($cart, $product, $request, $quantity, $price, $tax, $shipping_cost, $product_stock = null)
     {
+        // Mohammad Hassan - Enhanced save_cart_data with variant-specific pricing
+        $selected_items = isset($request['selected_items']) ? json_decode($request['selected_items'], true) : null;
+        $price = self::get_price($product, $product_stock, $quantity, auth()->user(), $selected_items);
+        $tax = self::tax_calculation($product, $price);
+        
         $cart->product_id = $product->id;
         $cart->price = $price;
         $cart->tax = $tax;
         $cart->shipping_cost = $shipping_cost;
         $cart->quantity = $quantity;
+        
+        // Mohammad Hassan - Store unit price for variant-specific pricing
+        $cart->unit_price = $price;
         
         // Mohammad Hassan - Store color variant if available
         if (isset($request['color'])) {
@@ -150,8 +166,19 @@ class CartUtility
             $cart->variant_name = $variant;
         }
         
-        // Mohammad Hassan - Price tier information is now handled via product_price_tiers table relationship
-        // No need to store in cart as we can retrieve it dynamically when needed
+        // Mohammad Hassan - Handle selected_items from table-based variant selection
+        if (isset($request['selected_items'])) {
+            $selectedItems = json_decode($request['selected_items'], true);
+            if (is_array($selectedItems) && count($selectedItems) > 0) {
+                $firstItem = $selectedItems[0];
+                if (isset($firstItem['variant_name'])) {
+                    $cart->variant_name = $firstItem['variant_name'];
+                }
+                if (isset($firstItem['unit_price'])) {
+                    $cart->unit_price = $firstItem['unit_price'];
+                }
+            }
+        }
         
         $cart->variation = CartUtility::create_cart_variant($product, $request);
         $cart->owner_id = $product->user_id;
