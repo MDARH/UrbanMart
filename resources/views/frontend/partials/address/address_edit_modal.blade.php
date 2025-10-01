@@ -1,5 +1,6 @@
 <form class="form-default" role="form" action="{{ route('addresses.update', $address_data->id) }}" method="POST">
     @csrf
+    @method('PUT')
     <div class="p-3">
         <!-- Name -->
         <div class="row">
@@ -140,7 +141,6 @@
         @endif
 
         <!-- Postal code (Optional) -->
-        // Mohammad Hassan - Hid postal code row
         <div class="row" style="display: none;">
             <div class="col-md-2">
                 <label>{{ translate('Postal Code')}} <span class="text-muted">({{ translate('Optional') }})</span></label>

@@ -55,7 +55,8 @@ class AddressController extends Controller
         $address->latitude      = $request->latitude;
         $address->postal_code   = $request->postal_code;
         $address->name          = $request->name;
-        $address->phone         = '+880' . substr($request->phone, 1);
+        // Mohammad Hassan - Store phone number as provided without automatic country code
+        $address->phone         = $request->phone;
         $address->save();
         flash(translate('Address info Stored successfully'))->success();
         return back();
@@ -110,13 +111,13 @@ class AddressController extends Controller
         }
         $address->country_id    = $request->country_id ?? $address->country_id;
         $address->city_id       = $request->city_id ?? $address->city_id; // Keep for backward compatibility
-        $address->city          = $request->city ?? $address->city; // New text field for city
         $address->area_id       = $request->area_id ?? null;
         $address->longitude     = $request->longitude;
         $address->latitude      = $request->latitude;
         $address->postal_code   = $request->postal_code;
         $address->name          = $request->name;
-        $address->phone         = '+880' . substr($request->phone, 1);
+        // Mohammad Hassan - Store phone number as provided without automatic country code
+        $address->phone         = $request->phone;
         $address->save();
         flash(translate('Address info updated successfully'))->success();
         return back();
