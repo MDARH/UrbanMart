@@ -4,7 +4,12 @@
     if(count($carts) > 0) {
         foreach ($carts as $key => $cartItem) {
             $product = get_single_product($cartItem['product_id']);
-            $total = $total + cart_product_price($cartItem, $product, false) * $cartItem['quantity'];
+            // If the cart item has a final grand total saved in price, use it.
+            // Otherwise, fallback to per-unit price * quantity.
+            $lineTotal = (isset($cartItem['price']) && $cartItem['price'] > 0)
+                ? $cartItem['price']
+                : cart_product_price($cartItem, $product, false) * $cartItem['quantity'];
+            $total += $lineTotal;
         }
     }
 @endphp
@@ -86,7 +91,7 @@
                                         </div>
                                     @endif
                                     <span class="fs-14 fw-400 text-secondary">{{ $cartItem['quantity'] }}x</span>
-                                    <span class="fs-14 fw-400 text-secondary">{{ cart_product_price($cartItem, $product) }}</span>
+                                    <span class="fs-14 fw-400 text-secondary">{{ single_price((isset($cartItem['price']) && $cartItem['price'] > 0) ? $cartItem['price'] : cart_product_price($cartItem, $product, false) * $cartItem['quantity']) }}</span>
                                 </span>
                             </a>
                             <span class="">

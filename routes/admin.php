@@ -92,8 +92,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
     Route::resource('categories', CategoryController::class);
     Route::controller(CategoryController::class)->group(function () {
         // Mohammad Hassan - Commented out duplicate route names that conflict with resource routes
-        // Route::get('/categories/edit/{id}', 'edit')->name('categories.edit');
-        // Route::get('/categories/destroy/{id}', 'destroy')->name('categories.destroy');
+        Route::get('/categories/edit/{id}', 'edit')->name('categories.edit');
+        Route::get('/categories/destroy/{id}', 'destroy')->name('categories.destroy');
         Route::post('/categories/featured', 'updateFeatured')->name('categories.featured');
         Route::post('/categories/categoriesByType', 'categoriesByType')->name('categories.categories-by-type');
 
@@ -109,16 +109,16 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
     Route::resource('brands', BrandController::class);
     Route::controller(BrandController::class)->group(function () {
         // Mohammad Hassan - Commented out duplicate route names that conflict with resource routes
-        // Route::get('/brands/edit/{id}', 'edit')->name('brands.edit');
-        // Route::get('/brands/destroy/{id}', 'destroy')->name('brands.destroy');
+        Route::get('/brands/edit/{id}', 'edit')->name('brands.edit');
+        Route::get('/brands/destroy/{id}', 'destroy')->name('brands.destroy');
     });
 
     // Warranty
     Route::resource('warranties', WarrantyController::class);
     Route::controller(WarrantyController::class)->group(function () {
         // Mohammad Hassan - Commented out duplicate route names that conflict with resource routes
-        // Route::get('/warranties/edit/{id}', 'edit')->name('warranties.edit');
-        // Route::get('/warranties/destroy/{id}', 'destroy')->name('warranties.destroy');
+        Route::get('/warranties/edit/{id}', 'edit')->name('warranties.edit');
+        Route::get('/warranties/destroy/{id}', 'destroy')->name('warranties.destroy');
     });
 
     Route::controller(BrandBulkUploadController::class)->group(function () {
@@ -383,8 +383,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
         Route::resource('custom-pages', PageController::class);
         Route::controller(PageController::class)->group(function () {
             // Mohammad Hassan - Commented out duplicate route names that conflict with resource route
-            // Route::get('/custom-pages/edit/{id}', 'edit')->name('custom-pages.edit');
-            // Route::get('/custom-pages/destroy/{id}', 'destroy')->name('custom-pages.destroy');
+            Route::get('/custom-pages/edit/{id}', 'edit')->name('custom-pages.edit');
+            Route::get('/custom-pages/destroy/{id}', 'destroy')->name('custom-pages.destroy');
         });
     });
 
@@ -408,8 +408,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
     Route::resource('flash_deals', FlashDealController::class);
     Route::controller(FlashDealController::class)->group(function () {
         // Mohammad Hassan - Commented out duplicate route names that conflict with resource route
-        // Route::get('/flash_deals/edit/{id}', 'edit')->name('flash_deals.edit');
-        // Route::get('/flash_deals/destroy/{id}', 'destroy')->name('flash_deals.destroy');
+        Route::get('/flash_deals/edit/{id}', 'edit')->name('flash_deals.edit');
+        Route::get('/flash_deals/destroy/{id}', 'destroy')->name('flash_deals.destroy');
         Route::post('/flash_deals/update_status', 'update_status')->name('flash_deals.update_status');
         Route::post('/flash_deals/update_featured', 'update_featured')->name('flash_deals.update_featured');
         Route::post('/flash_deals/product_discount', 'product_discount')->name('flash_deals.product_discount');
@@ -564,8 +564,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
     Route::resource('attributes', AttributeController::class);
     Route::controller(AttributeController::class)->group(function () {
         // Mohammad Hassan - Commented out duplicate route names that conflict with resource route
-        // Route::get('/attributes/edit/{id}', 'edit')->name('attributes.edit');
-        // Route::get('/attributes/destroy/{id}', 'destroy')->name('attributes.destroy');
+        Route::get('/attributes/edit/{id}', 'edit')->name('attributes.edit');
+        Route::get('/attributes/destroy/{id}', 'destroy')->name('attributes.destroy');
 
         //Attribute Value
         Route::post('/store-attribute-value', 'store_attribute_value')->name('store-attribute-value');
@@ -636,8 +636,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
     Route::resource('cities', CityController::class);
     Route::controller(CityController::class)->group(function () {
         // Mohammad Hassan - Commented out duplicate route names that conflict with resource route
-        // Route::get('/cities/edit/{id}', 'edit')->name('cities.edit');
-        // Route::get('/cities/destroy/{id}', 'destroy')->name('cities.destroy');
+        Route::get('/cities/edit/{id}', 'edit')->name('cities.edit');
+        Route::get('/cities/destroy/{id}', 'destroy')->name('cities.destroy');
         Route::post('/cities/status', 'updateStatus')->name('cities.status');
         Route::get('/get-cities-by-state', 'getCities')->name('get-cities-by-state');
         Route::get('/get-cities-by-country', 'getCitiesByCountry')->name('get-cities-by-country');
@@ -687,9 +687,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
     Route::resource('notification-type', NotificationTypeController::class);
     Route::controller(NotificationTypeController::class)->group(function () {
         // Mohammad Hassan - Commented out duplicate route names that conflict with resource route
-        // Route::get('/notification-type/edit/{id}', 'edit')->name('notification-type.edit');
+        Route::get('/notification-type/edit/{id}', 'edit')->name('notification-type.edit');
         Route::post('/notification-type/update-status', 'updateStatus')->name('notification-type.update-status');
-        // Route::get('/notification-type/destroy/{id}', 'destroy')->name('notification-type.destroy');
+        Route::get('/notification-type/destroy/{id}', 'destroy')->name('notification-type.destroy');
         Route::post('/notification-type/bulk_delete', 'bulkDelete')->name('notifications-type.bulk_delete');
         Route::post('/notification-type.get-default-text', 'getDefaulText')->name('notification_type.get_default_text');
     });
