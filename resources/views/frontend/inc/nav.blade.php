@@ -1,7 +1,7 @@
 <!-- Main Header Container -->
 <header class="@if (get_setting('header_stikcy') == 'on') sticky-top @endif z-1020 shadow-sm">
     <!-- Changed header background to a clean white with a subtle shadow -->
-    <div class="bg-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="bg-white py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <div class="container d-flex align-items-center justify-content-between">
 
             <!-- Left Section: Mobile Menu Toggle & Logo -->
@@ -9,11 +9,12 @@
                 <!-- Mobile Menu Button (Hamburger) -->
                 <button type="button" class="btn d-lg-none mr-3 mr-sm-4 p-0 active" data-toggle="class-toggle"
                     data-target=".aiz-top-menu-sidebar">
-                    <svg id="Component_43_1" data-name="Component 43 – 1" xmlns="http://www.w3.org/2000/svg" width="18"
-                        height="18" viewBox="0 0 16 16">
+                    <svg id="Component_43_1" data-name="Component 43 – 1" xmlns="http://www.w3.org/2000/svg"
+                        width="18" height="18" viewBox="0 0 16 16">
                         <rect id="Rectangle_19062" data-name="Rectangle 19062" width="16" height="2"
                             transform="translate(0 7)" fill="#333" />
-                        <rect id="Rectangle_19063" data-name="Rectangle 19063" width="16" height="2" fill="#333" />
+                        <rect id="Rectangle_19063" data-name="Rectangle 19063" width="16" height="2"
+                            fill="#333" />
                         <rect id="Rectangle_19064" data-name="Rectangle 19064" width="16" height="2"
                             transform="translate(0 14)" fill="#333" />
                     </svg>
@@ -159,7 +160,8 @@
                             <!-- Search Input -->
                             <div class="search-input-box w-100">
                                 <input type="text" class="form-control fs-14 h-40px rounded-pill pl-4 pr-5 border-0 "
-                                    id="search" name="keyword" @isset($query) value="{{ $query }}" @endisset
+                                    id="search" name="keyword"
+                                    @isset($query) value="{{ $query }}" @endisset
                                     placeholder="{{ translate('I am shopping for...') }}" autocomplete="off">
                                 <!-- Search Icon - now a submit button -->
                                 <button type="submit" class="search-icon position-absolute border-0 bg-transparent p-2"
@@ -200,7 +202,9 @@
                 }
 
                 @media (min-width: 992px) {
-                    .ml-lg-5, .mx-lg-5 {
+
+                    .ml-lg-5,
+                    .mx-lg-5 {
                         margin-left: 8rem !important;
                     }
                 }
@@ -216,13 +220,13 @@
                     </a>
                 </div>
 
-               <!-- Cart Icon -->
-<div class="d-none d-xl-block has-transition" data-hover="dropdown">
-    <div class="nav-cart-box dropdown h-100" id="cart_items">
-        {{-- Mohammad Hassan --}}
-        @include('frontend.partials.cart.cart')
-    </div>
-</div>
+                <!-- Cart Icon -->
+                <div class="d-none d-xl-block has-transition" data-hover="dropdown">
+                    <div class="nav-cart-box dropdown h-100" id="cart_items">
+                        {{-- Mohammad Hassan --}}
+                        @include('frontend.partials.cart.cart')
+                    </div>
+                </div>
 
 
                 <!-- User Account/Auth Links - Show for all users -->
@@ -242,7 +246,7 @@
                                 @endif
                             </span>
                             <div class="ml-2">
-                                  @if(auth()->user()->name)
+                                @if (auth()->user()->name)
                                     <h4 class="h5 fs-14 fw-700 text-white mb-0">{{ auth()->user()->name }}</h4>
                                     <small class="fs-12 text-white-50">{{ auth()->user()->email }}</small>
                                 @else
@@ -265,8 +269,7 @@
                                                 $dashboardRoute = 'admin.dashboard';
                                             } elseif (auth()->user()->user_type == 'seller') {
                                                 $dashboardRoute = 'seller.dashboard';
-                                            }
-                                            elseif (auth()->user()->user_type == 'wholesaler') {
+                                            } elseif (auth()->user()->user_type == 'wholesaler') {
                                                 $dashboardRoute = 'dashboard';
                                             }
                                         @endphp
@@ -321,7 +324,9 @@
                                 </svg>
                             </span>
                             <a href="javascript:void(0)" onclick="openCustomerLogin()"
-                                 class="text-reset hov-text-primary fs-14 d-inline-block border-soft-light border-width-2 pr-2 ml-3" style="color: #FFFFFF!important; font-weight: 700;">{{ translate('Login') }}</a> <!-- Mohammad Hassan -->
+                                class="text-reset hov-text-primary fs-14 d-inline-block border-soft-light border-width-2 pr-2 ml-3"
+                                style="color: #FFFFFF!important; font-weight: 700;">{{ translate('Login') }}</a>
+                            <!-- Mohammad Hassan -->
                         </span>
                     @endauth
                 </div>
@@ -337,25 +342,26 @@
                     <div class="aiz-user-top-menu bg-white rounded-0 border-top shadow-sm" style="width:220px;">
                         <ul class="list-unstyled no-scrollbar mb-0 text-left">
                             <li class="user-top-nav-element border border-top-0" data-id="1">
-                               @php
+                                @php
                                     $dashboardRoute = 'dashboard'; // Default customer dashboard
                                     if (auth()->user()->user_type == 'admin') {
                                         $dashboardRoute = 'admin.dashboard';
                                     } elseif (auth()->user()->user_type == 'seller') {
                                         $dashboardRoute = 'seller.dashboard';
-                                    }
-                                    elseif (auth()->user()->user_type == 'wholesaler') {
+                                    } elseif (auth()->user()->user_type == 'wholesaler') {
                                         $dashboardRoute = 'dashboard';
                                     }
                                 @endphp
                                 <a href="{{ route($dashboardRoute) }}"
                                     class="text-truncate text-dark px-4 fs-14 d-flex align-items-center hov-column-gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                        viewBox="0 0 16 16">
                                         <path id="Path_2916" data-name="Path 2916"
                                             d="M15.3,5.4,9.561.481A2,2,0,0,0,8.26,0H7.74a2,2,0,0,0-1.3.481L.7,5.4A2,2,0,0,0,0,6.92V14a2,2,0,0,0,2,2H14a2,2,0,0,0,2-2V6.92A2,2,0,0,0,15.3,5.4M10,15H6V9A1,1,0,0,1,7,8H9a1,1,0,0,1,1,1Zm5-1a1,1,0,0,1-1,1H11V9A2,2,0,0,0,9,7H7A2,2,0,0,0,5,9v6H2a1,1,0,0,1-1-1V6.92a1,1,0,0,1,.349-.76l5.74-4.92A1,1,0,0,1,7.74,1h.52a1,1,0,0,1,.651.24l5.74,4.92A1,1,0,0,1,15,6.92Z"
                                             fill="#b5b5c0" />
                                     </svg>
-                                    <span class="user-top-menu-name has-transition ml-3">{{ translate('Dashboard') }}</span>
+                                    <span
+                                        class="user-top-menu-name has-transition ml-3">{{ translate('Dashboard') }}</span>
                                 </a>
                             </li>
 
@@ -365,15 +371,17 @@
                                     class="text-truncate text-dark px-4 fs-14 d-flex align-items-center hov-column-gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15.999"
                                         viewBox="0 0 16 15.999">
-                                        <g id="Group_25503" data-name="Group 25503" transform="translate(-24.002 -377)">
+                                        <g id="Group_25503" data-name="Group 25503"
+                                            transform="translate(-24.002 -377)">
                                             <g id="Group_25265" data-name="Group 25265"
                                                 transform="translate(-216.534 -160)">
                                                 <path id="Subtraction_192" data-name="Subtraction 192"
                                                     d="M12052.535,2920a8,8,0,0,1-4.569-14.567l.721.72a7,7,0,1,0,7.7,0l.721-.72a8,8,0,0,1-4.567,14.567Z"
                                                     transform="translate(-11803.999 -2367)" fill="#d43533" />
                                             </g>
-                                            <rect id="Rectangle_19022" data-name="Rectangle 19022" width="1" height="8"
-                                                rx="0.5" transform="translate(31.5 377)" fill="#d43533" />
+                                            <rect id="Rectangle_19022" data-name="Rectangle 19022" width="1"
+                                                height="8" rx="0.5" transform="translate(31.5 377)"
+                                                fill="#d43533" />
                                         </g>
                                     </svg>
                                     <span
@@ -405,40 +413,43 @@
                         @if (auth()->user()->avatar_original != null)
                             <img src="{{ uploaded_asset(auth()->user()->avatar_original) }}" class="img-fit h-100"
                                 alt="{{ translate('avatar') }}"
-                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/avatar-place.png') }}';"> @else
-                                <img src="{{ static_asset('assets/img/avatar-place.png') }}" class="image"
-                                    alt="{{ translate('avatar') }}"
-                                    onerror="this.onerror=null;this.src='{{ static_asset('assets/img/avatar-place.png') }}';">
-                            @endif
+                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/avatar-place.png') }}';">
+                        @else
+                            <img src="{{ static_asset('assets/img/avatar-place.png') }}" class="image"
+                                alt="{{ translate('avatar') }}"
+                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/avatar-place.png') }}';">
+                        @endif
                     </span>
                     <div class="ml-2">
-                        {{-- @if(auth()->user()->name && auth()->user()->name != auth()->user()->email)
+                        {{-- @if (auth()->user()->name && auth()->user()->name != auth()->user()->email)
                             <h4 class="h5 fs-14 fw-700 text-dark mb-0">{{ auth()->user()->name }}</h4>
                             <small class="fs-12 text-muted">{{ auth()->user()->email }}</small>
                         @else
                             <h4 class="h5 fs-14 fw-700 text-dark mb-0">{{ auth()->user()->email }}</h4>
                         @endif --}}
-                          @if(auth()->user()->name)
-                                <h4 class="h5 fs-14 fw-700 text-dark mb-0">{{ auth()->user()->name }}</h4>
-                                <small class="fs-12 text-muted">{{ auth()->user()->email }}</small>
-                            @else
-                                <h4 class="h5 fs-14 fw-700 text-dark mb-0">{{ auth()->user()->email }}</h4>
-                                <small class="fs-12 text-muted">{{ translate('No Name') }}</small>
-                            @endif
+                        @if (auth()->user()->name)
+                            <h4 class="h5 fs-14 fw-700 text-dark mb-0">{{ auth()->user()->name }}</h4>
+                            <small class="fs-12 text-muted">{{ auth()->user()->email }}</small>
+                        @else
+                            <h4 class="h5 fs-14 fw-700 text-dark mb-0">{{ auth()->user()->email }}</h4>
+                            <small class="fs-12 text-muted">{{ translate('No Name') }}</small>
+                        @endif
                     </div>
                 </span>
             @else
                 <span class="d-flex align-items-center nav-user-info">
                     <span
                         class="size-40px rounded-circle overflow-hidden border d-flex align-items-center justify-content-center nav-user-img bg-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="19.902" height="20.012" viewBox="0 0 19.902 20.012">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19.902" height="20.012"
+                            viewBox="0 0 19.902 20.012">
                             <path id="fe2df171891038b33e9624c27e96e367"
                                 d="M15.71,12.71a6,6,0,1,0-7.42,0,10,10,0,0,0-6.22,8.18,1.006,1.006,0,1,0,2,.22,8,8,0,0,1,15.9,0,1,1,0,0,0,1,.89h.11a1,1,0,0,0,.88-1.1,10,10,0,0,0-6.25-8.19ZM12,12a4,4,0,1,1,4-4A4,4,0,0,1,12,12Z"
                                 transform="translate(-2.064 -1.995)" fill="#91919b" />
                         </svg>
                     </span>
                     <a href="javascript:void(0)" onclick="openCustomerLogin()"
-                         class="text-reset opacity-60 hov-opacity-100 hov-text-primary fs-12 d-inline-block border-right border-soft-light border-width-2 pr-2 ml-3">{{ translate('Login') }}</a> <!-- Mohammad Hassan -->
+                        class="text-reset opacity-60 hov-opacity-100 hov-text-primary fs-12 d-inline-block border-right border-soft-light border-width-2 pr-2 ml-3">{{ translate('Login') }}</a>
+                    <!-- Mohammad Hassan -->
                     <a href="{{ route(get_setting('customer_registration_verify') === '1' ? 'registration.verification' : 'user.registration') }}"
                         class="text-reset opacity-60 hov-opacity-100 hov-text-primary fs-12 d-inline-block py-2 pl-2">{{ translate('Registration') }}</a>
 
@@ -511,31 +522,34 @@
                         } elseif (auth()->user()->user_type == 'seller') {
                             $dashboardRoute = 'seller.dashboard';
                             $accountLabel = 'Seller Dashboard';
-                        }
-                        elseif (auth()->user()->user_type == 'wholesaler') {
-                              $dashboardRoute = 'dashboard';
+                        } elseif (auth()->user()->user_type == 'wholesaler') {
+                            $dashboardRoute = 'dashboard';
                         }
                     @endphp
-                    <a href="{{ route($dashboardRoute) }}" class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links
+                    <a href="{{ route($dashboardRoute) }}"
+                        class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links
                             {{ areActiveRoutes([$dashboardRoute], ' active') }}">
                         {{ translate($accountLabel) }}
                     </a>
                 </li>
-                @if(auth()->user()->user_type == 'customer')
+                @if (auth()->user()->user_type == 'customer')
                     <li class="mr-0">
-                        <a href="{{ route('customer.all-notifications') }}" class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links
+                        <a href="{{ route('customer.all-notifications') }}"
+                            class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links
                                     {{ areActiveRoutes(['customer.all-notifications'], ' active') }}">
                             {{ translate('Notifications') }}
                         </a>
                     </li>
                     <li class="mr-0">
-                        <a href="{{ route('wishlists.index') }}" class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links
+                        <a href="{{ route('wishlists.index') }}"
+                            class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links
                                     {{ areActiveRoutes(['wishlists.index'], ' active') }}">
                             {{ translate('Wishlist') }}
                         </a>
                     </li>
                     <li class="mr-0">
-                        <a href="{{ route('compare') }}" class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links
+                        <a href="{{ route('compare') }}"
+                            class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links
                                     {{ areActiveRoutes(['compare'], ' active') }}">
                             {{ translate('Compare') }}
                         </a>
@@ -581,7 +595,7 @@
             $.post('{{ route('orders.details') }}', {
                 _token: AIZ.data.csrf,
                 order_id: order_id
-            }, function (data) {
+            }, function(data) {
                 $('#order-details-modal-body').html(data);
                 $('#order_details').modal();
                 $('.c-preloader').hide();
@@ -590,15 +604,15 @@
         }
 
         // Close dropdown when clicking outside
-        $(document).ready(function () {
-            $(document).on('click', function (event) {
+        $(document).ready(function() {
+            $(document).on('click', function(event) {
                 if (!$(event.target).closest('.user-dropdown-container').length) {
                     $('.hover-user-top-menu').removeClass('show-dropdown');
                 }
             });
 
             // Prevent dropdown from closing when clicking inside it
-            $('.hover-user-top-menu').on('click', function (event) {
+            $('.hover-user-top-menu').on('click', function(event) {
                 event.stopPropagation();
             });
         });

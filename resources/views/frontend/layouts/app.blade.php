@@ -1376,7 +1376,7 @@
             .main-container {
                 flex-direction: column;
                 min-height: auto;
-                padding: 0 10px;
+                /* padding: 0 10px; */
             }
 
             .left-sidebar {
@@ -1391,6 +1391,7 @@
 
             .right-content {
                 padding: 10px 0;
+                margin-top: -8px;
             }
 
             .hero-section {
@@ -1406,7 +1407,7 @@
             }
 
             .slide {
-                padding: 20px;
+                /* padding: 20px; */
                 flex-direction: column;
                 text-align: center;
                 justify-content: center;
@@ -1604,7 +1605,7 @@
 
         @media (max-width: 480px) {
             .products-section .product-image{
-                height: 120px;
+                /* height: 120px; */
             }
             .logo {
                 font-size: 20px;
