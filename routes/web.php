@@ -565,9 +565,9 @@ Route::controller(ContactController::class)->group(function () {
 
 
 
-// Route::group(['middleware' => ['auth', 'user']], function() {
-//     Route::get('/wholesaler/dashboard', 'App\Http\Controllers\Admin\WholesalerController@wholesaler_dashboard')->name('wholesaler.dashboard');
-// });
+Route::group(['middleware' => ['auth', 'user']], function() {
+    Route::get('/wholesaler/dashboard', 'App\Http\Controllers\Admin\WholesalerController@wholesaler_dashboard')->name('wholesaler.dashboard');
+});
 
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function() {
@@ -581,6 +581,5 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::get('wholesale-orders/{id}/show', [$wholesaler_controller, 'wholesale_order_show'])->name('wholesale_orders.show'); // রুটের নাম 'wholesale_orders.show' নিশ্চিত করা হলো
     Route::get('wholesale-settings', [$wholesaler_controller, 'wholesale_settings_index'])->name('wholesale.settings');
     Route::post('wholesale-settings/update', [$wholesaler_controller, 'wholesale_settings_update'])->name('wholesale.settings.update');
-    // Mohammad Hassan - Commented out duplicate route name that conflicts with wholesale.php route
-    // Route::get('wholesale-products/all', [$wholesaler_controller, 'all_wholesale_products'])->name('wholesale_products.all');
+    Route::get('wholesale-products/all', [$wholesaler_controller, 'all_wholesale_products'])->name('wholesale_products.all');
 });

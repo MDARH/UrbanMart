@@ -1,16 +1,5 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| preorder Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register preorder routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
 use App\Http\Controllers\Preorder\DashboardController;
 use App\Http\Controllers\Preorder\FaqController;
 use App\Http\Controllers\Preorder\NotificationTypeController;
@@ -31,9 +20,6 @@ use App\Http\Controllers\Preorder\seller\PreorderProductController as SellerPreo
 use App\Http\Controllers\Preorder\seller\PreorderProductQueryController as SellerPreorderProductQueryController;
 use App\Http\Controllers\Preorder\seller\PreorderProductReviewController as SellerPreorderProductReviewController;
 
-
-Route::group([ 'middleware' => ['isPreorder', ]], function () {
-
     // Admin Routes
     Route::group(['prefix' => 'admin/preorder', 'middleware' => ['auth', 'admin', 'prevent-back-history']], function () {
         
@@ -46,9 +32,8 @@ Route::group([ 'middleware' => ['isPreorder', ]], function () {
         // Preorder Products
         Route::resource('preorder-product', PreorderProductController::class);
         Route::controller(PreorderProductController::class)->group(function () {
-            // Mohammad Hassan - Commented out duplicate route names that conflict with resource route
-            // Route::get('/preorder-product/edit/{id}', 'edit')->name('preorder-product.edit');
-            // Route::get('/preorder-product/destroy/{id}', 'destroy')->name('preorder-product.destroy');
+            Route::get('/preorder-product/edit/{id}', 'edit')->name('preorder-product.edit');
+            Route::get('/preorder-product/destroy/{id}', 'destroy')->name('preorder-product.destroy');
             Route::post('/preorder-product/bulk-destroy', 'bulkProductDestroy')->name('preorder-product.bulk-destroy');
             Route::post('/preorder-product/published', 'preorder_product_published')->name('preorder-product.published');
             Route::post('/preorder-product/approval', 'preorderProductApproval')->name('preorder-product.approval');
@@ -144,9 +129,8 @@ Route::group([ 'middleware' => ['isPreorder', ]], function () {
 
         Route::resource('preorder-product', SellerPreorderProductController::class);  
         Route::controller(SellerPreorderProductController::class)->group(function () {
-            // Mohammad Hassan - Commented out duplicate route names that conflict with admin preorder-product resource route
-            // Route::get('/preorder-product/edit/{id}', 'edit')->name('preorder-product.edit');
-            // Route::get('/preorder-product/destroy/{id}', 'destroy')->name('preorder-product.destroy');
+            Route::get('/preorder-product/edit/{id}', 'edit')->name('preorder-product.edit');
+            Route::get('/preorder-product/destroy/{id}', 'destroy')->name('preorder-product.destroy');
             Route::post('/preorder-product/bulk-destroy', 'bulkProductDestroy')->name('preorder-product.bulk-destroy');
             Route::post('/preorder-product/published', 'preorder_product_published')->name('preorder-product.published');
             Route::post('/preorder-product/featured', 'preorder_product_featured')->name('preorder-product.featured');
@@ -245,4 +229,3 @@ Route::group([ 'middleware' => ['isPreorder', ]], function () {
     Route::get('/all-preorder-products', [PreorderProductController::class,'all_preorder_products'])->name('all_preorder_products');
     Route::get('/preorder/category/{category_slug}', [PreorderProductController::class,'listingByCategory'])->name('preorder.category');
     Route::get('/how-to-preorder', [PreorderProductController::class,'how_to_preorder'])->name('how_to_preorder');
-});
