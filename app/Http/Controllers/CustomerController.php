@@ -93,6 +93,9 @@ class CustomerController extends Controller
                 'name' => $request->name,
                 'email' => $email,
                 'password' => Hash::make($password),
+                // Mohammad Hassan - Set user_type and email_verified_at for customer
+                'user_type' => 'customer',
+                'email_verified_at' => now(),
             ]);
 
             // Account Opening Email to customer
@@ -106,11 +109,13 @@ class CustomerController extends Controller
 
             // Email Verification mail to Customer
             if(get_setting('email_verification') != 1){
-                $user->email_verified_at = date('Y-m-d H:m:s');
-                $user->save();
+                // Mohammad Hassan - Already set email_verified_at to now() during user creation
                 offerUserWelcomeCoupon();
             }
             else {
+                // Mohammad Hassan - Override email_verified_at to null for email verification flow
+                $user->email_verified_at = now();
+                $user->save();
                 EmailUtility::email_verification($user, 'customer');
             }
             flash(translate('Registration successful.'))->success();
@@ -124,7 +129,10 @@ class CustomerController extends Controller
                     'name' => $request->name,
                     'phone' => $phone,
                     'password' => Hash::make($password),
-                    'verification_code' => rand(100000, 999999)
+                    'verification_code' => rand(100000, 999999),
+                    // Mohammad Hassan - Set user_type and email_verified_at for customer
+                    'user_type' => 'customer',
+                    'email_verified_at' => now(),
                 ]);
 
                 $otpController = new OTPVerificationController;

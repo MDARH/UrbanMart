@@ -76,19 +76,27 @@ class RegisterController extends Controller
     {
         // dd($data);
         if (isset($data['email']) && filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            // Mohammad Hassan
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
+                // Mohammad Hassan - Set user_type and email_verified_at for customer
+                'user_type' => 'customer',
+                'email_verified_at' => now(),
             ]);
         }
         else {
             if (addon_is_activated('otp_system')){
+                // Mohammad Hassan
                 $user = User::create([
                     'name' => $data['name'],
                     'phone' => '+'.$data['country_code'].$data['phone'],
                     'password' => Hash::make($data['password']),
-                    'verification_code' => rand(100000, 999999)
+                    'verification_code' => rand(100000, 999999),
+                    // Mohammad Hassan - Set user_type and email_verified_at for customer
+                    'user_type' => 'customer',
+                    'email_verified_at' => now(),
                 ]);
 
                 if(get_setting('customer_registration_verify') != '1' ){

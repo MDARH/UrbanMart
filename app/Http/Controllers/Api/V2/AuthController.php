@@ -412,6 +412,8 @@ public function signupWholesaler(Request $request)
         'trade_license' => $request->trade_license,
         'password' => bcrypt(Str::random(12)),
         'user_type' => 'wholesaler',
+        // Mohammad Hassan - Set email_verified_at to now() for wholesaler
+        'email_verified_at' => now(),
     ]);
 
     $token = $user->createToken('api_token')->plainTextToken;
