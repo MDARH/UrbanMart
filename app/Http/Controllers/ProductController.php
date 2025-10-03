@@ -317,7 +317,12 @@ class ProductController extends Controller
             ->where('digital', 0)
             ->with('childrenCategories')
             ->get();
-        return view('backend.product.products.edit', compact('product', 'categories', 'tags', 'lang'));
+        // Build variant => image URL map so edit view can show previews
+        $variantImages = [];
+        foreach ($product->stocks as $stock) {
+            $variantImages[$stock->variant] = $stock->image ? uploaded_asset($stock->image) : null;
+        }
+        return view('backend.product.products.edit', compact('product', 'categories', 'tags', 'lang', 'variantImages'));
     }
 
     /**
@@ -681,7 +686,12 @@ class ProductController extends Controller
         }
 
         $combinations = (new CombinationService())->generate_combination($options);
-        return view('backend.product.products.sku_combinations_edit', compact('combinations', 'unit_price', 'colors_active', 'product_name', 'product'));
+        // Build variant => image URL map for existing stocks
+        $variantImages = [];
+        foreach ($product->stocks as $stock) {
+            $variantImages[$stock->variant] = $stock->image ? uploaded_asset($stock->image) : null;
+        }
+        return view('backend.product.products.sku_combinations_edit', compact('combinations', 'unit_price', 'colors_active', 'product_name', 'product', 'variantImages'));
     }
 
     public function product_search(Request $request)

@@ -107,7 +107,21 @@
                                 }
                                @endphp">
                     </div>
-                    <div class="file-preview box sm"></div>
+                    <div class="file-preview box sm">
+                        @php
+                            $previewUrl = null;
+                            if(isset($stock) && $stock != null && $stock->image){
+                                $previewUrl = uploaded_asset($stock->image);
+                            }elseif(isset($variantImages) && !empty($variantImages[$str])){
+                                $previewUrl = $variantImages[$str];
+                            }
+                        @endphp
+                        @if($previewUrl)
+                            <div class="d-flex align-items-center justify-content-start file-preview-item">
+                                <img src="{{ $previewUrl }}" class="img-fit size-50px" alt="{{ translate('Variant Image') }}" onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
+                            </div>
+                        @endif
+                    </div>
                 </td>
             </tr>
             @endif
