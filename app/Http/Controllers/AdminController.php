@@ -62,6 +62,9 @@ class AdminController extends Controller
         $data['root_categories'] = $root_categories;
 
         $data['total_customers'] = User::where('user_type', 'customer')->where('email_verified_at', '!=', null)->count();
+        // Overall totals for customers and wholesalers
+        $data['total_customers_all'] = User::where('user_type', 'customer')->count();
+        $data['total_wholesalers_all'] = User::where('user_type', 'wholesaler')->count();
         $data['top_customers'] = User::select('users.id', 'users.name', 'users.avatar_original', DB::raw('SUM(grand_total) as total'))
             ->join('orders', 'orders.user_id', '=', 'users.id')
             ->groupBy('orders.user_id')
@@ -94,22 +97,82 @@ class AdminController extends Controller
             ->limit(3)
             ->get();
         $data['total_sale'] = Order::where('delivery_status', 'delivered')->sum('grand_total');
+        // Monthly total sales (paid orders this month)
         $data['sale_this_month'] = Order::whereYear('created_at', Carbon::now()->year)
                                         ->whereMonth('created_at', Carbon::now()->month)
+                                        ->where('payment_status', 'paid')
                                         ->sum('grand_total');
+        // Previous month total sales (paid)
+        $prev = Carbon::now()->subMonth();
+        $data['sale_previous_month'] = Order::whereYear('created_at', $prev->year)
+                                            ->whereMonth('created_at', $prev->month)
+                                            ->where('payment_status', 'paid')
+                                            ->sum('grand_total');
+        // New customers added this month
+        $data['new_customers_this_month'] = User::where('user_type', 'customer')
+                                        ->whereYear('created_at', Carbon::now()->year)
+                                        ->whereMonth('created_at', Carbon::now()->month)
+                                        ->count();
+        // Wholesaler sales this month (paid amount) and orders count
+        $data['wholesaler_sales_this_month'] = Order::leftJoin('users', 'orders.user_id', '=', 'users.id')
+                                        ->where('users.user_type', 'wholesaler')
+                                        ->whereYear('orders.created_at', Carbon::now()->year)
+                                        ->whereMonth('orders.created_at', Carbon::now()->month)
+                                        ->where('orders.payment_status', 'paid')
+                                        ->sum('orders.grand_total');
+        $data['wholesaler_orders_count_this_month'] = Order::leftJoin('users', 'orders.user_id', '=', 'users.id')
+                                        ->where('users.user_type', 'wholesaler')
+                                        ->whereYear('orders.created_at', Carbon::now()->year)
+                                        ->whereMonth('orders.created_at', Carbon::now()->month)
+                                        ->where('orders.payment_status', 'paid')
+                                        ->count();
+        // Customer sales this month (paid amount)
+        $data['customer_sales_this_month'] = Order::leftJoin('users', 'orders.user_id', '=', 'users.id')
+                                        ->where('users.user_type', 'customer')
+                                        ->whereYear('orders.created_at', Carbon::now()->year)
+                                        ->whereMonth('orders.created_at', Carbon::now()->month)
+                                        ->where('orders.payment_status', 'paid')
+                                        ->sum('orders.grand_total');
+
+        // Payment method breakdown (this month, paid)
+        $payment_breakdown = Order::select(
+                                    DB::raw("CASE
+                                        WHEN payment_type = 'cash_on_delivery' THEN 'cod'
+                                        WHEN payment_type = 'wallet' THEN 'wallet'
+                                        ELSE 'online'
+                                    END AS payment_group"),
+                                    DB::raw('SUM(grand_total) as total_amount')
+                                )
+                                ->whereYear('orders.created_at', Carbon::now()->year)
+                                ->whereMonth('orders.created_at', Carbon::now()->month)
+                                ->where('orders.payment_status', 'paid')
+                                ->groupBy('payment_group')
+                                ->pluck('total_amount', 'payment_group');
+
+        $data['paid_cod_this_month'] = $payment_breakdown['cod'] ?? 0;
+        $data['paid_wallet_this_month'] = $payment_breakdown['wallet'] ?? 0;
+        $data['paid_online_this_month'] = $payment_breakdown['online'] ?? 0;
+
+        // Per-gateway totals (this month, paid)
+        $data['paid_sslcommerz_this_month'] = Order::whereYear('orders.created_at', Carbon::now()->year)
+                                                ->whereMonth('orders.created_at', Carbon::now()->month)
+                                                ->where('orders.payment_status', 'paid')
+                                                ->where('orders.payment_type', 'sslcommerz')
+                                                ->sum('orders.grand_total');
+        $data['paid_bkash_this_month'] = Order::whereYear('orders.created_at', Carbon::now()->year)
+                                            ->whereMonth('orders.created_at', Carbon::now()->month)
+                                            ->where('orders.payment_status', 'paid')
+                                            ->where('orders.payment_type', 'bkash')
+                                            ->sum('orders.grand_total');
                                         
         $data['admin_sale_this_month'] = Order::select(DB::raw('COALESCE(users.user_type, "admin") as user_type'), DB::raw('COALESCE(SUM(grand_total), 0) as total_sale'))
             ->leftJoin('users', 'orders.seller_id', '=', 'users.id')
             ->whereRaw('users.user_type = "admin"')
             ->whereYear('orders.created_at', Carbon::now()->year)
             ->whereMonth('orders.created_at', Carbon::now()->month)
+            ->where('orders.payment_status', 'paid')
             ->first();
-        $data['seller_sale_this_month'] = Order::select(DB::raw('COALESCE(users.user_type, "seller") as user_type'), DB::raw('COALESCE(SUM(grand_total), 0) as total_sale'))
-            ->leftJoin('users', 'orders.seller_id', '=', 'users.id')
-            ->whereRaw('users.user_type = "seller"')
-            ->whereYear('orders.created_at', Carbon::now()->year)
-            ->whereMonth('orders.created_at', Carbon::now()->month)
-            ->first();
+        // Seller-specific sales are not needed for this dashboard customization.
         $sales_stat = Order::select('orders.user_id', 'users.name', 'users.user_type', 'users.avatar_original', DB::raw('SUM(grand_total) as total'), DB::raw('DATE_FORMAT(orders.created_at, "%M") AS month'))
             ->leftJoin('users', 'orders.seller_id', '=', 'users.id')
             ->whereRaw('users.user_type = "admin"')
@@ -122,23 +185,7 @@ class AdminController extends Controller
             $new_stat[$row->month][] = $row;
         }
         $data['sales_stat'] = $new_stat;
-        $data['total_sellers'] = User::where('user_type', 'seller')->where('email_verified_at', '!=', null)->count();
-        $data['status_wise_sellers'] = Shop::select('verification_status', DB::raw('COUNT(*) as total'))
-            ->whereIn('user_id', function ($q){
-                $q->select('id')
-                    ->from(with(new User)->getTable())
-                    ->where('user_type', 'seller')
-                    ->where('email_verified_at', '!=', null);
-            })
-            ->groupBy('verification_status')
-            ->get();
-        $data['top_sellers'] = Order::select('orders.seller_id', 'users.name', 'users.user_type', 'users.avatar_original', DB::raw('SUM(grand_total) as total'))
-            ->leftJoin('users', 'orders.seller_id', '=', 'users.id')
-            ->whereRaw('users.user_type = "seller"')
-            ->groupBy('users.id')
-            ->orderBy('total', 'desc')
-            ->limit(6)
-            ->get();
+        // Remove seller-focused metrics for simplified admin dashboard
         $data['total_order'] = Order::count();
         $data['total_placed_order'] = Order::where('delivery_status', '!=', 'cancelled')->count();
         $data['total_pending_order'] = Order::where('delivery_status', 'pending')->count();
@@ -158,6 +205,16 @@ class AdminController extends Controller
             ->get();
         $data['inhouse_product_rating'] = Product::where('added_by', 'admin')->where('rating', '!=', 0)->avg('rating');
         $data['total_inhouse_order'] = Order::where("seller_id", $admin_id)->count();
+
+        // Total revenue by customer type (paid orders only)
+        $data['customer_revenue_total'] = Order::leftJoin('users', 'orders.user_id', '=', 'users.id')
+                                        ->where('users.user_type', 'customer')
+                                        ->where('orders.payment_status', 'paid')
+                                        ->sum('orders.grand_total');
+        $data['wholesaler_revenue_total'] = Order::leftJoin('users', 'orders.user_id', '=', 'users.id')
+                                        ->where('users.user_type', 'wholesaler')
+                                        ->where('orders.payment_status', 'paid')
+                                        ->sum('orders.grand_total');
 
         return view('backend.dashboard', $data);
     }

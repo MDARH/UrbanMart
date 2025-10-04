@@ -26,13 +26,13 @@ class EarningReportController extends Controller
 
     public function index()
     {
-        // sale data
-        $product_sales = Order::where('delivery_status', 'delivered')->groupBy('time')
+        // sale data (use paid orders instead of delivered)
+        $product_sales = Order::where('payment_status', 'paid')->groupBy('time')
                         ->select(DB::raw('SUM(grand_total) as total'), DB::raw('DATE_FORMAT(created_at, "%M") AS time'))
                         ->whereYear('created_at', Carbon::now()->year)
                         ->orderBy(DB::raw('MONTH(created_at)'), 'asc')
                         ->get();
-        $total_product_sale_earning = Order::where('delivery_status', 'delivered')->sum('grand_total');
+        $total_product_sale_earning = Order::where('payment_status', 'paid')->sum('grand_total');
 
         $seller_subscriptions = array();
         $total_seller_subscriptions_earning = 0;
@@ -154,25 +154,25 @@ class EarningReportController extends Controller
         $data['payout_this_month'] = $payout_this_month;
         // Total payouts and This month payouts end
 
-        // Category wise Report
+        // Category wise Report (filter paid orders)
         $data['total_categories'] = Category::count();
         $data['top_categories'] = Product::select('categories.name', 'categories.id', DB::raw('SUM(grand_total) as total'))
             ->leftJoin('order_details', 'order_details.product_id', '=', 'products.id')
             ->leftJoin('orders', 'orders.id', '=', 'order_details.order_id')
             ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
-            ->where('orders.delivery_status', 'delivered')
+            ->where('orders.payment_status', 'paid')
             ->groupBy('categories.id')
             ->orderBy('total', 'desc')
             ->limit(3)
             ->get();
 
-        // Brand wise Report
+        // Brand wise Report (filter paid orders)
         $data['total_brands'] = Brand::count();
         $data['top_brands'] = Product::select('brands.name', 'brands.id', DB::raw('SUM(grand_total) as total'))
             ->leftJoin('order_details', 'order_details.product_id', '=', 'products.id')
             ->leftJoin('orders', 'orders.id', '=', 'order_details.order_id')
             ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
-            ->where('orders.delivery_status', 'delivered')
+            ->where('orders.payment_status', 'paid')
             ->groupBy('brands.id')
             ->orderBy('total', 'desc')
             ->limit(3)

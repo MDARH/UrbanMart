@@ -14,8 +14,8 @@
     @can('admin_dashboard')
         <div class="row gutters-16">
 
-            <!-- Customer, Products, Category, Brands -->
-            <div class="col-lg-6">
+            <!-- Customer, Products, Category, Brands (hidden) -->
+            <div class="col-lg-6 d-none">
                 <div class="row gutters-16">
                     <!-- Total Customer -->
                     <div class="col-sm-6">
@@ -210,136 +210,159 @@
                 </div>
             </div>
 
-            <!-- Sales & sellers -->
-            <div class="col-lg-6">
+            <!-- Sales -->
+            <div class="col-lg-12">
                 <div class="row gutters-16">
                     <!-- Total Sales -->
-                    <div class="col-sm-6">
-                        <div class="dashboard-box bg-soft-primary mb-2rem overflow-hidden" style="height: 470px;">
-                            <div class="d-flex flex-column justify-content-between h-100">
-                                <!-- Total Sales -->
-                                <div>
-                                    <h1 class="fs-30 fw-600 text-primary mb-1">
-                                        {{ number_format_short($total_sale) }}
-                                    </h1>
-                                    <h3 class="fs-13 fw-600 text-primary mb-0">{{ translate('Total Sales') }}</h3>
-                                </div>
-                                <!-- Sales this month -->
-                                <div
-                                    class="d-flex align-items-center justify-content-between p-3 rounded-2 bg-primary text-white mr-2">
-                                    <h3 class="fs-13 fw-600 mb-0">
-                                        {{ translate('Sales this month') }}
-                                    </h3>
-                                    <h3 class="fs-13 fw-600 mb-0">
-                                        {{ single_price($sale_this_month) }}
-                                    </h3>
-                                </div>
-                                <!-- Sales Stat -->
-                                <div>
-                                    <h3 class="fs-13 fw-600 text-primary mb-0">{{ translate('Sales Stat') }}</h3>
-                                </div>
-                                <canvas id="graph-3" class="w-100" height="140"></canvas>
-                                <!-- Sales -->
-                                <div>
-                                    <!-- In-house Sales -->
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <h3 class="fs-13 fw-600 mb-0">
-                                            <span
-                                                class="badge badge-md badge-dot badge-circle badge-info text-truncate mr-2"></span>
-                                            {{ translate('In-house Sales') }}
-                                        </h3>
-                                        <h3 class="fs-13 fw-600 mb-0">
-                                            {{ single_price($admin_sale_this_month->total_sale) }}
-                                        </h3>
+
+
+                    <!-- Card Dashboard: Right-side Stat Cards -->
+                    <div class="col-sm-12">
+                        <div class="dashboard-box bg-white mb-2rem overflow-hidden" style="height: auto;">
+                            <div class="p-3">
+                                <h2 class="fs-16 fw-600 text-dark mb-3">{{ translate('Quick Stats') }}</h2>
+                                <style>
+                                    /* Mohammad Hassan — Dashboard Stat Cards */
+                                    .stat-card { text-decoration: none !important; color: inherit; border: 1px solid rgba(0,0,0,0.05); transition: all .2s ease; border-radius: .5rem; }
+                                    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.08); }
+                                    .stat-icon { width: 36px; height: 36px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; background: rgba(255,255,255,.6); }
+                                    .fs-label { font-size: 13px; font-weight: 600; }
+                                </style>
+                                <div class="row gutters-16">
+                                    <!-- Total Categories -->
+                                    <div class="col-6 mb-3">
+                                        <a href="{{ route('categories.index') }}" class="rounded-2 bg-soft-secondary px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#6c757d"><path d="M10 4H4c-1.1 0-2 .9-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-secondary">{{ translate('Total Categories') }}</span>
+                                            </div>
+                                            <span class="fs-24 fw-700 text-dark">{{ $total_categories }}</span>
+                                        </a>
                                     </div>
-                                    <!-- Sellers Sales -->
-                                    <div class="d-flex justify-content-between">
-                                        <h3 class="fs-13 fw-600 mb-0">
-                                            <span
-                                                class="badge badge-md badge-dot badge-circle badge-success text-truncate mr-2"></span>
-                                            {{ translate('Sellers Sales') }}
-                                        </h3>
-                                        <h3 class="fs-13 fw-600 mb-0">
-                                            {{ single_price($seller_sale_this_month->total_sale) }}
-                                        </h3>
+                                    <!-- Total Products -->
+                                    <div class="col-6 mb-3">
+                                        <a href="{{ route('products.admin') }}" class="rounded-2 bg-soft-info px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#17a2b8"><path d="M21 16V8a2 2 0 0 0-2-2h-3l-2-2H10L8 6H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-info">{{ translate('Total Products') }}</span>
+                                            </div>
+                                            <span class="fs-24 fw-700 text-dark">{{ $total_products }}</span>
+                                        </a>
                                     </div>
+                                    <!-- Total Wholesalers -->
+                                    <div class="col-6 mb-3">
+                                        <a href="{{ route('wholesalers.all') }}" class="rounded-2 bg-soft-success px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#28a745"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 2.01 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-success">{{ translate('Total Wholesalers') }}</span>
+                                            </div>
+                                            <span class="fs-24 fw-700 text-dark">{{ $total_wholesalers_all }}</span>
+                                        </a>
+                                    </div>
+                                    <!-- Total Customers -->
+                                    <div class="col-6 mb-3">
+                                        <a href="{{ route('customers.index') }}" class="rounded-2 bg-soft-primary px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#007bff"><path d="M12 12c2.7 0 8 1.35 8 4v2H4v-2c0-2.65 5.3-4 8-4zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-primary">{{ translate('Total Customers') }}</span>
+                                            </div>
+                                            <span class="fs-24 fw-700 text-dark">{{ $total_customers_all }}</span>
+                                        </a>
+                                    </div>
+                                    <!-- Wholesaler Sales (This Month) -->
+                                    <div class="col-6 mb-3">
+                                        <a href="{{ route('wholesale_orders.index') }}" class="rounded-2 bg-soft-warning px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ffc107"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9zm9 3l7-5-7-5-7 5 7 5z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-warning">{{ translate('Wholesaler Sales (This Month)') }}</span>
+                                            </div>
+                                            <span class="fs-20 fw-700 text-dark">{{ single_price($wholesaler_sales_this_month) }}</span>
+                                        </a>
+                                    </div>
+                                    <!-- Customer Sales (This Month) -->
+                                    <div class="col-6 mb-3">
+                                        <a href="{{ route('in_house_sale_report.index') }}" class="rounded-2 bg-soft-danger px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#dc3545"><path d="M12 12c2.7 0 8 1.35 8 4v2H4v-2c0-2.65 5.3-4 8-4zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-danger">{{ translate('Customer Sales (This Month)') }}</span>
+                                            </div>
+                                            <span class="fs-20 fw-700 text-dark">{{ single_price($customer_sales_this_month) }}</span>
+                                        </a>
+                                    </div>
+                                    <!-- This Month Sales (Paid) -->
+                                    <div class="col-6 mb-3">
+                                        <a href="{{ route('in_house_sale_report.index') }}" class="rounded-2 bg-soft-secondary px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#6c757d"><path d="M3 17h18v2H3v-2zm0-7h18v2H3V10zm0-7h18v2H3V3z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-secondary">{{ translate('This Month Sales') }}</span>
+                                            </div>
+                                            <span class="fs-20 fw-700 text-dark">{{ single_price($sale_this_month) }}</span>
+                                        </a>
+                                    </div>
+                                    <!-- Previous Month Sales (Paid) -->
+                                    <div class="col-6 mb-3">
+                                        <a href="{{ route('in_house_sale_report.index') }}" class="rounded-2 bg-soft-secondary px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#6c757d"><path d="M12 8v8m-4-4h8" stroke="#6c757d" stroke-width="2" fill="none"/></svg>
+                                                </span>
+                                                <span class="fs-label text-secondary">{{ translate('Previous Month Sales') }}</span>
+                                            </div>
+                                            <span class="fs-20 fw-700 text-dark">{{ single_price($sale_previous_month) }}</span>
+                                        </a>
+                                    </div>
+
+                                    <!-- Payment Method Breakdown (This Month, Paid) -->
+                                    <div class="col-4 mb-3">
+                                        <a href="" class="rounded-2 bg-soft-info px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#17a2b8"><path d="M20 6h-3l-2-2H9L7 6H4v14h16V6z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-info">{{ translate('COD Sales') }}</span>
+                                            </div>
+                                            <span class="fs-20 fw-700 text-dark">{{ single_price($paid_cod_this_month) }}</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-4 mb-3">
+                                        <div class="rounded-2 bg-soft-primary px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#007bff"><path d="M4 7h16v10H4V7zm2 2v6h12V9H6zm3-5h6v2H9V4z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-primary">{{ translate('SSLCommerz Sales') }}</span>
+                                            </div>
+                                                <span class="fs-20 fw-700 text-dark">{{ single_price($paid_sslcommerz_this_month) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 mb-3">
+                                        <div class="rounded-2 bg-soft-success px-2rem py-3 h-100 d-flex align-items-center justify-content-between stat-card">
+                                            <div class="d-flex align-items-center">
+                                                <span class="stat-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#28a745"><path d="M12 2l4 8H8l4-8zm0 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>
+                                                </span>
+                                                <span class="fs-label text-success">{{ translate('Bkash Sales') }}</span>
+                                            </div>
+                                                <span class="fs-20 fw-700 text-dark">{{ single_price($paid_bkash_this_month) }}</span>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Total Sellers -->
-                    <div class="col-sm-6">
-                        <div class="dashboard-box bg-white mb-2rem overflow-hidden" style="height: 470px;">
-                            @if (get_setting('vendor_system_activation') == 1)
-                                <div class="d-flex flex-column justify-content-between h-100">
-                                    <!-- Total Sellers -->
-                                    <div>
-                                        <h1 class="fs-30 fw-600 text-dark mb-1">
-                                            {{ $total_sellers }}
-                                        </h1>
-                                        <h3 class="fs-13 fw-600 text-secondary mb-0">{{ translate('Total Sellers') }}</h3>
-                                    </div>
-                                    <!-- Sales -->
-                                    <div>
-                                        @foreach ($status_wise_sellers as $key => $status_wise_seller)
-                                            <div
-                                                class="d-flex justify-content-between @if ($key == 0) mb-1 @endif">
-                                                <h3 class="fs-13 fw-600 mb-0">
-                                                    @if ($status_wise_seller->verification_status == 1)
-                                                        <span
-                                                            class="badge badge-md badge-dot badge-circle badge-success text-truncate mr-2"></span>
-                                                        {{ translate('Approved Sellers') }}
-                                                    @else
-                                                        <span
-                                                            class="badge badge-md badge-dot badge-circle badge-danger text-truncate mr-2"></span>
-                                                        {{ translate('Pending Seller') }}
-                                                    @endif
-                                                </h3>
-                                                <h3 class="fs-13 fw-600 mb-0">
-                                                    {{ $status_wise_seller->total }}
-                                                </h3>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <!-- Top Sellers -->
-                                    <div>
-                                        <h3 class="fs-13 fw-600 mb-1">
-                                            <span class="badge badge-md badge-dot badge-circle badge-warning mr-2"></span>
-                                            {{ translate('Top Sellers') }}
-                                        </h3>
-                                        <div class="symbol-group">
-                                            @foreach ($top_sellers as $top_seller)
-                                                <div class="symbol size-40px rounded-content overflow-hidden"
-                                                    title="{{ $top_seller->name }}">
-                                                    <img src="{{ uploaded_asset($top_seller->avatar_original) }}"
-                                                        alt="{{ translate('seller') }}" class="h-100 img-fit lazyload"
-                                                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                        <hr style="border: 1px dashed #dbdfe9;">
-                                    </div>
-                                    <!-- Sales this month -->
-                                    <div class="">
-                                        <a href="{{ route('sellers.index') }}"
-                                            class="btn btn-md btn-soft-success btn-block rounded-2 mb-3">{{ translate('All Sellers') }}</a>
-                                        <a href="{{ route('sellers.index') }}?approved_status=0"
-                                            class="btn btn-md btn-soft-danger btn-block rounded-2">{{ translate('Pending Sellers') }}</a>
-                                    </div>
-                                </div>
-                            @else
-                                <div class="d-flex flex-column align-items-center justify-content-center h-100">
-                                    <div class="h-200px">
-                                        <img src="{{ static_asset('assets/img/multivendor.jpg') }}"
-                                            alt="{{ translate('multivendor') }}" class="h-100 img-fit">
-                                    </div>
-                                    <a href="{{ route('activation.index') }}"
-                                        class="mt-4 fs-13 fw-600 text-info hov-text-primary animate-underline-primary">
-                                        {{ translate('Activate Vendor System') }}
-                                    </a>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 </div>
@@ -367,8 +390,8 @@
                                 </div>
                             </div>
                             <!-- Pending order -->
-                            <div
-                                class="bg-danger rounded-2 h-90px d-flex align-items-center justify-content-between text-white px-2rem mb-3 mb-sm-0">
+                            <a href="{{ route('all_orders.index') }}"
+                                class="bg-danger rounded-2 h-90px d-flex align-items-center justify-content-between text-white px-2rem mb-3 mb-sm-0 stat-card">
                                 <div class="d-flex flex-wrap align-items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="mr-3"
                                         viewBox="0 0 20 20">
@@ -386,13 +409,13 @@
                                 <h1 class="fs-24 fw-600 mb-0">
                                     {{ $total_pending_order }}
                                 </h1>
-                            </div>
+                            </a>
                         </div>
 
                         <div class="col-sm-6">
                             <!-- Order Placed -->
-                            <div
-                                class="bg-soft-primary rounded-2 h-90px d-flex align-items-center justify-content-between text-primary px-2rem mb-3">
+                            <a href="{{ route('all_orders.index') }}"
+                                class="bg-soft-primary rounded-2 h-90px d-flex align-items-center justify-content-between text-primary px-2rem mb-3 stat-card">
                                 <div class="d-flex flex-wrap align-items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="23.999" height="23.999" class="mr-3"
                                         viewBox="0 0 23.999 23.999">
@@ -410,10 +433,10 @@
                                 <h1 class="fs-24 fw-600 mb-0">
                                     {{ $total_placed_order }}
                                 </h1>
-                            </div>
+                            </a>
                             <!-- Confirmed Order -->
-                            <div
-                                class="bg-soft-success rounded-2 h-90px d-flex align-items-center justify-content-between text-success px-2rem mb-3">
+                            <a href="{{ route('all_orders.index') }}"
+                                class="bg-soft-success rounded-2 h-90px d-flex align-items-center justify-content-between text-success px-2rem mb-3 stat-card">
                                 <div class="d-flex flex-wrap align-items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="23.999" height="25.134" class="mr-3"
                                         viewBox="0 0 23.999 25.134">
@@ -434,10 +457,10 @@
                                 <h1 class="fs-24 fw-600 mb-0">
                                     {{ $total_confirmed_order }}
                                 </h1>
-                            </div>
+                            </a>
                             <!-- Processed Order -->
-                            <div
-                                class="bg-soft-danger rounded-2 h-90px d-flex align-items-center justify-content-between text-danger px-2rem mb-3">
+                            <a href="{{ route('all_orders.index') }}"
+                                class="bg-soft-danger rounded-2 h-90px d-flex align-items-center justify-content-between text-danger px-2rem mb-3 stat-card">
                                 <div class="d-flex flex-wrap align-items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="26.182" class="mr-3"
                                         viewBox="0 0 24 26.182">
@@ -450,10 +473,10 @@
                                 <h1 class="fs-24 fw-600 mb-0">
                                     {{ $total_picked_up_order }}
                                 </h1>
-                            </div>
+                            </a>
                             <!-- Order Shipped -->
-                            <div
-                                class="bg-soft-warning rounded-2 h-90px d-flex align-items-center justify-content-between text-warning px-2rem">
+                            <a href="{{ route('all_orders.index') }}"
+                                class="bg-soft-warning rounded-2 h-90px d-flex align-items-center justify-content-between text-warning px-2rem stat-card">
                                 <div class="d-flex flex-wrap align-items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20.727" class="mr-3"
                                         viewBox="0 0 24 20.727">
@@ -466,111 +489,13 @@
                                 <h1 class="fs-24 fw-600 mb-0">
                                     {{ $total_shipped_order }}
                                 </h1>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Top Category & Top Brands -->
-            <div class="col-lg-6">
-                <div class="row gutters-16">
-                    <!-- Top Category -->
-                    <div class="col-sm-6">
-                        <div class="dashboard-box px-0 mb-2rem overflow-hidden" style="height: 474px;">
-                            <div class="mb-2 px-2rem">
-                                <h2 class="fs-16 fw-600 text-primary mb-1 h-40px">{{ translate('In-house Top Category') }}
-                                </h2>
-                                <h4 class="fs-13 fw-600 text-secondary mb-0">{{ translate('By Sales') }}</h4>
-                            </div>
-                            <!-- nav -->
-                            <ul class="nav nav-tabs dashboard-tab dashboard-tab-primary border-0 px-2rem mb-3" role="tablist"
-                                aria-orientation="vertical">
-                                <li class="nav-item">
-                                    <a class="nav-link active inhouse_top_categories" id="all-tab" href="#all"
-                                        data-toggle="tab" data-target="all" type="button" role="tab"
-                                        aria-controls="all" aria-selected="true">
-                                        {{ translate('All') }}
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link inhouse_top_categories" id="today-tab" href="#today"
-                                        data-toggle="tab" data-target="DAY" type="button" role="tab"
-                                        aria-controls="today" aria-selected="true">
-                                        {{ translate('Today') }}
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link inhouse_top_categories" id="week-tab" href="#week"
-                                        data-toggle="tab" data-target="WEEK" type="button" role="tab"
-                                        aria-controls="week" aria-selected="true">
-                                        {{ translate('Week') }}
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link inhouse_top_categories" id="month-tab" href="#month"
-                                        data-toggle="tab" data-target="MONTH" type="button" role="tab"
-                                        aria-controls="month" aria-selected="true">
-                                        {{ translate('Month') }}
-                                    </a>
-                                </li>
-                            </ul>
-                            <!-- Categories -->
-                            <div class="h-290px h-lg-280px h-xxl-300px c-scrollbar-light px-2rem mt-4"
-                                style="overflow-x: hidden;" id="inhouse-top-categories">
 
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Top Brands -->
-                    <div class="col-sm-6">
-                        <div class="dashboard-box px-0 mb-2rem overflow-hidden" style="height: 474px;">
-                            <div class="mb-2 px-2rem">
-                                <h2 class="fs-16 fw-600 text-danger mb-1 h-40px">{{ translate('In-house Top Brands') }}</h2>
-                                <h4 class="fs-13 fw-600 text-secondary mb-0">{{ translate('By Sales') }}</h4>
-                            </div>
-                            <!-- nav -->
-                            <ul class="nav nav-tabs dashboard-tab dashboard-tab-danger border-0 px-2rem mb-3" role="tablist"
-                                aria-orientation="vertical">
-                                <li class="nav-item">
-                                    <a class="nav-link active inhouse_top_brands" id="all-tab" href="#all"
-                                        data-toggle="tab" data-target="all" type="button" role="tab"
-                                        aria-controls="all" aria-selected="true">
-                                        {{ translate('All') }}
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link inhouse_top_brands" id="today-tab" href="#today" data-toggle="tab"
-                                        data-target="DAY" type="button" role="tab" aria-controls="today"
-                                        aria-selected="true">
-                                        {{ translate('Today') }}
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link inhouse_top_brands" id="week-tab" href="#week" data-toggle="tab"
-                                        data-target="WEEK" type="button" role="tab" aria-controls="week"
-                                        aria-selected="true">
-                                        {{ translate('Week') }}
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link inhouse_top_brands" id="month-tab" href="#month" data-toggle="tab"
-                                        data-target="MONTH" type="button" role="tab" aria-controls="month"
-                                        aria-selected="true">
-                                        {{ translate('Month') }}
-                                    </a>
-                                </li>
-                            </ul>
-                            <!-- Brands -->
-                            <div class="h-290px h-lg-280px h-xxl-300px c-scrollbar-light px-2rem mt-4"
-                                style="overflow-x: hidden;" id="inhouse-top-brands">
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- In-house Store -->
             <div class="col-lg-6">
@@ -602,15 +527,7 @@
                                 </h1>
                                 <p class="fs-13 fw-600 text-primary mb-0">{{ translate('In-house product') }}</p>
                             </div>
-                            <!-- Ratings -->
-                            <div
-                                class="bg-soft-secondary rounded-2 h-120px d-flex flex-column justify-content-center text-success px-2rem mb-4">
-                                <h1 class="fs-30 fw-600 text-dark mb-0">
-                                    {{ number_format($inhouse_product_rating, 2) }}
-                                </h1>
-                                <p class="fs-13 fw-600 text-warning mb-0">{{ translate('Ratings') }}</p>
-                            </div>
-                            <!-- Total Orders -->
+
                             <div
                                 class="bg-soft-secondary rounded-2 h-120px d-flex flex-column justify-content-center text-danger px-2rem">
                                 <h1 class="fs-30 fw-600 text-dark mb-0">
@@ -674,7 +591,7 @@
             @endif
         </div>
     @endcan
-    
+
 @endsection
 @section('script')
     <!-- dashboard script -->

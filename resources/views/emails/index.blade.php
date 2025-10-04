@@ -10,7 +10,7 @@
                     <td align="center">
                         <table width="650" border="0" cellspacing="0" cellpadding="0">
                             <tr>
-                                <td bgcolor="#ffffff" style="width:650px; min-width:650px; line-height:0pt; padding:0; margin:0; font-weight:normal;">
+                                <td bgcolor="#ffffff" style="width:650px; min-width:650px; padding:0; margin:0; font-weight:normal;">
                                     <!-- Header -->
                                     <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="background-color: #f8fafa" >
                                         <tr>
@@ -43,8 +43,8 @@
                                     <!-- END Header -->
 
                                     <!-- Content -->
-                                    <div style="padding: 10px 30px 70px 30px;">
-                                        <p>{!! $content !!}</p>
+                                    <div style="padding: 10px 30px 70px 30px; font-family:'Public Sans', sans-serif; font-size:14px; line-height:22px; color:#333;">
+                                        {!! $content !!}
                                     </div>
                                     
                                 </td>

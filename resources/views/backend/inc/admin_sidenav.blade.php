@@ -513,50 +513,6 @@
                 </a>
             </li>
             @endcan
-
-            {{-- আপনার বাকি সাব-মেন্যুগুলো --}}
-            {{-- @can('add_wholesale_product')
-            <li class="aiz-side-nav-item">
-                <a class="aiz-side-nav-link" href="{{route('wholesale_product_create.admin')}}">
-                    <span class="aiz-side-nav-text">{{translate('Add New Wholesale Product')}}</span>
-                </a>
-            </li>
-            @endcan --}}
-            @can('view_all_wholesale_products')
-            <li class="aiz-side-nav-item">
-                <a href="{{ route('wholesale_products.all') }}"
-                    class="aiz-side-nav-link {{ areActiveRoutes(['wholesale_product_edit.admin']) }}">
-                    <span class="aiz-side-nav-text">{{ translate('All Wholesale Products') }}</span>
-                </a>
-            </li>
-            @endcan
-            {{-- @can('view_inhouse_wholesale_products')
-            <li class="aiz-side-nav-item">
-                <a href="{{route('wholesale_products.in_house')}}"
-                    class="aiz-side-nav-link {{ areActiveRoutes(['wholesale_product_edit.admin']) }}">
-                    <span class="aiz-side-nav-text">{{ translate('In House Wholesale Products') }}</span>
-                </a>
-            </li>
-            @endcan --}}
-            {{-- @if (get_setting('vendor_system_activation') == 1)
-                @can('view_sellers_wholesale_products')
-                <li class="aiz-side-nav-item">
-                    <a href="{{route('wholesale_products.seller')}}"
-                        class="aiz-side-nav-link {{ areActiveRoutes(['wholesale_product_edit.admin']) }}">
-                        <span class="aiz-side-nav-text">{{ translate('Seller Wholesale Products') }}</span>
-                    </a>
-                </li>
-                @endcan
-            @endif --}}
-
-            {{-- নতুন যোগ করা হয়েছে: Wholesale Settings --}}
-            @can('manage_wholesale_settings')
-            <li class="aiz-side-nav-item">
-                <a href="{{ route('wholesale.settings') }}" class="aiz-side-nav-link">
-                    <span class="aiz-side-nav-text">{{ translate('Wholesale Settings') }}</span>
-                </a>
-            </li>
-            @endcan
         </ul>
     </li>
 @endcanany
@@ -1791,7 +1747,7 @@
                         </li>
                         @endcan
 
-                       
+
                         @canany(['shipping_configuration','select_shipping_methods','shipping_country_setting','manage_shipping_states','manage_shipping_cities','manage_zones','manage_carriers'])
                         <li class="aiz-side-nav-item">
                             <a href="javascript:void(0);" class="aiz-side-nav-link">
