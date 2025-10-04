@@ -11,7 +11,6 @@
         $product_tax_rate = (float) $detailedProduct->tax;
     }
 
-    // Prepare price tiers for JavaScript: Sort by min_qty descending for easier logic
     $price_tiers_json = '[]';
     if (
         Auth::check() &&
@@ -28,7 +27,6 @@
         $price_tiers_json = json_encode($tiers);
     }
 
-    // Mohammad Hassan - Calculate base and discounted prices for display
     $base_price = $detailedProduct->unit_price;
     $discounted_price = $base_price;
     if ($detailedProduct->discount_type == 'percent' && $detailedProduct->discount > 0) {
@@ -45,35 +43,44 @@
         {{ $detailedProduct->getTranslation('name') }}
     </h2>
 
-    <!-- Mohammad Hassan - Enhanced Price Display Section -->
-    <div class="price-section mb-4 p-3 bg-light rounded-lg border" style="max-width: calc(100% - 145px);">
-        <div class="d-flex align-items-center flex-wrap">
+    <style>
+        /* Scoped styles for product price box */
+        .product-price-box { background: #f5f7fb; border: 1px solid #e6ebf5; border-radius: 12px; }
+        .product-price-box .price-value { font-size: 26px; font-weight: 800; color: #2E3A59; }
+        .product-price-box .price-label { font-size: 12px; color: #8a94a6; }
+        .product-price-box .original { font-size: 18px; color: #9aa5b1; text-decoration: line-through; }
+        .product-price-box .off-badge { background: #ff4d6d; color: #fff; font-weight: 700; border-radius: 20px; padding: 6px 12px; font-size: 13px; }
+        .product-price-box .muted-note { color: #5f6c7b; }
+    </style>
+
+    <div class="product-price-box mb-4 p-3" style="max-width: calc(100% - 145px);">
+        <div class="d-flex align-items-end flex-wrap">
             @if($has_discount)
-                <div class="mr-3 mb-2">
-                    <span class="fs-24 fw-700 text-primary">৳{{ number_format($discounted_price, 2) }}</span>
-                    <small class="text-muted ml-1">{{ translate('Discounted Price') }}</small>
+                <div class="mr-4 mb-2">
+                    <div class="price-value">৳{{ number_format($discounted_price, 2) }}</div>
+                    <div class="price-label">{{ translate('Discounted') }}</div>
                 </div>
-                <div class="mr-3 mb-2">
-                    <del class="fs-18 fw-500 text-muted">৳{{ number_format($base_price, 2) }}</del>
-                    <small class="text-muted ml-1">{{ translate('Original Price') }}</small>
+                <div class="mr-4 mb-2">
+                    <div class="original">৳{{ number_format($base_price, 2) }}</div>
+                    <div class="price-label">{{ translate('Original') }}</div>
                 </div>
-                <div class="mb-2">
-                    <span class="rounded p-1 badge-danger fs-12 fw-600">
-                        {{ $detailedProduct->discount_type == 'percent' ? $detailedProduct->discount.'% OFF' : '৳'.$detailedProduct->discount.' OFF' }}
+                <div class="ml-auto mb-2">
+                    <span class="off-badge">
+                        {{ $detailedProduct->discount_type == 'percent' ? $detailedProduct->discount.'% '.translate('OFF') : '৳'.$detailedProduct->discount.' '.translate('OFF') }}
                     </span>
                 </div>
             @else
-                <div class="mr-3 mb-2">
-                    <span class="fs-24 fw-700 text-primary">৳{{ number_format($base_price, 2) }}</span>
-                    <small class="text-muted ml-1">{{ translate('Price') }}</small>
+                <div class="mr-4 mb-2">
+                    <div class="price-value">৳{{ number_format($base_price, 2) }}</div>
+                    <div class="price-label">{{ translate('Price') }}</div>
                 </div>
             @endif
         </div>
 
         @if($detailedProduct->tax > 0)
             <div class="mt-2">
-                <small class="text-info">
-                    <i class="fas fa-info-circle"></i>
+                <small class="muted-note">
+                    <i class="las la-receipt"></i>
                     {{ translate('Tax') }}: {{ $detailedProduct->tax_type == 'percent' ? $detailedProduct->tax.'%' : '৳'.$detailedProduct->tax }}
                 </small>
             </div>
@@ -83,26 +90,48 @@
     <hr>
 
     <!-- Dynamic Color Section -->
-    @if ($detailedProduct->colors != null && count(json_decode($detailedProduct->colors)) > 0)
+    @php
+        $__colors = json_decode($detailedProduct->colors ?? '[]');
+        // Map color name => hex/code for quick lookup
+        $__colorCodeByName = [];
+        foreach ($__colors as $__code) {
+            $__name = get_single_color_name($__code);
+            $__colorCodeByName[$__name] = $__code;
+        }
+        $__stocks = $detailedProduct->stocks ?? collect();
+        $__firstStock = $__stocks && count($__stocks) > 0 ? $__stocks[0] : null;
+        $__initialDisplayName = $__firstStock && $__firstStock->variant ? $__firstStock->variant : ((count($__colors) > 0) ? get_single_color_name($__colors[0]) : '');
+    @endphp
+    @if ($detailedProduct->stocks && count($detailedProduct->stocks) > 0)
         <div class="mb-4">
             <h5 class="mb-3 fs-16 fw-600">{{ translate('Color') }} :
-                <span class="text-primary fw-700"
-                    id="selected-color-name">{{ get_single_color_name(json_decode($detailedProduct->colors)[0]) }}</span>
+                <span class="text-primary fw-700" id="selected-color-name">{{ $__initialDisplayName }}</span>
             </h5>
             <div class="d-flex flex-wrap" id="color-options">
-                @foreach (json_decode($detailedProduct->colors) as $key => $color)
-                    <div class="color-option mr-3 mb-2 p-1 border @if ($key == 0) selected-color @endif"
-                        data-color="{{ get_single_color_name($color) }}" data-color-value="{{ $color }}"
-                        style="border-width: @if ($key == 0) 2px @else 1px @endif; border-style: solid; border-color: @if ($key == 0) #3D52A0 @else #ddd @endif; border-radius: 8px; cursor: pointer;"
-                        onclick="selectColor(this, '{{ get_single_color_name($color) }}', '{{ $color }}')">
+                @foreach ($detailedProduct->stocks as $idx => $stock)
+                    @php
+                        $variantLabel = $stock->variant ?? '';
+                        $parts = $variantLabel ? explode('-', $variantLabel) : [];
+                        $colorName = $parts[0] ?? '';
+                        $colorCode = $colorName && isset($__colorCodeByName[$colorName]) ? $__colorCodeByName[$colorName] : ($__colors[0] ?? '');
+                        $img = $stock->image ? uploaded_asset($stock->image) : null;
+                    @endphp
+                    <div class="color-option mr-3 mb-2 p-1 border @if ($idx == 0) selected-color @endif"
+                        data-color="{{ $variantLabel }}" data-color-value="{{ $colorCode }}"
+                        style="border-width: @if ($idx == 0) 2px @else 1px @endif; border-style: solid; border-color: @if ($idx == 0) #3D52A0 @else #ddd @endif; border-radius: 8px; cursor: pointer;"
+                        onclick="selectColor(this, '{{ $variantLabel }}', '{{ $colorCode }}')">
                         <div class="color-swatch"
-                            style="width: 56px; height: 50px; background-color: {{ $color }}; border-radius: 4px; position: relative;">
-                            <span class="color-name"
+                            style="width: 56px; height: 50px; border-radius: 4px; position: relative; overflow: hidden;">
+                            @if($img)
+                                <img src="{{ $img }}" class="img-fit w-100 h-100" alt="{{ $variantLabel }}" onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
+                            @else
+                                <div style="width: 100%; height: 100%; background-color: {{ $colorCode }};"></div>
+                            @endif
+                            {{-- <span class="color-name"
                                 style="position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
-                                         font-size: 10px; color: {{ isDarkColor($color) ? '#fff' : '#000' }};
-                                         text-shadow: 1px 1px 1px {{ isDarkColor($color) ? '#000' : '#fff' }};">
-                                {{ get_single_color_name($color) }}
-                            </span>
+                                         font-size: 10px; color: #000; text-shadow: 1px 1px 1px #fff;">
+                                {{ $variantLabel }}
+                            </span> --}}
                         </div>
                     </div>
                 @endforeach
@@ -118,7 +147,7 @@
         <div class="mb-4">
             <h5 class="mb-3 fs-16 fw-600">{{ translate('Wholesale Price Tiers') }}</h5>
             <div class="d-flex flex-wrap mb-3" id="price-tier-options"
-                style="gap: 12px; justify-content: flex-start; margin-right: 145px;">
+                style="gap: 12px; justify-content: flex-start; margin-right: 80px;">
                 @foreach (collect($detailedProduct->priceTiers)->sortBy('min_qty') as $key => $tier)
                     <div class="price-tier-item text-center rounded-lg p-3 mb-2" data-price="{{ $tier->price }}"
                         data-min-qty="{{ $tier->min_qty }}" onclick="selectPriceTier(this)"
@@ -160,12 +189,20 @@
                         @php
                             $variantId = $stock->variant ?? $stock->id;
                             $variantName = $stock->variant ?? translate('Default');
+
+                            // Row-wise discounted price from product discount settings
+                            $row_base_price = (float) $stock->price;
+                            $row_discounted_price = $row_base_price;
+                            if ($detailedProduct->discount_type == 'percent' && $detailedProduct->discount > 0) {
+                                $row_discounted_price = $row_base_price - ($row_base_price * $detailedProduct->discount / 100);
+                            } elseif ($detailedProduct->discount_type == 'amount' && $detailedProduct->discount > 0) {
+                                $row_discounted_price = $row_base_price - $detailedProduct->discount;
+                            }
                         @endphp
                         <tr data-size="{{ $variantId }}" data-original-price="{{ $stock->price }}"
-                            data-stock-qty="{{ $stock->qty }}" style="height: 60px;">
-
+                            data-discounted-price="{{ $row_discounted_price }}" data-stock-qty="{{ $stock->qty }}" style="height: 60px;">
                             <td style="padding: 8px 12px;">{{ $variantName }}</td>
-                            <td class="unit-price" style="padding: 8px 12px;">৳ {{ number_format($stock->price, 2) }}
+                            <td class="unit-price" style="padding: 8px 12px;">৳ {{ number_format(($has_discount ? $row_discounted_price : $stock->price), 2) }}
                             </td>
                             <td class="total-price" style="padding: 8px 12px;">৳ 0.00</td>
                             <td style="padding: 8px 12px;">
@@ -202,8 +239,6 @@
             @csrf
             <input type="hidden" name="id" value="{{ $detailedProduct->id }}">
             <input type="hidden" name="quantity" value="0">
-
-            <!-- Mohammad Hassan - Order Summary section removed -->
         </form>
     @endif
 
@@ -481,7 +516,13 @@
         $('#sizeTable tbody tr').each(function() {
             const row = $(this);
             const originalPrice = parseFloat(row.data('original-price'));
-            const unitPrice = activeTierPrice !== null ? activeTierPrice : originalPrice;
+            const discountedPrice = parseFloat(row.data('discounted-price'));
+            let unitPrice = originalPrice;
+            if (activeTierPrice !== null) {
+                unitPrice = activeTierPrice;
+            } else if (!isNaN(discountedPrice) && discountedPrice > 0 && discountedPrice < originalPrice) {
+                unitPrice = discountedPrice;
+            }
 
             row.find('.unit-price').text('৳ ' + unitPrice.toFixed(2));
 
@@ -638,8 +679,13 @@
             option.style.borderColor = '#ddd';
         });
         element.classList.add('selected-color');
+        // Show full variant label on UI (e.g., Black-Xiaomi14Pro)
         document.getElementById('selected-color-name').textContent = colorName;
-        $('input[name="color"][value="' + colorName + '"]').prop('checked', true);
+        // But select the base color radio for price/stock logic
+        const baseColorName = (element.getAttribute('data-base-color-name') || (colorName ? colorName.split('-')[0] : ''));
+        if (baseColorName) {
+            $('input[name="color"][value="' + baseColorName + '"]').prop('checked', true);
+        }
         if (typeof getVariantPrice === 'function') {
             getVariantPrice();
         }

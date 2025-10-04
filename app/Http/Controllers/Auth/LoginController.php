@@ -286,7 +286,7 @@ class LoginController extends Controller
             // Mohammad Hassan - Removed CoreComponentRepository::instantiateShopRepository();
             return redirect()->route('admin.dashboard');
         } elseif (auth()->user()->user_type == 'seller') {
-            
+
             if (auth()->user()->shop->registration_approval  == 0) {
                 auth()->logout();
                 flash(translate("Your seller account is under review. We will notify you once approved."));
@@ -299,9 +299,16 @@ class LoginController extends Controller
                 'time' => now()->toDateTimeString(),
             ]);
             return redirect()->route('seller.dashboard');
-        } elseif (auth()->user()->user_type == 'wholesaler') {
-            return redirect()->route('dashboard'); // Wholesaler-দের জন্য ড্যাশবোর্ড
-        } else {
+        }
+        elseif (auth()->user()->user_type == 'wholesaler' ) {
+            if (auth()->user()->status === 'active') {
+                return redirect()->route('dashboard');
+            }
+            auth()->logout();
+            flash(translate('Your wholesaler account is pending approval. You cannot log in until it is active.'))->warning();
+            return redirect()->route('home');
+        }
+        else {
 
             if (session('link') != null) {
                 return redirect(session('link'));

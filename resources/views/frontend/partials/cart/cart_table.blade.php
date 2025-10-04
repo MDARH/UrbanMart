@@ -194,8 +194,8 @@
                         </td>
 
                         <!-- Unit Price -->
-                        <td class="text-center align-middle">
-                            <span class="fw-600 fs-14">{{ single_price($unit_price) }}</span>
+                        <td class="text-center align-middle unit-price">
+                            <span class="fw-600 fs-14 unit-price">{{ single_price($unit_price) }}</span>
                         </td>
 
                         <!-- Quantity -->

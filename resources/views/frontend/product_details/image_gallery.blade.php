@@ -191,11 +191,17 @@
     position: relative;
     overflow: hidden;
     border-radius: 8px;
+    /* Fixed height for main gallery area */
+    height: 520px;
 }
 
 .main-product-image {
     transition: transform 0.3s ease;
     cursor: zoom-in;
+    /* Force image to fill wrapper consistently */
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
 }
 
 .main-product-image:hover {
@@ -248,11 +254,18 @@
 
 .thumbnail-wrapper {
     position: relative;
+    /* Fixed box for thumbnails */
+    width: 64px;
+    height: 64px;
 }
 
 .thumbnail-image {
     border-radius: 6px;
     transition: all 0.3s ease;
+    /* Fixed thumbnail sizing */
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
 }
 
 .thumbnail-item:hover .thumbnail-image {
@@ -290,6 +303,12 @@
 .image-error i {
     font-size: 48px;
     margin-bottom: 10px;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+    .image-wrapper { height: 320px; }
+    .thumbnail-wrapper { width: 56px; height: 56px; }
 }
 </style>
 

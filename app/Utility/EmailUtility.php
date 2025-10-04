@@ -193,6 +193,43 @@ class EmailUtility
                 try {
                     Mail::to($user->email)->queue(new MailManager($array));
                 } catch (\Exception $e) {}
+            } else {
+                // Fallback: Send timeline email to wholesaler when delivery is confirmed
+                if ($user->user_type === 'wholesaler' && $status === 'confirmed') {
+                    $deliveryDays = (int) (get_setting('wholesale_delivery_days') ?? 5);
+                    $shipping = null;
+                    try {
+                        $shipping = $order->shipping_address ? json_decode($order->shipping_address, true) : null;
+                    } catch (\Exception $e) {}
+
+                    $subject = 'Order '.$order->code.' Confirmed — Delivery in '.$deliveryDays.' days';
+
+                    $shippingText = '';
+                    if ($shipping) {
+                        $shippingText = '<br><strong>Shipping to:</strong> '
+                            . e(($shipping['name'] ?? $order->user->name)) . ', '
+                            . e(($shipping['address'] ?? '')) . ', '
+                            . e(($shipping['city'] ?? '')) . ', '
+                            . e(($shipping['state'] ?? '')) . ', '
+                            . e(($shipping['postal_code'] ?? ''));
+                    }
+
+                    $supportEmail = get_setting('support_email') ?: $admin->email;
+                    $body = '<p>Dear '.e($order->user->name).',</p>'
+                        . '<p>Your wholesale order <strong>#'.$order->code.'</strong> has been <strong>confirmed</strong>.</p>'
+                        . '<p>Estimated delivery: within <strong>'.$deliveryDays.' days</strong> from today.</p>'
+                        . $shippingText
+                        . '<br><br><strong>Order Amount:</strong> '.single_price($order->grand_total)
+                        . '<br><br>If you have any questions, reply to this email or contact us at '.e($supportEmail).'.'
+                        . '<br><br>Thank you for choosing '.e(get_setting('site_name')).'!';
+
+                    $array['subject'] = $subject;
+                    $array['content'] = $body;
+
+                    try {
+                        Mail::to($user->email)->queue(new MailManager($array));
+                    } catch (\Exception $e) {}
+                }
             }   
         }  
     }
